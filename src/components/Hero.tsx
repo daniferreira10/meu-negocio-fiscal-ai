@@ -1,11 +1,8 @@
-
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { CircuitBoard, Shield, Zap } from 'lucide-react';
-
 const Hero = () => {
-  return (
-    <section className="bg-gradient-to-br from-brand-dark-blue to-brand-dark py-16 md:py-24 text-white">
+  return <section className="bg-gradient-to-br from-brand-dark-blue to-brand-dark py-16 md:py-24 text-white">
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row items-center justify-between">
           <div className="md:w-1/2 mb-12 md:mb-0">
@@ -29,7 +26,7 @@ const Hero = () => {
                 </Button>
               </Link>
               <Link to="/pricing">
-                <Button variant="outline" className="w-full sm:w-auto border-white text-white hover:bg-white/10 px-8 py-6 text-lg">
+                <Button variant="outline" className="w-full sm:w-auto border-white px-8 py-6 text-lg text-cyan-600 bg-slate-50">
                   Ver Planos
                 </Button>
               </Link>
@@ -49,17 +46,11 @@ const Hero = () => {
           <div className="md:w-1/2 flex justify-center">
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-brand blur-2xl opacity-20 rounded-full"></div>
-              <img 
-                src="https://images.unsplash.com/photo-1488590528505-98d2b5aba04b" 
-                alt="Dashboard de contabilidade automatizada" 
-                className="rounded-lg shadow-xl w-full max-w-md object-cover relative z-10"
-              />
+              <img src="https://images.unsplash.com/photo-1488590528505-98d2b5aba04b" alt="Dashboard de contabilidade automatizada" className="rounded-lg shadow-xl w-full max-w-md object-cover relative z-10" />
             </div>
           </div>
         </div>
       </div>
-    </section>
-  );
+    </section>;
 };
-
 export default Hero;
