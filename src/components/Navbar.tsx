@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import Logo from '@/components/Logo';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -10,11 +11,7 @@ const Navbar = () => {
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-        <Link to="/" className="text-2xl font-bold text-brand-blue flex items-center">
-          <span className="text-brand-green">Meu</span>
-          <span>NegócioFiscal</span>
-          <span className="text-brand-green ml-1">AI</span>
-        </Link>
+        <Logo />
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-8">

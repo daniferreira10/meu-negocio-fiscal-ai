@@ -1,165 +1,108 @@
 
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
+import { Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Send, Bot, User } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
 
-// Example chat messages
-const initialMessages = [
-  {
-    role: 'assistant',
-    content: 'Olá! Sou seu assistente contábil. Como posso ajudá-lo hoje?'
-  }
-];
-
-const suggestedQuestions = [
-  'Quais impostos devo pagar este mês?',
-  'Como classificar uma nota fiscal de serviço?',
-  'Explique o que é DAS para MEI',
-  'Como deduzir despesas da minha empresa?'
-];
-
-interface Message {
+type Message = {
   role: 'user' | 'assistant';
   content: string;
-}
+};
 
 const AIChat = () => {
-  const [messages, setMessages] = useState<Message[]>(initialMessages);
+  const [messages, setMessages] = useState<Message[]>([
+    { 
+      role: 'assistant', 
+      content: 'Olá! Sou o assistente contábil PrimeDesk. Como posso ajudá-lo hoje com questões relacionadas à contabilidade, impostos ou obrigações fiscais?' 
+    }
+  ]);
   const [input, setInput] = useState('');
-  const [loading, setLoading] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!input.trim() || isLoading) return;
 
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  const handleSendMessage = async (content: string) => {
-    if (!content.trim()) return;
-    
-    // Add user message
-    const userMessage: Message = { role: 'user', content };
-    setMessages((prev) => [...prev, userMessage]);
+    const userMessage: Message = { role: 'user', content: input };
+    setMessages(prev => [...prev, userMessage]);
     setInput('');
-    setLoading(true);
+    setIsLoading(true);
 
-    // Simulate AI response
+    // Simulate response
     setTimeout(() => {
-      let response = '';
+      const responses = [
+        "Para responder sua pergunta sobre impostos, precisaria saber mais sobre seu regime tributário. Você é MEI, Simples Nacional, Lucro Presumido ou Lucro Real?",
+        "Essa despesa específica pode ser deduzida sim, desde que seja comprovadamente relacionada à atividade da empresa e esteja documentada com nota fiscal.",
+        "O prazo para pagamento do DAS do Simples Nacional é até o dia 20 do mês seguinte. Já para o IRPJ trimestral, o prazo vence no último dia útil do mês seguinte ao fechamento do trimestre.",
+        "De acordo com a legislação atual, essa operação precisa ser registrada como receita bruta e entrará na base de cálculo dos impostos. Recomendo emitir uma nota fiscal para documentá-la adequadamente.",
+        "Analisando seu perfil, sugiro avaliar a possibilidade de mudar para o regime de Lucro Presumido. Pela simulação que fiz, poderia economizar aproximadamente 15% em tributos anuais."
+      ];
       
-      if (content.toLowerCase().includes('imposto') || content.toLowerCase().includes('devo pagar')) {
-        response = 'Com base no seu regime tributário (Simples Nacional), você precisa pagar o DAS até o dia 20 de maio. O valor estimado é de R$ 567,89 com base na sua receita mensal.';
-      } else if (content.toLowerCase().includes('nota fiscal') || content.toLowerCase().includes('classificar')) {
-        response = 'Para classificar uma nota fiscal de serviço, você deve verificar a natureza do serviço prestado. Geralmente, esses valores entram como "Serviços Prestados" na receita. Se for uma nota de serviço tomado, classifique como despesa na categoria correspondente ao tipo de serviço.';
-      } else if (content.toLowerCase().includes('das') || content.toLowerCase().includes('mei')) {
-        response = 'O DAS (Documento de Arrecadação do Simples Nacional) é o imposto unificado que os MEIs e empresas do Simples Nacional pagam mensalmente. Ele inclui IRPJ, CSLL, PIS, COFINS, IPI, ICMS, ISS e a Contribuição Previdenciária. Para MEIs, o valor é fixo dependendo da atividade.';
-      } else if (content.toLowerCase().includes('deduzir') || content.toLowerCase().includes('despesa')) {
-        response = 'Você pode deduzir despesas que sejam relacionadas à atividade da empresa e estejam devidamente documentadas com nota fiscal ou recibo. Exemplos incluem: aluguel do escritório, salários, insumos, materiais de escritório, serviços contratados, etc. Guarde todos os comprovantes por pelo menos 5 anos.';
-      } else {
-        response = 'Entendi sua pergunta. Para responder de forma mais precisa, precisaria analisar seus dados financeiros. Posso ajudar com dúvidas sobre impostos, obrigações fiscais, interpretação de relatórios contábeis e recomendações para sua empresa.';
-      }
+      const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+      const assistantMessage: Message = { 
+        role: 'assistant', 
+        content: randomResponse 
+      };
       
-      // Add AI response
-      const aiMessage: Message = { role: 'assistant', content: response };
-      setMessages((prev) => [...prev, aiMessage]);
-      setLoading(false);
+      setMessages(prev => [...prev, assistantMessage]);
+      setIsLoading(false);
     }, 1500);
   };
 
   return (
-    <div className="flex flex-col h-full bg-white rounded-lg shadow-md">
-      {/* Chat Header */}
-      <div className="p-4 border-b flex items-center bg-brand-blue text-white rounded-t-lg">
-        <Bot className="w-6 h-6 mr-2" />
-        <h2 className="text-lg font-semibold">Assistente Contábil</h2>
-      </div>
-      
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+    <div className="flex flex-col h-full bg-gray-50">
+      <div className="flex-1 p-4 overflow-y-auto">
         {messages.map((message, index) => (
           <div
             key={index}
-            className={`flex ${
-              message.role === 'user' ? 'justify-end' : 'justify-start'
+            className={`mb-4 ${
+              message.role === 'user' 
+                ? 'ml-auto max-w-[80%]' 
+                : 'mr-auto max-w-[80%]'
             }`}
           >
             <div
-              className={`max-w-[80%] rounded-lg p-3 ${
+              className={`p-3 rounded-lg ${
                 message.role === 'user'
                   ? 'bg-brand-blue text-white rounded-tr-none'
-                  : 'bg-gray-100 text-gray-800 rounded-tl-none'
+                  : 'bg-white border border-gray-200 text-gray-800 rounded-tl-none'
               }`}
             >
-              <div className="flex items-start">
-                {message.role === 'assistant' && (
-                  <Bot className="w-5 h-5 mr-2 mt-1 flex-shrink-0" />
-                )}
-                <div className="whitespace-pre-wrap text-sm">{message.content}</div>
-                {message.role === 'user' && (
-                  <User className="w-5 h-5 ml-2 mt-1 flex-shrink-0" />
-                )}
-              </div>
+              {message.content}
             </div>
           </div>
         ))}
-        {loading && (
-          <div className="flex justify-start">
-            <div className="bg-gray-100 text-gray-800 rounded-lg rounded-tl-none max-w-[80%] p-3">
-              <div className="flex items-center space-x-2">
-                <Bot className="w-5 h-5" />
-                <div className="text-sm">Digitando...</div>
+        {isLoading && (
+          <div className="mr-auto max-w-[80%] mb-4">
+            <div className="bg-white border border-gray-200 p-3 rounded-lg rounded-tl-none text-gray-800">
+              <div className="flex space-x-2">
+                <div className="w-2 h-2 rounded-full bg-gray-300 animate-pulse"></div>
+                <div className="w-2 h-2 rounded-full bg-gray-300 animate-pulse delay-75"></div>
+                <div className="w-2 h-2 rounded-full bg-gray-300 animate-pulse delay-150"></div>
               </div>
             </div>
           </div>
         )}
-        <div ref={messagesEndRef} />
       </div>
 
-      {/* Suggested questions */}
-      {messages.length < 3 && (
-        <div className="px-4 py-2 bg-gray-50 border-t">
-          <p className="text-xs text-gray-500 mb-2">Perguntas sugeridas:</p>
-          <div className="flex flex-wrap gap-2">
-            {suggestedQuestions.map((question, index) => (
-              <button
-                key={index}
-                className="text-xs bg-white border border-gray-200 rounded-full px-3 py-1 text-gray-700 hover:bg-gray-100 transition-colors"
-                onClick={() => handleSendMessage(question)}
-              >
-                {question}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-      
-      {/* Input Area */}
-      <div className="p-4 border-t bg-white rounded-b-lg">
+      <form onSubmit={handleSubmit} className="p-4 border-t border-gray-200 bg-white">
         <div className="flex space-x-2">
-          <Input
+          <Textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Digite sua pergunta sobre contabilidade..."
-            onKeyDown={(e) => e.key === 'Enter' && handleSendMessage(input)}
-            className="flex-1"
-            disabled={loading}
+            placeholder="Digite sua dúvida contábil..."
+            className="min-h-12 resize-none flex-1"
           />
-          <Button
-            onClick={() => handleSendMessage(input)}
-            className="bg-brand-blue hover:bg-brand-blue/90 text-white px-3"
-            disabled={!input.trim() || loading}
+          <Button 
+            type="submit" 
+            size="icon" 
+            disabled={isLoading || !input.trim()}
+            className="bg-brand-blue hover:bg-brand-blue/90"
           >
-            <Send className="w-4 h-4" />
+            <Send className="h-5 w-5" />
           </Button>
         </div>
-        <p className="text-xs text-gray-500 mt-2">
-          Nosso assistente AI responde a perguntas sobre contabilidade, impostos e finanças para seu negócio.
-        </p>
-      </div>
+      </form>
     </div>
   );
 };

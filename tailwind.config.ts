@@ -63,13 +63,14 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Custom colors
-				'brand-blue': '#0066CC',
-				'brand-green': '#00AA88',
+				// Novas cores da marca PrimeDesk
+				'brand-cyan': '#0ADBDF',
+				'brand-blue': '#067ADB',
+				'brand-dark': '#121C26',
+				'brand-dark-blue': '#0A2C4A',
 				'brand-light-blue': '#E6F3FF',
-				'brand-light-green': '#E6F9F5',
+				'brand-light-cyan': '#E6FBFC',
 				'brand-gray': '#F0F2F5',
-				'brand-dark': '#1A1F2C',
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -100,6 +101,9 @@ export default {
 			},
 			fontFamily: {
 				sans: ['Inter', 'sans-serif']
+			},
+			backgroundImage: {
+				'gradient-brand': 'linear-gradient(90deg, #067ADB 0%, #0ADBDF 100%)',
 			}
 		}
 	},

@@ -1,5 +1,5 @@
 
-import { FileText, DollarSign, BellRing, MessageSquare } from 'lucide-react';
+import { FileText, CircuitBoard, BellRing, MessageSquare } from 'lucide-react';
 
 const features = [
   {
@@ -8,7 +8,7 @@ const features = [
     description: "Nossa IA classifica automaticamente suas transações e gera relatórios contábeis completos."
   },
   {
-    icon: <DollarSign className="w-12 h-12 text-brand-blue" />,
+    icon: <CircuitBoard className="w-12 h-12 text-brand-blue" />,
     title: "Cálculo de Impostos",
     description: "Cálculo automático dos impostos a pagar, como DAS, ISS e IRPJ, de acordo com seu regime tributário."
   },
@@ -40,8 +40,8 @@ const Features = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {features.map((feature, index) => (
-            <div key={index} className="bg-white rounded-lg p-6 shadow-md hover:shadow-lg transition-shadow border border-gray-100">
-              <div className="mb-4">{feature.icon}</div>
+            <div key={index} className="bg-white rounded-lg p-6 shadow-md hover:shadow-lg transition-shadow border border-gray-100 hover:border-brand-cyan/20">
+              <div className="mb-4 bg-brand-light-blue p-3 rounded-full inline-block">{feature.icon}</div>
               <h3 className="text-xl font-semibold mb-3 text-brand-dark">{feature.title}</h3>
               <p className="text-gray-600">{feature.description}</p>
             </div>
