@@ -7,7 +7,8 @@ type User = {
   role: string;
 };
 
-const mockUsers: User[] = [
+// Initial mock users
+const initialMockUsers: User[] = [
   {
     id: '1',
     email: 'admin@example.com',
@@ -25,6 +26,53 @@ const mockUsers: User[] = [
 // Auth tokens are stored in localStorage
 const AUTH_TOKEN_KEY = 'auth_token';
 const USER_DATA_KEY = 'user_data';
+const REGISTERED_USERS_KEY = 'registered_users';
+
+// Get all users (including registered ones)
+const getAllUsers = (): User[] => {
+  const storedUsers = localStorage.getItem(REGISTERED_USERS_KEY);
+  const registeredUsers = storedUsers ? JSON.parse(storedUsers) : [];
+  return [...initialMockUsers, ...registeredUsers];
+};
+
+/**
+ * Register a new user
+ */
+export const registerUser = async (email: string, password: string): Promise<boolean> => {
+  // Simulate API request delay
+  await new Promise(resolve => setTimeout(resolve, 800));
+  
+  const allUsers = getAllUsers();
+  
+  // Check if email already exists
+  if (allUsers.some(u => u.email.toLowerCase() === email.toLowerCase())) {
+    throw new Error('EMAIL_ALREADY_EXISTS');
+  }
+  
+  // Create new user object
+  const newUser: User = {
+    id: `user_${Math.random().toString(36).substring(2)}`,
+    email,
+    name: email.split('@')[0],
+    role: 'user',
+  };
+  
+  // Store user password (in a real app, this would be hashed)
+  localStorage.setItem(`password_${newUser.id}`, password);
+  
+  // Add to registered users
+  const storedUsers = localStorage.getItem(REGISTERED_USERS_KEY);
+  const registeredUsers = storedUsers ? JSON.parse(storedUsers) : [];
+  registeredUsers.push(newUser);
+  localStorage.setItem(REGISTERED_USERS_KEY, JSON.stringify(registeredUsers));
+  
+  // Auto login after registration
+  const token = `token_${Math.random().toString(36).substring(2)}`;
+  localStorage.setItem(AUTH_TOKEN_KEY, token);
+  localStorage.setItem(USER_DATA_KEY, JSON.stringify(newUser));
+  
+  return true;
+};
 
 /**
  * Attempts to log in a user with the provided credentials
@@ -33,16 +81,26 @@ export const loginUser = async (email: string, password: string, rememberMe: boo
   // Simulate API request delay
   await new Promise(resolve => setTimeout(resolve, 800));
   
+  // Get all users including registered ones
+  const allUsers = getAllUsers();
+  
   // Check if email exists
-  const user = mockUsers.find(u => u.email.toLowerCase() === email.toLowerCase());
+  const user = allUsers.find(u => u.email.toLowerCase() === email.toLowerCase());
   if (!user) {
     throw new Error('USER_NOT_FOUND');
   }
   
-  // In a real app, you would hash and compare passwords
-  // For demo, we'll accept any password that meets the length requirement
-  if (password.length < 8) {
-    throw new Error('INVALID_PASSWORD');
+  // For mock users, accept any password that meets the length requirement
+  if (initialMockUsers.some(u => u.email === user.email)) {
+    if (password.length < 8) {
+      throw new Error('INVALID_PASSWORD');
+    }
+  } else {
+    // For registered users, check stored password
+    const storedPassword = localStorage.getItem(`password_${user.id}`);
+    if (storedPassword !== password) {
+      throw new Error('INVALID_PASSWORD');
+    }
   }
   
   // Generate a fake token

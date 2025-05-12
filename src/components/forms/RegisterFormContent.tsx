@@ -1,5 +1,6 @@
 
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Checkbox } from '@/components/ui/checkbox';
 import { z } from 'zod';
@@ -19,6 +20,7 @@ import PasswordInput from './PasswordInput';
 import SubmitButton from './SubmitButton';
 import FormHeader from './FormHeader';
 import FormFooter from './FormFooter';
+import { registerUser } from '@/services/authService';
 
 // Schema de validação para registro
 const registerSchema = z.object({
@@ -42,6 +44,7 @@ type RegisterFormValues = z.infer<typeof registerSchema>;
 const RegisterFormContent = () => {
   const [loading, setLoading] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const navigate = useNavigate();
 
   // Form para registro
   const registerForm = useForm<RegisterFormValues>({
@@ -59,15 +62,17 @@ const RegisterFormContent = () => {
     console.log("Register data:", data);
     
     try {
-      // Simulação de registro - aqui você faria a integração com seu backend
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Use the register service function
+      await registerUser(data.email, data.password);
       toast.success("Cadastro realizado com sucesso!");
-      
-      // Em uma aplicação real, você redirecionaria para o dashboard ou login
-      window.location.href = '/dashboard';
-    } catch (error) {
-      toast.error("Erro ao realizar cadastro. Tente novamente.");
-      console.error("Erro no registro:", error);
+      navigate('/dashboard');
+    } catch (error: any) {
+      if (error.message === 'EMAIL_ALREADY_EXISTS') {
+        toast.error("Este e-mail já está cadastrado. Tente fazer login.");
+      } else {
+        toast.error("Erro ao realizar cadastro. Tente novamente.");
+        console.error("Erro no registro:", error);
+      }
     } finally {
       setLoading(false);
     }
