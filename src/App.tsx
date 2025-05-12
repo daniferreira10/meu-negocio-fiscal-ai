@@ -14,6 +14,7 @@ import NotFound from "./pages/NotFound";
 import ClientRegistration from "./pages/ClientRegistration";
 import TaxManagement from "./pages/TaxManagement";
 import Documents from "./pages/Documents";
+import AIAnalysis from "./pages/AIAnalysis";
 import PrivateRoute from "./components/PrivateRoute";
 import { useEffect } from "react";
 import { isAuthenticated } from "./services/authService";
@@ -72,6 +73,11 @@ const App = () => {
             <Route path="/documents" element={
               <PrivateRoute>
                 <Documents />
+              </PrivateRoute>
+            } />
+            <Route path="/ai-analysis" element={
+              <PrivateRoute>
+                <AIAnalysis />
               </PrivateRoute>
             } />
             

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -8,17 +8,28 @@ import Dashboard from '@/components/Dashboard';
 import TransactionForm from '@/components/TransactionForm';
 import AIChat from '@/components/AIChat';
 import DashboardLayout from '@/components/DashboardLayout';
+
 const DashboardPage = () => {
   const [activeTab, setActiveTab] = useState('overview');
+  const navigate = useNavigate();
+  
+  const handleAnalyzeWithAI = () => {
+    navigate('/ai-analysis');
+  };
+  
   const renderActions = () => {
     if (activeTab === 'overview') {
-      return <Button className="bg-brand-blue hover:bg-brand-blue/90 text-white">
+      return <Button 
+          className="bg-brand-blue hover:bg-brand-blue/90 text-white"
+          onClick={handleAnalyzeWithAI}
+        >
           <TrendingUp className="w-4 h-4 mr-2" />
           Analisar com IA
         </Button>;
     }
     return null;
   };
+  
   const getTitle = () => {
     switch (activeTab) {
       case 'overview':
@@ -35,9 +46,11 @@ const DashboardPage = () => {
         return 'Dashboard';
     }
   };
+  
   const getSubtitle = () => {
     return 'Empresa: Minha Empresa LTDA - CNPJ: 00.000.000/0001-00';
   };
+  
   return <DashboardLayout activeItem="dashboard" title={getTitle()} subtitle={getSubtitle()} actions={renderActions()}>
       {/* Dashboard tabs */}
       <div className="mb-6">
@@ -53,10 +66,10 @@ const DashboardPage = () => {
       
       {/* Dashboard Content */}
       {activeTab === 'overview' && <Dashboard />}
-
+      
       {/* Transactions Form */}
       {activeTab === 'transactions' && <TransactionForm />}
-
+      
       {/* Reports */}
       {activeTab === 'reports' && <Card className="p-6">
           <h2 className="text-xl font-bold text-brand-dark mb-6">Relatórios Contábeis</h2>
@@ -92,11 +105,12 @@ const DashboardPage = () => {
             </TabsContent>
           </Tabs>
         </Card>}
-
+      
       {/* AI Assistant */}
       {activeTab === 'ai-assistant' && <div className="h-[calc(100vh-12rem)]">
           <AIChat />
         </div>}
     </DashboardLayout>;
 };
+
 export default DashboardPage;

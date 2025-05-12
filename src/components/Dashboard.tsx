@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import { Card } from '@/components/ui/card';
 import { Bell, Calendar, DollarSign, TrendingUp, AlertTriangle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 // Sample data
 const monthlyData = [{
@@ -62,8 +63,15 @@ const taxesDue = [{
   status: 'pending'
 }];
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
+
 const Dashboard = () => {
   const [currentMonth] = useState('Maio 2025');
+  const navigate = useNavigate();
+  
+  const handleAnalyzeWithAI = () => {
+    navigate('/ai-analysis');
+  };
+
   return <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
@@ -76,7 +84,10 @@ const Dashboard = () => {
             <Calendar className="w-4 h-4 mr-1" />
             <span>Mudar Período</span>
           </button>
-          <button className="flex items-center bg-brand-blue text-white rounded-md px-3 py-1 hover:bg-brand-blue/90">
+          <button 
+            className="flex items-center bg-brand-blue text-white rounded-md px-3 py-1 hover:bg-brand-blue/90"
+            onClick={handleAnalyzeWithAI}
+          >
             <TrendingUp className="w-4 h-4 mr-1" />
             <span className="">Analisar com IA</span>
           </button>
