@@ -29,12 +29,11 @@ const DashboardPage = () => {
         <aside className="w-20 md:w-64 min-h-screen bg-white shadow-md flex flex-col fixed">
           <div className="p-4 border-b border-gray-100">
             <Link to="/" className="text-xl font-bold text-brand-blue hidden md:flex items-center">
-              <span className="text-brand-green">Meu</span>
-              <span>Negócio</span>
-              <span className="text-brand-green ml-1">AI</span>
+              <span className="text-brand-blue">Prime</span>
+              <span className="text-brand-dark">Dask</span>
             </Link>
             <div className="md:hidden flex justify-center">
-              <span className="text-xl font-bold text-brand-green">M</span>
+              <span className="text-xl font-bold text-brand-green">P</span>
             </div>
           </div>
           
@@ -49,6 +48,17 @@ const DashboardPage = () => {
                   <Home className="h-5 w-5 md:mr-2" />
                   <span className="hidden md:inline">Visão Geral</span>
                 </Button>
+              </li>
+              <li>
+                <Link to="/client-registration">
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start text-gray-600"
+                  >
+                    <User className="h-5 w-5 md:mr-2" />
+                    <span className="hidden md:inline">Cadastros</span>
+                  </Button>
+                </Link>
               </li>
               <li>
                 <Button
@@ -71,14 +81,15 @@ const DashboardPage = () => {
                 </Button>
               </li>
               <li>
-                <Button
-                  variant="ghost"
-                  className={`w-full justify-start ${activeTab === 'taxes' ? 'bg-brand-light-blue text-brand-blue' : 'text-gray-600'}`}
-                  onClick={() => setActiveTab('taxes')}
-                >
-                  <DollarSign className="h-5 w-5 md:mr-2" />
-                  <span className="hidden md:inline">Impostos</span>
-                </Button>
+                <Link to="/tax-management">
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start text-gray-600"
+                  >
+                    <DollarSign className="h-5 w-5 md:mr-2" />
+                    <span className="hidden md:inline">Impostos</span>
+                  </Button>
+                </Link>
               </li>
               <li>
                 <Button
@@ -212,8 +223,17 @@ const DashboardPage = () => {
             {activeTab === 'taxes' && (
               <Card className="p-6">
                 <h2 className="text-xl font-bold text-brand-dark mb-6">Impostos e Obrigações</h2>
-                <div className="bg-gray-50 p-4 rounded-md">
-                  <p className="text-center text-gray-500 italic">Funcionalidade disponível apenas no plano Premium</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <Link to="/tax-management" className="block">
+                    <Button className="w-full bg-brand-blue hover:bg-brand-blue/90 text-white text-lg py-8">
+                      Calculadora de Impostos
+                    </Button>
+                  </Link>
+                  <Link to="/tax-management?tab=generator" className="block">
+                    <Button className="w-full bg-brand-blue hover:bg-brand-blue/90 text-white text-lg py-8">
+                      Gerador de Guias
+                    </Button>
+                  </Link>
                 </div>
               </Card>
             )}
@@ -229,8 +249,30 @@ const DashboardPage = () => {
             {activeTab === 'calendar' && (
               <Card className="p-6">
                 <h2 className="text-xl font-bold text-brand-dark mb-6">Calendário Fiscal</h2>
-                <div className="bg-gray-50 p-4 rounded-md">
-                  <p className="text-center text-gray-500 italic">Funcionalidade disponível apenas no plano Premium</p>
+                <Link to="/tax-management?tab=schedule" className="block">
+                  <Button className="w-full bg-brand-blue hover:bg-brand-blue/90 text-white mb-6">
+                    Ver Calendário Fiscal Completo
+                  </Button>
+                </Link>
+                <div className="bg-gray-50 p-6 rounded-md">
+                  <h3 className="text-lg font-semibold mb-4">Próximos Vencimentos:</h3>
+                  
+                  <div className="space-y-6">
+                    <div className="bg-white p-4 rounded shadow-sm border-l-4 border-amber-500">
+                      <p className="font-bold text-lg">10 de Maio</p>
+                      <p className="text-gray-600">ISS</p>
+                    </div>
+                    
+                    <div className="bg-white p-4 rounded shadow-sm border-l-4 border-amber-500">
+                      <p className="font-bold text-lg">15 de Maio</p>
+                      <p className="text-gray-600">ICMS</p>
+                    </div>
+                    
+                    <div className="bg-white p-4 rounded shadow-sm border-l-4 border-amber-500">
+                      <p className="font-bold text-lg">20 de Maio</p>
+                      <p className="text-gray-600">DAS (Simples Nacional)</p>
+                    </div>
+                  </div>
                 </div>
               </Card>
             )}

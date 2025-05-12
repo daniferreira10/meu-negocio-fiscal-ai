@@ -11,6 +11,8 @@ import Dashboard from "./pages/Dashboard";
 import Chat from "./pages/Chat";
 import Pricing from "./pages/Pricing";
 import NotFound from "./pages/NotFound";
+import ClientRegistration from "./pages/ClientRegistration";
+import TaxManagement from "./pages/TaxManagement";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +29,8 @@ const App = () => (
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/chat" element={<Chat />} />
           <Route path="/pricing" element={<Pricing />} />
+          <Route path="/client-registration" element={<ClientRegistration />} />
+          <Route path="/tax-management" element={<TaxManagement />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
