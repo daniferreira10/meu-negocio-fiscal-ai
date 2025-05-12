@@ -11,7 +11,9 @@ const Login = () => {
       
       <main className="flex-1 container mx-auto px-4 py-12">
         <div className="max-w-md mx-auto">
-          <h1 className="text-2xl font-bold text-brand-dark mb-6 text-center">Entrar na PrimeDask</h1>
+          <h1 className="text-3xl font-bold text-brand-dark mb-2 text-center">Bem-vindo à PrimeDask</h1>
+          <p className="text-gray-500 mb-6 text-center">Sua contabilidade inteligente e automatizada</p>
+          
           <div className="bg-white rounded-lg shadow-md p-8 border border-gray-100">
             <LoginForm />
             
@@ -20,6 +22,13 @@ const Login = () => {
                 Não tem uma conta? <Link to="/register" className="text-brand-blue hover:underline">Registre-se</Link>
               </p>
             </div>
+          </div>
+          
+          <div className="mt-8 text-center">
+            <p className="text-sm text-gray-500">
+              Contabilidade automatizada com inteligência artificial <br />
+              para empresários brasileiros
+            </p>
           </div>
         </div>
       </main>

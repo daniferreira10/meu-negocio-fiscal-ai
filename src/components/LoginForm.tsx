@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
+import { EyeIcon, EyeOffIcon, LockIcon, MailIcon } from 'lucide-react';
 
 interface LoginFormProps {
   isRegister?: boolean;
@@ -14,6 +15,8 @@ const LoginForm = ({ isRegister = false }: LoginFormProps) => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,63 +50,100 @@ const LoginForm = ({ isRegister = false }: LoginFormProps) => {
   };
 
   return (
-    <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md mx-auto">
+    <div>
       <div className="text-center mb-8">
         <h2 className="text-2xl font-bold text-brand-dark">
-          {isRegister ? "Crie sua conta" : "Bem-vindo de volta"}
+          {isRegister ? "Crie sua conta" : "Entrar na sua conta"}
         </h2>
         <p className="text-gray-600 mt-2">
           {isRegister 
             ? "Comece a usar nossa contabilidade automatizada com IA" 
-            : "Faça login para acessar sua conta"}
+            : "Acesse sua contabilidade automatizada"}
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+        <div className="space-y-1">
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700">
             E-mail
           </label>
-          <Input
-            id="email"
-            type="email"
-            placeholder="exemplo@empresa.com.br"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="input-field"
-            required
-          />
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+              <MailIcon className="h-5 w-5 text-gray-400" />
+            </div>
+            <Input
+              id="email"
+              type="email"
+              placeholder="exemplo@empresa.com.br"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="pl-10"
+              required
+            />
+          </div>
         </div>
 
-        <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+        <div className="space-y-1">
+          <label htmlFor="password" className="block text-sm font-medium text-gray-700">
             Senha
           </label>
-          <Input
-            id="password"
-            type="password"
-            placeholder="********"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="input-field"
-            required
-          />
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+              <LockIcon className="h-5 w-5 text-gray-400" />
+            </div>
+            <Input
+              id="password"
+              type={showPassword ? "text" : "password"}
+              placeholder="********"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="pl-10 pr-10"
+              required
+            />
+            <button 
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute inset-y-0 right-0 flex items-center pr-3"
+            >
+              {showPassword ? (
+                <EyeOffIcon className="h-5 w-5 text-gray-400" />
+              ) : (
+                <EyeIcon className="h-5 w-5 text-gray-400" />
+              )}
+            </button>
+          </div>
         </div>
 
         {isRegister && (
-          <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+          <div className="space-y-1">
+            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
               Confirmar Senha
             </label>
-            <Input
-              id="confirmPassword"
-              type="password"
-              placeholder="********"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              className="input-field"
-              required
-            />
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                <LockIcon className="h-5 w-5 text-gray-400" />
+              </div>
+              <Input
+                id="confirmPassword"
+                type={showConfirmPassword ? "text" : "password"}
+                placeholder="********"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="pl-10 pr-10"
+                required
+              />
+              <button 
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute inset-y-0 right-0 flex items-center pr-3"
+              >
+                {showConfirmPassword ? (
+                  <EyeOffIcon className="h-5 w-5 text-gray-400" />
+                ) : (
+                  <EyeIcon className="h-5 w-5 text-gray-400" />
+                )}
+              </button>
+            </div>
           </div>
         )}
 
@@ -117,24 +157,20 @@ const LoginForm = ({ isRegister = false }: LoginFormProps) => {
 
         <Button
           type="submit"
-          className="w-full bg-brand-blue hover:bg-brand-blue/90 text-white py-6"
+          className="w-full bg-brand-blue hover:bg-brand-blue/90 text-white"
           disabled={loading}
         >
-          {loading ? "Carregando..." : isRegister ? "Criar Conta" : "Entrar"}
+          {loading ? (
+            <>
+              <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Processando...
+            </>
+          ) : isRegister ? "Criar Conta" : "Entrar"}
         </Button>
       </form>
-
-      <div className="mt-6 text-center">
-        <p className="text-gray-600">
-          {isRegister ? "Já tem uma conta?" : "Não tem uma conta?"}
-          <Link 
-            to={isRegister ? "/login" : "/register"} 
-            className="text-brand-blue hover:underline ml-1"
-          >
-            {isRegister ? "Faça login" : "Cadastre-se"}
-          </Link>
-        </p>
-      </div>
 
       <div className="mt-8 pt-6 border-t border-gray-200">
         <p className="text-xs text-gray-500 text-center">
