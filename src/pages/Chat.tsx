@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import AIChat from '@/components/AIChat';
 import { MessageSquare, BookOpen, FileCog, Calculator, UserRound, FileBarChart2, CalendarClock } from 'lucide-react';

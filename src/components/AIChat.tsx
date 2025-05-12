@@ -1,6 +1,5 @@
-
 import { useState, useRef } from 'react';
-import { Send, PaperClip, X, FileSpreadsheet, FileText, FileCog } from 'lucide-react';
+import { Send, Paperclip, X, FileSpreadsheet, FileText, FileCog } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
@@ -367,7 +366,7 @@ Como posso ajudar você hoje?`
             onClick={triggerFileInput}
             className="bg-transparent border-gray-700 hover:bg-gray-800 hover:text-brand-cyan"
           >
-            <PaperClip className="h-5 w-5" />
+            <Paperclip className="h-5 w-5" />
             <input
               type="file"
               ref={fileInputRef}
