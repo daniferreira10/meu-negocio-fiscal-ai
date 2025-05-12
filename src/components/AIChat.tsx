@@ -1,6 +1,6 @@
 
-import { useState } from 'react';
-import { Send } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { Send, PaperClip, X, FileSpreadsheet, FileText, FileCog } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
@@ -8,6 +8,10 @@ import { toast } from 'sonner';
 type Message = {
   role: 'user' | 'assistant';
   content: string;
+  attachment?: {
+    name: string;
+    type: string;
+  } | null;
 };
 
 // Categorized knowledge base for accounting and business topics
@@ -131,6 +135,8 @@ Como posso ajudar você hoje?`
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [attachedFile, setAttachedFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Function to find the best response based on user input
   const findBestResponse = (userInput: string) => {
@@ -199,16 +205,36 @@ Como posso ajudar você hoje?`
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || isLoading) return;
+    if ((!input.trim() && !attachedFile) || isLoading) return;
 
-    const userMessage: Message = { role: 'user', content: input };
+    const userMessage: Message = { 
+      role: 'user', 
+      content: input || "Analisar o arquivo anexado",
+      attachment: attachedFile ? {
+        name: attachedFile.name,
+        type: attachedFile.type
+      } : null
+    };
+    
     setMessages(prev => [...prev, userMessage]);
     setInput('');
+    setAttachedFile(null);
     setIsLoading(true);
 
     // Find the best response from our knowledge base
     setTimeout(() => {
-      const response = findBestResponse(userMessage.content);
+      let response = findBestResponse(userMessage.content);
+      
+      // If there's an attachment, add context about it
+      if (userMessage.attachment) {
+        if (userMessage.attachment.type.includes('spreadsheet') || userMessage.attachment.type.includes('excel')) {
+          response = `Recebi sua planilha "${userMessage.attachment.name}". Para uma análise detalhada de planilhas, nossos contadores precisariam revisar o arquivo. Posso responder perguntas gerais sobre os dados ou ajudar você a entender como organizar melhor suas informações financeiras em planilhas.`;
+        } else if (userMessage.attachment.type.includes('pdf') || userMessage.attachment.type.includes('document')) {
+          response = `Recebi seu documento "${userMessage.attachment.name}". Para uma análise completa de documentos fiscais ou contábeis, nossos especialistas precisariam revisar o conteúdo. Posso responder perguntas gerais sobre o tipo de documento ou orientar sobre procedimentos relacionados.`;
+        } else {
+          response = `Recebi seu arquivo "${userMessage.attachment.name}". Para uma análise detalhada, nossos especialistas precisariam revisar o conteúdo. Posso responder perguntas gerais sobre o assunto ou orientar sobre os próximos passos.`;
+        }
+      }
       
       const assistantMessage: Message = { 
         role: 'assistant', 
@@ -227,55 +253,135 @@ Como posso ajudar você hoje?`
     }, 1500);
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      // Only accept common document types
+      const validTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 
+                         'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                         'text/csv', 'application/xml', 'text/plain'];
+      
+      if (validTypes.includes(file.type) || file.name.endsWith('.xml')) {
+        setAttachedFile(file);
+        toast.success(`Arquivo "${file.name}" anexado com sucesso.`);
+      } else {
+        toast.error("Formato de arquivo não suportado. Por favor, envie documentos, planilhas ou arquivos de texto.");
+      }
+    }
+  };
+
+  const triggerFileInput = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const removeAttachedFile = () => {
+    setAttachedFile(null);
+  };
+
+  const getFileIcon = (fileName: string) => {
+    if (fileName.endsWith('.xlsx') || fileName.endsWith('.xls') || fileName.endsWith('.csv')) {
+      return <FileSpreadsheet className="h-5 w-5" />;
+    } else if (fileName.endsWith('.pdf') || fileName.endsWith('.doc') || fileName.endsWith('.docx')) {
+      return <FileText className="h-5 w-5" />;
+    } else {
+      return <FileCog className="h-5 w-5" />;
+    }
+  };
+
   return (
-    <div className="flex flex-col h-full bg-gray-50">
-      <div className="flex-1 p-4 overflow-y-auto">
+    <div className="flex flex-col h-full bg-gradient-to-br from-gray-900 to-brand-dark-blue">
+      <div className="flex-1 p-4 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent">
         {messages.map((message, index) => (
           <div
             key={index}
-            className={`mb-4 ${
+            className={`mb-4 animate-fade-in ${
               message.role === 'user' 
                 ? 'ml-auto max-w-[80%]' 
                 : 'mr-auto max-w-[80%]'
             }`}
           >
             <div
-              className={`p-3 rounded-lg ${
+              className={`p-3 rounded-lg backdrop-blur-sm ${
                 message.role === 'user'
-                  ? 'bg-brand-blue text-white rounded-tr-none'
-                  : 'bg-white border border-gray-200 text-gray-800 rounded-tl-none'
+                  ? 'bg-brand-blue/90 text-white rounded-tr-none shadow-lg border border-brand-blue/30'
+                  : 'bg-white/10 border border-gray-500/20 text-gray-100 rounded-tl-none shadow-lg'
               }`}
             >
               {message.content}
+              
+              {message.attachment && (
+                <div className="mt-2 p-2 bg-gray-700/40 rounded-md flex items-center gap-2 text-sm">
+                  {getFileIcon(message.attachment.name)}
+                  <span className="truncate">{message.attachment.name}</span>
+                </div>
+              )}
             </div>
           </div>
         ))}
         {isLoading && (
           <div className="mr-auto max-w-[80%] mb-4">
-            <div className="bg-white border border-gray-200 p-3 rounded-lg rounded-tl-none text-gray-800">
+            <div className="bg-white/10 border border-gray-500/20 p-3 rounded-lg rounded-tl-none text-gray-100 shadow-lg backdrop-blur-sm">
               <div className="flex space-x-2">
-                <div className="w-2 h-2 rounded-full bg-gray-300 animate-pulse"></div>
-                <div className="w-2 h-2 rounded-full bg-gray-300 animate-pulse delay-75"></div>
-                <div className="w-2 h-2 rounded-full bg-gray-300 animate-pulse delay-150"></div>
+                <div className="w-2 h-2 rounded-full bg-gray-300/70 animate-pulse"></div>
+                <div className="w-2 h-2 rounded-full bg-gray-300/70 animate-pulse delay-75"></div>
+                <div className="w-2 h-2 rounded-full bg-gray-300/70 animate-pulse delay-150"></div>
               </div>
             </div>
           </div>
         )}
       </div>
 
-      <form onSubmit={handleSubmit} className="p-4 border-t border-gray-200 bg-white">
+      <form onSubmit={handleSubmit} className="p-4 border-t border-gray-700/50 bg-gray-800/50 backdrop-blur-md">
+        {attachedFile && (
+          <div className="mb-3 p-2 bg-gray-700/40 rounded-md flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              {getFileIcon(attachedFile.name)}
+              <span className="text-sm text-gray-200 truncate">{attachedFile.name}</span>
+            </div>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={removeAttachedFile}
+              className="h-6 w-6 rounded-full hover:bg-gray-600/50"
+            >
+              <X className="h-4 w-4 text-gray-300" />
+            </Button>
+          </div>
+        )}
+        
         <div className="flex space-x-2">
           <Textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Digite sua dúvida contábil ou fiscal..."
-            className="min-h-12 resize-none flex-1"
+            className="min-h-12 resize-none flex-1 bg-gray-900/50 border-gray-700 text-gray-100 placeholder:text-gray-400 focus-visible:ring-brand-cyan"
           />
+          
+          <Button 
+            type="button" 
+            variant="outline" 
+            size="icon" 
+            onClick={triggerFileInput}
+            className="bg-transparent border-gray-700 hover:bg-gray-800 hover:text-brand-cyan"
+          >
+            <PaperClip className="h-5 w-5" />
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              className="hidden"
+              accept=".pdf,.doc,.docx,.xlsx,.xls,.csv,.xml,.txt"
+            />
+          </Button>
+          
           <Button 
             type="submit" 
             size="icon" 
-            disabled={isLoading || !input.trim()}
-            className="bg-brand-blue hover:bg-brand-blue/90"
+            disabled={isLoading || (!input.trim() && !attachedFile)}
+            className="bg-gradient-to-r from-brand-blue to-brand-cyan hover:opacity-90 text-white"
           >
             <Send className="h-5 w-5" />
           </Button>
