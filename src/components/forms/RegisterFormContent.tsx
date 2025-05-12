@@ -63,15 +63,19 @@ const RegisterFormContent = () => {
     
     try {
       // Use the register service function
-      await registerUser(data.email, data.password);
-      toast.success("Cadastro realizado com sucesso!");
-      navigate('/dashboard');
+      const success = await registerUser(data.email, data.password);
+      
+      if (success) {
+        console.log("Registration successful, navigating to dashboard");
+        toast.success("Cadastro realizado com sucesso!");
+        navigate('/dashboard');
+      }
     } catch (error: any) {
+      console.error("Registration error:", error);
       if (error.message === 'EMAIL_ALREADY_EXISTS') {
         toast.error("Este e-mail já está cadastrado. Tente fazer login.");
       } else {
         toast.error("Erro ao realizar cadastro. Tente novamente.");
-        console.error("Erro no registro:", error);
       }
     } finally {
       setLoading(false);

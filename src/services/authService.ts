@@ -30,9 +30,15 @@ const REGISTERED_USERS_KEY = 'registered_users';
 
 // Get all users (including registered ones)
 const getAllUsers = (): User[] => {
-  const storedUsers = localStorage.getItem(REGISTERED_USERS_KEY);
-  const registeredUsers = storedUsers ? JSON.parse(storedUsers) : [];
-  return [...initialMockUsers, ...registeredUsers];
+  try {
+    const storedUsers = localStorage.getItem(REGISTERED_USERS_KEY);
+    const registeredUsers = storedUsers ? JSON.parse(storedUsers) : [];
+    console.log('Retrieved registered users:', registeredUsers);
+    return [...initialMockUsers, ...registeredUsers];
+  } catch (error) {
+    console.error('Error getting registered users:', error);
+    return [...initialMockUsers];
+  }
 };
 
 /**
@@ -57,23 +63,29 @@ export const registerUser = async (email: string, password: string): Promise<boo
     role: 'user',
   };
   
-  // Store user password (in a real app, this would be hashed)
-  localStorage.setItem(`password_${newUser.id}`, password);
-  
-  // Add to registered users
-  const storedUsers = localStorage.getItem(REGISTERED_USERS_KEY);
-  const registeredUsers = storedUsers ? JSON.parse(storedUsers) : [];
-  registeredUsers.push(newUser);
-  localStorage.setItem(REGISTERED_USERS_KEY, JSON.stringify(registeredUsers));
-  
-  // Auto login after registration
-  const token = `token_${Math.random().toString(36).substring(2)}`;
-  localStorage.setItem(AUTH_TOKEN_KEY, token);
-  localStorage.setItem(USER_DATA_KEY, JSON.stringify(newUser));
-  
-  console.log('User registered and logged in:', newUser);
-  
-  return true;
+  try {
+    // Store user password (in a real app, this would be hashed)
+    localStorage.setItem(`password_${newUser.id}`, password);
+    
+    // Add to registered users
+    const storedUsers = localStorage.getItem(REGISTERED_USERS_KEY);
+    const registeredUsers = storedUsers ? JSON.parse(storedUsers) : [];
+    registeredUsers.push(newUser);
+    localStorage.setItem(REGISTERED_USERS_KEY, JSON.stringify(registeredUsers));
+    
+    // Auto login after registration
+    const token = `token_${Math.random().toString(36).substring(2)}`;
+    localStorage.setItem(AUTH_TOKEN_KEY, token);
+    localStorage.setItem(USER_DATA_KEY, JSON.stringify(newUser));
+    
+    console.log('User registered and logged in:', newUser);
+    console.log('Updated registered users list:', registeredUsers);
+    
+    return true;
+  } catch (error) {
+    console.error('Error registering user:', error);
+    throw new Error('REGISTRATION_FAILED');
+  }
 };
 
 /**
@@ -83,43 +95,49 @@ export const loginUser = async (email: string, password: string, rememberMe: boo
   // Simulate API request delay
   await new Promise(resolve => setTimeout(resolve, 800));
   
-  // Get all users including registered ones
-  const allUsers = getAllUsers();
-  
-  console.log('All users during login attempt:', allUsers);
-  console.log('Attempting login with email:', email);
-  
-  // Check if email exists
-  const user = allUsers.find(u => u.email.toLowerCase() === email.toLowerCase());
-  if (!user) {
-    console.error('User not found with email:', email);
-    throw new Error('USER_NOT_FOUND');
-  }
-  
-  // For mock users, accept any password that meets the length requirement
-  if (initialMockUsers.some(u => u.email === user.email)) {
-    if (password.length < 8) {
-      throw new Error('INVALID_PASSWORD');
+  try {
+    // Get all users including registered ones
+    const allUsers = getAllUsers();
+    
+    console.log('All users during login attempt:', allUsers);
+    console.log('Attempting login with email:', email);
+    
+    // Check if email exists
+    const user = allUsers.find(u => u.email.toLowerCase() === email.toLowerCase());
+    if (!user) {
+      console.error('User not found with email:', email);
+      throw new Error('USER_NOT_FOUND');
     }
-  } else {
-    // For registered users, check stored password
-    const storedPassword = localStorage.getItem(`password_${user.id}`);
-    if (storedPassword !== password) {
-      console.error('Invalid password for user:', user.email);
-      throw new Error('INVALID_PASSWORD');
+    
+    // For mock users, accept any password that meets the length requirement
+    if (initialMockUsers.some(u => u.email === user.email)) {
+      if (password.length < 8) {
+        throw new Error('INVALID_PASSWORD');
+      }
+    } else {
+      // For registered users, check stored password
+      const storedPassword = localStorage.getItem(`password_${user.id}`);
+      console.log(`Checking password for user ${user.id}, stored password exists:`, !!storedPassword);
+      if (storedPassword !== password) {
+        console.error('Invalid password for user:', user.email);
+        throw new Error('INVALID_PASSWORD');
+      }
     }
+    
+    // Generate a fake token
+    const token = `token_${Math.random().toString(36).substring(2)}`;
+    
+    // Store auth data
+    localStorage.setItem(AUTH_TOKEN_KEY, token);
+    localStorage.setItem(USER_DATA_KEY, JSON.stringify(user));
+    
+    console.log('User successfully logged in:', user);
+    
+    return true;
+  } catch (error) {
+    console.error('Error during login:', error);
+    throw error;
   }
-  
-  // Generate a fake token
-  const token = `token_${Math.random().toString(36).substring(2)}`;
-  
-  // Store auth data
-  localStorage.setItem(AUTH_TOKEN_KEY, token);
-  localStorage.setItem(USER_DATA_KEY, JSON.stringify(user));
-  
-  console.log('User successfully logged in:', user);
-  
-  return true;
 };
 
 /**
