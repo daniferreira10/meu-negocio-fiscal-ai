@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Checkbox } from '@/components/ui/checkbox';
 import { z } from 'zod';
@@ -19,6 +19,7 @@ import PasswordInput from './PasswordInput';
 import SubmitButton from './SubmitButton';
 import FormHeader from './FormHeader';
 import FormFooter from './FormFooter';
+import { loginUser } from '@/services/authService';
 
 // Schema de validação para login
 const loginSchema = z.object({
@@ -35,6 +36,7 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 const LoginFormContent = () => {
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   // Form para login
   const loginForm = useForm<LoginFormValues>({
@@ -51,32 +53,21 @@ const LoginFormContent = () => {
     console.log("Login data:", data);
     
     try {
-      // Simulação de autenticação - aqui você faria a integração com seu backend
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Use the login service function
+      const success = await loginUser(data.email, data.password, data.rememberMe || false);
       
-      // Verificar se o email existe (simulação)
-      const emailExists = true; // Em uma aplicação real você verificaria isso no backend
-      
-      if (!emailExists) {
+      if (success) {
+        toast.success("Login realizado com sucesso!");
+        navigate('/dashboard');
+      }
+    } catch (error: any) {
+      if (error.message === 'USER_NOT_FOUND') {
         toast.error("E-mail não encontrado. Verifique ou cadastre uma nova conta.");
-        setLoading(false);
-        return;
-      }
-      
-      // Verificar se a senha está correta (simulação)
-      const passwordCorrect = true; // Em uma aplicação real você verificaria isso no backend
-      
-      if (!passwordCorrect) {
+      } else if (error.message === 'INVALID_PASSWORD') {
         toast.error("Senha incorreta. Tente novamente.");
-        setLoading(false);
-        return;
+      } else {
+        toast.error("Erro ao fazer login. Tente novamente.");
       }
-      
-      toast.success("Login realizado com sucesso!");
-      // Em uma aplicação real, você redirecionaria para o dashboard
-      window.location.href = '/dashboard';
-    } catch (error) {
-      toast.error("Erro ao fazer login. Tente novamente.");
       console.error("Erro no login:", error);
     } finally {
       setLoading(false);
