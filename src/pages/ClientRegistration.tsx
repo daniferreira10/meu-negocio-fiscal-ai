@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,6 +8,7 @@ import { toast } from 'sonner';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import Sidebar from '@/components/Sidebar';
 import {
   Form,
   FormControl,
@@ -65,79 +65,7 @@ const ClientRegistration = () => {
     <div className="min-h-screen bg-gray-50">
       <div className="flex">
         {/* Sidebar */}
-        <aside className="w-20 md:w-64 min-h-screen bg-white shadow-md flex flex-col fixed">
-          <div className="p-4 border-b border-gray-100">
-            <a href="/dashboard" className="text-xl font-bold text-brand-blue hidden md:flex items-center">
-              <span className="text-brand-blue">Prime</span>
-              <span className="text-brand-dark">Dask</span>
-            </a>
-            <div className="md:hidden flex justify-center">
-              <span className="text-xl font-bold text-brand-blue">P</span>
-            </div>
-          </div>
-          
-          <nav className="flex-1 py-6">
-            <ul className="space-y-1">
-              <li>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start text-gray-600"
-                  onClick={() => window.location.href = '/dashboard'}
-                >
-                  <span className="h-5 w-5 md:mr-2">🏠</span>
-                  <span className="hidden md:inline">Dashboard</span>
-                </Button>
-              </li>
-              <li>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start bg-brand-light-blue text-brand-blue"
-                >
-                  <span className="h-5 w-5 md:mr-2">👤</span>
-                  <span className="hidden md:inline">Cadastros</span>
-                </Button>
-              </li>
-              <li>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start text-gray-600"
-                >
-                  <span className="h-5 w-5 md:mr-2">💰</span>
-                  <span className="hidden md:inline">Finanças</span>
-                </Button>
-              </li>
-              <li>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start text-gray-600"
-                >
-                  <span className="h-5 w-5 md:mr-2">📄</span>
-                  <span className="hidden md:inline">Impostos</span>
-                </Button>
-              </li>
-              <li>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start text-gray-600"
-                >
-                  <span className="h-5 w-5 md:mr-2">💬</span>
-                  <span className="hidden md:inline">Assistente IA</span>
-                </Button>
-              </li>
-            </ul>
-          </nav>
-          
-          <div className="p-4 border-t border-gray-100">
-            <Button
-              variant="ghost"
-              className="w-full justify-start text-gray-600"
-              onClick={() => window.location.href = '/'}
-            >
-              <span className="h-5 w-5 md:mr-2">🚪</span>
-              <span className="hidden md:inline">Sair</span>
-            </Button>
-          </div>
-        </aside>
+        <Sidebar activeItem="clients" />
 
         {/* Main Content */}
         <main className="ml-20 md:ml-64 w-full min-h-screen">
