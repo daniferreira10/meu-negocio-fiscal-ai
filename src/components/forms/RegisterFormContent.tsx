@@ -1,24 +1,21 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { Checkbox } from '@/components/ui/checkbox';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { 
   Form,
   FormField,
-  FormItem,
   FormLabel,
-  FormMessage,
-  FormControl
+  FormControl,
+  FormDescription
 } from '@/components/ui/form';
 
 import EmailInput from './EmailInput';
 import PasswordInput from './PasswordInput';
 import SubmitButton from './SubmitButton';
 import FormHeader from './FormHeader';
-import FormFooter from './FormFooter';
 import { registerUser } from '@/services/authService';
 
 // Schema de validação para registro
@@ -27,15 +24,21 @@ const registerSchema = z.object({
     .email({ message: "E-mail inválido" })
     .min(1, { message: "E-mail é obrigatório" }),
   password: z.string()
-    .min(8, { message: "A senha deve ter pelo menos 8 caracteres" })
-    .regex(/^(?=.*[A-Za-z])(?=.*\d)/, { message: "A senha deve incluir letras e números" }),
+    .min(1, { message: "Senha é obrigatória" })
+    .min(8, { message: "A senha deve ter pelo menos 8 caracteres" }),
   confirmPassword: z.string()
-    .min(1, { message: "Confirmar senha é obrigatório" }),
-  acceptTerms: z.boolean()
-    .refine(val => val === true, { message: "Você precisa aceitar os termos para continuar" })
-}).refine(data => data.password === data.confirmPassword, {
-  message: "As senhas não coincidem",
-  path: ["confirmPassword"]
+    .min(1, { message: "Confirme sua senha" }),
+  acceptTerms: z.boolean().refine(val => val === true, {
+    message: "Você deve aceitar os termos e condições"
+  })
+}).superRefine(({confirmPassword, password}, ctx) => {
+  if (confirmPassword !== password) {
+    ctx.addIssue({
+      code: "custom",
+      message: "As senhas não coincidem",
+      path: ["confirmPassword"]
+    });
+  }
 });
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
@@ -58,27 +61,29 @@ const RegisterFormContent = () => {
 
   const onRegisterSubmit = async (data: RegisterFormValues) => {
     setLoading(true);
-    console.log("Register data:", data);
+    console.log("Registration data:", data);
     
     try {
-      // Use the register service function
+      // Registra o usuário usando o serviço de autenticação
       const success = await registerUser(data.email, data.password);
       
       if (success) {
         console.log("Registration successful, navigating to dashboard");
         toast.success("Cadastro realizado com sucesso!");
         
-        // Garantindo que não haja redirecionamento imediato após o registro
+        // Aguardamos um pouco mais para garantir que o localStorage foi atualizado
         setTimeout(() => {
+          console.log("Redirecting to dashboard after registration");
           navigate('/dashboard');
-        }, 100);
+        }, 1500);
       }
     } catch (error: any) {
       console.error("Registration error:", error);
+      
       if (error.message === 'EMAIL_ALREADY_EXISTS') {
-        toast.error("Este e-mail já está cadastrado. Tente fazer login.");
+        toast.error("Este e-mail já está em uso. Tente outro ou faça login.");
       } else {
-        toast.error("Erro ao realizar cadastro. Tente novamente.");
+        toast.error("Erro ao criar conta. Tente novamente.");
       }
     } finally {
       setLoading(false);

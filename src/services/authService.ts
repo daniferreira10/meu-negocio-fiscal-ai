@@ -115,17 +115,26 @@ export const registerUser = async (email: string, password: string): Promise<boo
   };
   
   try {
+    // Importante: Garantimos que os usuários existentes sejam carregados primeiro
+    const registeredUsers = getRegisteredUsers();
+    
     // Store user password (in a real app, this would be hashed)
     localStorage.setItem(`password_${newUser.id}`, password);
     
     // Add to registered users
-    const registeredUsers = getRegisteredUsers();
     registeredUsers.push(newUser);
+    
+    // Debug: Log antes de salvar
+    console.log('About to save registered users:', registeredUsers);
     
     // Save updated registered users list
     if (!saveRegisteredUsers(registeredUsers)) {
       throw new Error('Failed to save user');
     }
+    
+    // Debug: Log após salvar
+    console.log('Successfully saved users, checking storage...');
+    console.log('Current stored users:', getRegisteredUsers());
     
     // Auto login after registration
     const token = `token_${Math.random().toString(36).substring(2)}`;
