@@ -4,7 +4,8 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
-import { EyeIcon, EyeOffIcon, LockIcon, MailIcon } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { EyeIcon, EyeOffIcon, LockIcon, MailIcon, AlertCircle } from 'lucide-react';
 
 interface LoginFormProps {
   isRegister?: boolean;
@@ -17,24 +18,61 @@ const LoginForm = ({ isRegister = false }: LoginFormProps) => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [acceptTerms, setAcceptTerms] = useState(false);
+  const [errors, setErrors] = useState<{
+    email?: string;
+    password?: string;
+    confirmPassword?: string;
+    terms?: string;
+  }>({});
+
+  const validateForm = () => {
+    const newErrors: {
+      email?: string;
+      password?: string;
+      confirmPassword?: string;
+      terms?: string;
+    } = {};
+
+    // Email validation with proper format check
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email) {
+      newErrors.email = 'E-mail é obrigatório';
+    } else if (!emailRegex.test(email)) {
+      newErrors.email = 'Formato de e-mail inválido';
+    }
+
+    // Password validation
+    if (!password) {
+      newErrors.password = 'Senha é obrigatória';
+    } else if (password.length < 6) {
+      newErrors.password = 'A senha deve ter pelo menos 6 caracteres';
+    }
+
+    // Confirm password validation for registration
+    if (isRegister && password !== confirmPassword) {
+      newErrors.confirmPassword = 'As senhas não coincidem';
+    }
+
+    // Terms acceptance for registration
+    if (isRegister && !acceptTerms) {
+      newErrors.terms = 'Você precisa aceitar os termos para continuar';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateForm()) {
+      toast.error("Por favor, corrija os erros no formulário");
+      return;
+    }
+    
     setLoading(true);
     
-    // Form validation
-    if (!email || !password) {
-      toast.error("Por favor, preencha todos os campos");
-      setLoading(false);
-      return;
-    }
-    
-    if (isRegister && password !== confirmPassword) {
-      toast.error("As senhas não coincidem");
-      setLoading(false);
-      return;
-    }
-
     // Simulate authentication (in a real app, this would be connected to a backend)
     setTimeout(() => {
       if (isRegister) {
@@ -77,10 +115,16 @@ const LoginForm = ({ isRegister = false }: LoginFormProps) => {
               placeholder="exemplo@empresa.com.br"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="pl-10"
+              className={`pl-10 ${errors.email ? 'border-red-500' : ''}`}
               required
             />
           </div>
+          {errors.email && (
+            <div className="text-red-500 text-xs mt-1 flex items-center">
+              <AlertCircle className="h-3 w-3 mr-1" />
+              {errors.email}
+            </div>
+          )}
         </div>
 
         <div className="space-y-1">
@@ -97,7 +141,7 @@ const LoginForm = ({ isRegister = false }: LoginFormProps) => {
               placeholder="********"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="pl-10 pr-10"
+              className={`pl-10 pr-10 ${errors.password ? 'border-red-500' : ''}`}
               required
             />
             <button 
@@ -112,6 +156,12 @@ const LoginForm = ({ isRegister = false }: LoginFormProps) => {
               )}
             </button>
           </div>
+          {errors.password && (
+            <div className="text-red-500 text-xs mt-1 flex items-center">
+              <AlertCircle className="h-3 w-3 mr-1" />
+              {errors.password}
+            </div>
+          )}
         </div>
 
         {isRegister && (
@@ -129,7 +179,7 @@ const LoginForm = ({ isRegister = false }: LoginFormProps) => {
                 placeholder="********"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="pl-10 pr-10"
+                className={`pl-10 pr-10 ${errors.confirmPassword ? 'border-red-500' : ''}`}
                 required
               />
               <button 
@@ -143,6 +193,35 @@ const LoginForm = ({ isRegister = false }: LoginFormProps) => {
                   <EyeIcon className="h-5 w-5 text-gray-400" />
                 )}
               </button>
+            </div>
+            {errors.confirmPassword && (
+              <div className="text-red-500 text-xs mt-1 flex items-center">
+                <AlertCircle className="h-3 w-3 mr-1" />
+                {errors.confirmPassword}
+              </div>
+            )}
+          </div>
+        )}
+
+        {isRegister && (
+          <div className="flex items-start">
+            <div className="flex items-center h-5">
+              <Checkbox 
+                id="terms"
+                checked={acceptTerms}
+                onCheckedChange={(checked) => setAcceptTerms(checked as boolean)}
+              />
+            </div>
+            <div className="ml-3 text-sm">
+              <label htmlFor="terms" className="text-gray-600">
+                Li e concordo com os <a href="#" className="text-brand-blue hover:underline">Termos de Serviço</a> e <a href="#" className="text-brand-blue hover:underline">Política de Privacidade</a>
+              </label>
+              {errors.terms && (
+                <div className="text-red-500 text-xs mt-1 flex items-center">
+                  <AlertCircle className="h-3 w-3 mr-1" />
+                  {errors.terms}
+                </div>
+              )}
             </div>
           </div>
         )}

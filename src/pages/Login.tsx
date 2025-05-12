@@ -3,6 +3,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import LoginForm from '@/components/LoginForm';
 import { Link } from 'react-router-dom';
+import { Shield } from 'lucide-react';
 
 const Login = () => {
   return (
@@ -11,6 +12,11 @@ const Login = () => {
       
       <main className="flex-1 container mx-auto px-4 py-12">
         <div className="max-w-md mx-auto">
+          <div className="flex justify-center mb-6">
+            <div className="bg-brand-light-blue rounded-full p-2">
+              <Shield className="h-8 w-8 text-brand-blue" />
+            </div>
+          </div>
           <h1 className="text-3xl font-bold text-brand-dark mb-2 text-center">Bem-vindo à PrimeDask</h1>
           <p className="text-gray-500 mb-6 text-center">Sua contabilidade inteligente e automatizada</p>
           
