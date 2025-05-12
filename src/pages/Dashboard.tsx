@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
@@ -9,44 +8,37 @@ import Dashboard from '@/components/Dashboard';
 import TransactionForm from '@/components/TransactionForm';
 import AIChat from '@/components/AIChat';
 import DashboardLayout from '@/components/DashboardLayout';
-
 const DashboardPage = () => {
   const [activeTab, setActiveTab] = useState('overview');
-
   const renderActions = () => {
     if (activeTab === 'overview') {
-      return (
-        <Button className="bg-brand-blue hover:bg-brand-blue/90 text-white">
+      return <Button className="bg-brand-blue hover:bg-brand-blue/90 text-white">
           <TrendingUp className="w-4 h-4 mr-2" />
           Analisar com IA
-        </Button>
-      );
+        </Button>;
     }
     return null;
   };
-
   const getTitle = () => {
     switch (activeTab) {
-      case 'overview': return 'Dashboard';
-      case 'transactions': return 'Nova Transação';
-      case 'reports': return 'Relatórios';
-      case 'ai-assistant': return 'Assistente IA';
-      case 'calendar': return 'Calendário Fiscal';
-      default: return 'Dashboard';
+      case 'overview':
+        return 'Dashboard';
+      case 'transactions':
+        return 'Nova Transação';
+      case 'reports':
+        return 'Relatórios';
+      case 'ai-assistant':
+        return 'Assistente IA';
+      case 'calendar':
+        return 'Calendário Fiscal';
+      default:
+        return 'Dashboard';
     }
   };
-  
   const getSubtitle = () => {
     return 'Empresa: Minha Empresa LTDA - CNPJ: 00.000.000/0001-00';
   };
-
-  return (
-    <DashboardLayout 
-      activeItem="dashboard" 
-      title={getTitle()} 
-      subtitle={getSubtitle()} 
-      actions={renderActions()}
-    >
+  return <DashboardLayout activeItem="dashboard" title={getTitle()} subtitle={getSubtitle()} actions={renderActions()}>
       {/* Dashboard tabs */}
       <div className="mb-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -66,8 +58,7 @@ const DashboardPage = () => {
       {activeTab === 'transactions' && <TransactionForm />}
 
       {/* Reports */}
-      {activeTab === 'reports' && (
-        <Card className="p-6">
+      {activeTab === 'reports' && <Card className="p-6">
           <h2 className="text-xl font-bold text-brand-dark mb-6">Relatórios Contábeis</h2>
           <Tabs defaultValue="dre">
             <TabsList className="mb-6">
@@ -100,17 +91,12 @@ const DashboardPage = () => {
               </div>
             </TabsContent>
           </Tabs>
-        </Card>
-      )}
+        </Card>}
 
       {/* AI Assistant */}
-      {activeTab === 'ai-assistant' && (
-        <div className="h-[calc(100vh-12rem)]">
+      {activeTab === 'ai-assistant' && <div className="h-[calc(100vh-12rem)]">
           <AIChat />
-        </div>
-      )}
-    </DashboardLayout>
-  );
+        </div>}
+    </DashboardLayout>;
 };
-
 export default DashboardPage;

@@ -1,52 +1,70 @@
-
 import { useState } from 'react';
-import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer, 
-  PieChart, 
-  Pie, 
-  Cell, 
-  Legend 
-} from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import { Card } from '@/components/ui/card';
 import { Bell, Calendar, DollarSign, TrendingUp, AlertTriangle } from 'lucide-react';
 
 // Sample data
-const monthlyData = [
-  { name: 'Jan', receitas: 12000, despesas: 8000 },
-  { name: 'Fev', receitas: 15000, despesas: 9000 },
-  { name: 'Mar', receitas: 18000, despesas: 12000 },
-  { name: 'Abr', receitas: 17000, despesas: 10000 },
-  { name: 'Mai', receitas: 22000, despesas: 15000 },
-  { name: 'Jun', receitas: 20000, despesas: 13000 },
-];
-
-const expenseData = [
-  { name: 'Aluguel', value: 3000 },
-  { name: 'Salários', value: 5000 },
-  { name: 'Insumos', value: 2500 },
-  { name: 'Marketing', value: 1500 },
-  { name: 'Outros', value: 1000 },
-];
-
-const taxesDue = [
-  { name: 'DAS', due: '20/05/2025', amount: 'R$ 567,89', status: 'pending' },
-  { name: 'ISS', due: '10/05/2025', amount: 'R$ 234,45', status: 'pending' },
-  { name: 'IRPJ', due: '30/05/2025', amount: 'R$ 1.245,67', status: 'pending' },
-];
-
+const monthlyData = [{
+  name: 'Jan',
+  receitas: 12000,
+  despesas: 8000
+}, {
+  name: 'Fev',
+  receitas: 15000,
+  despesas: 9000
+}, {
+  name: 'Mar',
+  receitas: 18000,
+  despesas: 12000
+}, {
+  name: 'Abr',
+  receitas: 17000,
+  despesas: 10000
+}, {
+  name: 'Mai',
+  receitas: 22000,
+  despesas: 15000
+}, {
+  name: 'Jun',
+  receitas: 20000,
+  despesas: 13000
+}];
+const expenseData = [{
+  name: 'Aluguel',
+  value: 3000
+}, {
+  name: 'Salários',
+  value: 5000
+}, {
+  name: 'Insumos',
+  value: 2500
+}, {
+  name: 'Marketing',
+  value: 1500
+}, {
+  name: 'Outros',
+  value: 1000
+}];
+const taxesDue = [{
+  name: 'DAS',
+  due: '20/05/2025',
+  amount: 'R$ 567,89',
+  status: 'pending'
+}, {
+  name: 'ISS',
+  due: '10/05/2025',
+  amount: 'R$ 234,45',
+  status: 'pending'
+}, {
+  name: 'IRPJ',
+  due: '30/05/2025',
+  amount: 'R$ 1.245,67',
+  status: 'pending'
+}];
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
-
 const Dashboard = () => {
   const [currentMonth] = useState('Maio 2025');
-  
-  return (
-    <div className="space-y-6">
+  return <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
         <div>
@@ -60,7 +78,7 @@ const Dashboard = () => {
           </button>
           <button className="flex items-center bg-brand-blue text-white rounded-md px-3 py-1 hover:bg-brand-blue/90">
             <TrendingUp className="w-4 h-4 mr-1" />
-            <span>Analisar com IA</span>
+            <span className="">Analisar com IA</span>
           </button>
         </div>
       </div>
@@ -138,14 +156,16 @@ const Dashboard = () => {
           <h3 className="text-lg font-bold text-brand-dark mb-4">Receitas x Despesas</h3>
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={monthlyData}
-                margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-              >
+              <BarChart data={monthlyData} margin={{
+              top: 20,
+              right: 30,
+              left: 20,
+              bottom: 5
+            }}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
                 <YAxis />
-                <Tooltip formatter={(value) => `R$ ${value}`} />
+                <Tooltip formatter={value => `R$ ${value}`} />
                 <Legend />
                 <Bar dataKey="receitas" name="Receitas" fill="#0066CC" />
                 <Bar dataKey="despesas" name="Despesas" fill="#FF6B6B" />
@@ -159,21 +179,13 @@ const Dashboard = () => {
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
-                <Pie
-                  data={expenseData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  outerRadius={100}
-                  fill="#8884d8"
-                  dataKey="value"
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                >
-                  {expenseData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
+                <Pie data={expenseData} cx="50%" cy="50%" labelLine={false} outerRadius={100} fill="#8884d8" dataKey="value" label={({
+                name,
+                percent
+              }) => `${name} ${(percent * 100).toFixed(0)}%`}>
+                  {expenseData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
                 </Pie>
-                <Tooltip formatter={(value) => `R$ ${value}`} />
+                <Tooltip formatter={value => `R$ ${value}`} />
                 <Legend />
               </PieChart>
             </ResponsiveContainer>
@@ -196,8 +208,7 @@ const Dashboard = () => {
               </tr>
             </thead>
             <tbody>
-              {taxesDue.map((tax, index) => (
-                <tr key={index} className="border-b">
+              {taxesDue.map((tax, index) => <tr key={index} className="border-b">
                   <td className="py-4 px-4 text-sm text-gray-900 font-medium">{tax.name}</td>
                   <td className="py-4 px-4 text-sm text-gray-500">{tax.due}</td>
                   <td className="py-4 px-4 text-sm text-gray-900">{tax.amount}</td>
@@ -211,14 +222,11 @@ const Dashboard = () => {
                       Gerar Guia
                     </button>
                   </td>
-                </tr>
-              ))}
+                </tr>)}
             </tbody>
           </table>
         </div>
       </Card>
-    </div>
-  );
+    </div>;
 };
-
 export default Dashboard;
