@@ -6,7 +6,6 @@ import { Shield } from 'lucide-react';
 import AccountTypeSelection from '@/components/AccountTypeSelection';
 import CpfRegistrationForm from '@/components/registration/CpfRegistrationForm';
 import CnpjRegistrationForm from '@/components/registration/CnpjRegistrationForm';
-import LoginForm from '@/components/LoginForm';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { CheckCircle2 } from 'lucide-react';
 

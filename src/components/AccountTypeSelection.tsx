@@ -15,7 +15,7 @@ const AccountTypeSelection = ({ onSelect }: AccountTypeSelectionProps) => {
     <div className="space-y-6">
       <div className="text-center">
         <h2 className="text-2xl font-bold text-brand-dark">Selecione o tipo de conta</h2>
-        <p className="text-gray-600 mt-2">Você está se cadastrando como Pessoa Física (CPF) ou Pessoa Jurídica (CNPJ)?</p>
+        <p className="text-gray-600 mt-2">Você está se cadastrando como:</p>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
