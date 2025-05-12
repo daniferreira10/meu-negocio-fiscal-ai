@@ -1,4 +1,3 @@
-
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { 
@@ -8,8 +7,52 @@ import {
   DollarSign, 
   MessageSquare,
   Settings, 
-  LogOut
+  LogOut,
+  Layout,
+  FileText as FileTextIcon,
+  Calculator,
+  Users,
+  CreditCard
 } from 'lucide-react';
+
+const sidebarItems = [
+  {
+    name: 'Dashboard',
+    icon: <Layout className="w-5 h-5" />,
+    path: '/dashboard',
+    key: 'dashboard'
+  },
+  {
+    name: 'Documentos',
+    icon: <FileTextIcon className="w-5 h-5" />,
+    path: '/documents',
+    key: 'documents'
+  },
+  {
+    name: 'Chat Contábil',
+    icon: <MessageSquare className="w-5 h-5" />,
+    path: '/chat',
+    key: 'chat'
+  },
+  {
+    name: 'Impostos',
+    icon: <Calculator className="w-5 h-5" />,
+    path: '/tax-management',
+    key: 'taxes'
+  },
+  {
+    name: 'Clientes',
+    icon: <Users className="w-5 h-5" />,
+    path: '/client-registration',
+    key: 'clients'
+  },
+  {
+    name: 'Planos',
+    icon: <CreditCard className="w-5 h-5" />,
+    path: '/pricing',
+    key: 'pricing'
+  }
+];
 
 const Sidebar = ({ activeItem = 'dashboard' }: { activeItem?: string }) => {
   return (

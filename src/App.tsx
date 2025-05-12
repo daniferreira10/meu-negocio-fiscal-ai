@@ -13,6 +13,7 @@ import Pricing from "./pages/Pricing";
 import NotFound from "./pages/NotFound";
 import ClientRegistration from "./pages/ClientRegistration";
 import TaxManagement from "./pages/TaxManagement";
+import Documents from "./pages/Documents";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +32,7 @@ const App = () => (
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/client-registration" element={<ClientRegistration />} />
           <Route path="/tax-management" element={<TaxManagement />} />
+          <Route path="/documents" element={<Documents />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
