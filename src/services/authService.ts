@@ -71,6 +71,8 @@ export const registerUser = async (email: string, password: string): Promise<boo
   localStorage.setItem(AUTH_TOKEN_KEY, token);
   localStorage.setItem(USER_DATA_KEY, JSON.stringify(newUser));
   
+  console.log('User registered and logged in:', newUser);
+  
   return true;
 };
 
@@ -84,9 +86,13 @@ export const loginUser = async (email: string, password: string, rememberMe: boo
   // Get all users including registered ones
   const allUsers = getAllUsers();
   
+  console.log('All users during login attempt:', allUsers);
+  console.log('Attempting login with email:', email);
+  
   // Check if email exists
   const user = allUsers.find(u => u.email.toLowerCase() === email.toLowerCase());
   if (!user) {
+    console.error('User not found with email:', email);
     throw new Error('USER_NOT_FOUND');
   }
   
@@ -99,6 +105,7 @@ export const loginUser = async (email: string, password: string, rememberMe: boo
     // For registered users, check stored password
     const storedPassword = localStorage.getItem(`password_${user.id}`);
     if (storedPassword !== password) {
+      console.error('Invalid password for user:', user.email);
       throw new Error('INVALID_PASSWORD');
     }
   }
@@ -109,6 +116,8 @@ export const loginUser = async (email: string, password: string, rememberMe: boo
   // Store auth data
   localStorage.setItem(AUTH_TOKEN_KEY, token);
   localStorage.setItem(USER_DATA_KEY, JSON.stringify(user));
+  
+  console.log('User successfully logged in:', user);
   
   return true;
 };
