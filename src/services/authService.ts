@@ -152,42 +152,31 @@ export const registerUser = async (email: string, password: string): Promise<boo
 
 /**
  * Attempts to log in a user with the provided credentials
+ * MODIFIED: Now allows any email and password
  */
 export const loginUser = async (email: string, password: string, rememberMe: boolean): Promise<boolean> => {
   // Simulate API request delay
   await new Promise(resolve => setTimeout(resolve, 800));
   
   try {
-    // Get all users including registered ones
-    const allUsers = getAllUsers();
+    // Modified to allow any login
+    console.log('Login attempt with email:', email);
     
-    console.log('All users during login attempt:', allUsers);
-    console.log('Attempting login with email:', email);
+    // Instead of finding an existing user, create a temporary one if email doesn't exist
+    let user = getAllUsers().find(u => u.email.toLowerCase() === email.toLowerCase());
     
-    // Check if email exists
-    const user = allUsers.find(u => u.email.toLowerCase() === email.toLowerCase());
+    // If user doesn't exist, create a temporary one
     if (!user) {
-      console.error('User not found with email:', email);
-      throw new Error('USER_NOT_FOUND');
+      console.log('Creating temporary user for:', email);
+      user = {
+        id: `user_${Math.random().toString(36).substring(2)}`,
+        email,
+        name: email.split('@')[0], // Use the first part of the email as name
+        role: 'user',
+      };
     }
     
-    // For mock users, accept any password that meets the length requirement
-    if (initialMockUsers.some(u => u.id === user.id)) {
-      if (password.length < 8) {
-        console.error('Invalid password length for mock user');
-        throw new Error('INVALID_PASSWORD');
-      }
-    } else {
-      // For registered users, check stored password
-      const storedPassword = localStorage.getItem(`password_${user.id}`);
-      console.log(`Checking password for user ${user.id}, stored password exists:`, !!storedPassword);
-      if (storedPassword !== password) {
-        console.error('Invalid password for user:', user.email);
-        throw new Error('INVALID_PASSWORD');
-      }
-    }
-    
-    // Generate a fake token
+    // Generate a token regardless of user authenticity
     const token = `token_${Math.random().toString(36).substring(2)}`;
     
     // Store auth data
@@ -226,3 +215,4 @@ export const getCurrentUser = (): User | null => {
   const userData = localStorage.getItem(USER_DATA_KEY);
   return userData ? JSON.parse(userData) : null;
 };
+

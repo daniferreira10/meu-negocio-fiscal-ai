@@ -27,8 +27,7 @@ const loginSchema = z.object({
     .email({ message: "E-mail inválido" })
     .min(1, { message: "E-mail é obrigatório" }),
   password: z.string()
-    .min(1, { message: "Senha é obrigatória" })
-    .min(8, { message: "A senha deve ter pelo menos 8 caracteres" }),
+    .min(1, { message: "Senha é obrigatória" }),
   rememberMe: z.boolean().optional()
 });
 
@@ -53,7 +52,7 @@ const LoginFormContent = () => {
     console.log("Login data:", data);
     
     try {
-      // Use the login service function
+      // Use the login service function - now allows any login
       const success = await loginUser(data.email, data.password, data.rememberMe || false);
       
       if (success) {
@@ -61,13 +60,7 @@ const LoginFormContent = () => {
         navigate('/dashboard');
       }
     } catch (error: any) {
-      if (error.message === 'USER_NOT_FOUND') {
-        toast.error("E-mail não encontrado. Verifique ou cadastre uma nova conta.");
-      } else if (error.message === 'INVALID_PASSWORD') {
-        toast.error("Senha incorreta. Tente novamente.");
-      } else {
-        toast.error("Erro ao fazer login. Tente novamente.");
-      }
+      toast.error("Erro ao fazer login. Tente novamente.");
       console.error("Erro no login:", error);
     } finally {
       setLoading(false);
