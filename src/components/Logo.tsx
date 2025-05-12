@@ -14,7 +14,7 @@ const Logo: React.FC<LogoProps> = ({
       </div>
       {withText && <span className="font-bold text-xl">
           <span className="text-brand-blue">PrimeDask</span>
-          <span className="text-brand-dark">Dask</span>
+          <span className="text-brand-dark"></span>
         </span>}
     </Link>;
 };
