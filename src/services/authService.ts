@@ -28,16 +28,66 @@ const AUTH_TOKEN_KEY = 'auth_token';
 const USER_DATA_KEY = 'user_data';
 const REGISTERED_USERS_KEY = 'registered_users';
 
-// Get all users (including registered ones)
-const getAllUsers = (): User[] => {
+/**
+ * Ensure localStorage is available and working
+ */
+const isLocalStorageAvailable = (): boolean => {
+  try {
+    const testKey = '__test__';
+    localStorage.setItem(testKey, testKey);
+    localStorage.removeItem(testKey);
+    return true;
+  } catch (e) {
+    console.error('LocalStorage is not available:', e);
+    return false;
+  }
+}
+
+/**
+ * Get all registered users from localStorage
+ */
+const getRegisteredUsers = (): User[] => {
+  if (!isLocalStorageAvailable()) {
+    console.error('LocalStorage unavailable, returning empty array');
+    return [];
+  }
+  
   try {
     const storedUsers = localStorage.getItem(REGISTERED_USERS_KEY);
     const registeredUsers = storedUsers ? JSON.parse(storedUsers) : [];
     console.log('Retrieved registered users:', registeredUsers);
-    return [...initialMockUsers, ...registeredUsers];
+    return registeredUsers;
   } catch (error) {
     console.error('Error getting registered users:', error);
-    return [...initialMockUsers];
+    return [];
+  }
+};
+
+/**
+ * Get all users (including initial mock users and registered ones)
+ */
+const getAllUsers = (): User[] => {
+  const registeredUsers = getRegisteredUsers();
+  console.log('All users (combined):', [...initialMockUsers, ...registeredUsers]);
+  return [...initialMockUsers, ...registeredUsers];
+};
+
+/**
+ * Save registered users to localStorage
+ */
+const saveRegisteredUsers = (users: User[]): boolean => {
+  if (!isLocalStorageAvailable()) {
+    console.error('LocalStorage unavailable, could not save users');
+    return false;
+  }
+  
+  try {
+    localStorage.setItem(REGISTERED_USERS_KEY, JSON.stringify(users));
+    console.log('Saved registered users:', users);
+    return true;
+  } catch (error) {
+    console.error('Error saving registered users:', error);
+    return false;
   }
 };
 
@@ -52,6 +102,7 @@ export const registerUser = async (email: string, password: string): Promise<boo
   
   // Check if email already exists
   if (allUsers.some(u => u.email.toLowerCase() === email.toLowerCase())) {
+    console.error('Registration failed: Email already exists:', email);
     throw new Error('EMAIL_ALREADY_EXISTS');
   }
   
@@ -68,10 +119,13 @@ export const registerUser = async (email: string, password: string): Promise<boo
     localStorage.setItem(`password_${newUser.id}`, password);
     
     // Add to registered users
-    const storedUsers = localStorage.getItem(REGISTERED_USERS_KEY);
-    const registeredUsers = storedUsers ? JSON.parse(storedUsers) : [];
+    const registeredUsers = getRegisteredUsers();
     registeredUsers.push(newUser);
-    localStorage.setItem(REGISTERED_USERS_KEY, JSON.stringify(registeredUsers));
+    
+    // Save updated registered users list
+    if (!saveRegisteredUsers(registeredUsers)) {
+      throw new Error('Failed to save user');
+    }
     
     // Auto login after registration
     const token = `token_${Math.random().toString(36).substring(2)}`;
@@ -79,7 +133,6 @@ export const registerUser = async (email: string, password: string): Promise<boo
     localStorage.setItem(USER_DATA_KEY, JSON.stringify(newUser));
     
     console.log('User registered and logged in:', newUser);
-    console.log('Updated registered users list:', registeredUsers);
     
     return true;
   } catch (error) {
@@ -110,8 +163,9 @@ export const loginUser = async (email: string, password: string, rememberMe: boo
     }
     
     // For mock users, accept any password that meets the length requirement
-    if (initialMockUsers.some(u => u.email === user.email)) {
+    if (initialMockUsers.some(u => u.id === user.id)) {
       if (password.length < 8) {
+        console.error('Invalid password length for mock user');
         throw new Error('INVALID_PASSWORD');
       }
     } else {

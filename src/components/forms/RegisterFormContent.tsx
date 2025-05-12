@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -68,7 +67,11 @@ const RegisterFormContent = () => {
       if (success) {
         console.log("Registration successful, navigating to dashboard");
         toast.success("Cadastro realizado com sucesso!");
-        navigate('/dashboard');
+        
+        // Garantindo que não haja redirecionamento imediato após o registro
+        setTimeout(() => {
+          navigate('/dashboard');
+        }, 100);
       }
     } catch (error: any) {
       console.error("Registration error:", error);
