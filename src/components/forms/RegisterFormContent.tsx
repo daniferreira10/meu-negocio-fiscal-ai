@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -7,15 +8,19 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { 
   Form,
   FormField,
+  FormItem,
   FormLabel,
   FormControl,
-  FormDescription
+  FormDescription,
+  FormMessage
 } from '@/components/ui/form';
+import { Checkbox } from '@/components/ui/checkbox';
 
 import EmailInput from './EmailInput';
 import PasswordInput from './PasswordInput';
 import SubmitButton from './SubmitButton';
 import FormHeader from './FormHeader';
+import FormFooter from './FormFooter';
 import { registerUser } from '@/services/authService';
 
 // Schema de validação para registro
