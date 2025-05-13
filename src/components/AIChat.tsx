@@ -12,13 +12,13 @@ const AIChat = () => {
       role: 'assistant', 
       content: `Olá! Sou o assistente contábil inteligente da PrimeDash. Posso ajudar você com diversos assuntos:
 
-📊 Consultoria contábil personalizada
-💰 Análise de regime tributário
-📂 Processamento de documentos
-💼 Apuração de tributos e obrigações fiscais
-📈 Relatórios financeiros
-📅 Agenda fiscal e alertas
-🔒 Compliance e segurança fiscal
+Consultoria contábil personalizada
+Análise de regime tributário
+Processamento de documentos
+Apuração de tributos e obrigações fiscais
+Relatórios financeiros
+Agenda fiscal e alertas
+Compliance e segurança fiscal
 
 Como posso ajudar sua empresa hoje?`
     }
@@ -58,12 +58,12 @@ Como posso ajudar sua empresa hoje?`
     // Module 3 - Document processing for spreadsheets
     return `Analisei sua planilha "${fileName}" e detectei:
 
-📊 **Análise Financeira**:
+**Análise Financeira**:
 - ${Math.random() > 0.5 ? 'Receitas estão 12% acima do mês anterior' : 'Despesas aumentaram em 8% nos últimos 3 meses'}
 - ${Math.random() > 0.5 ? 'Detectei possíveis lançamentos duplicados nas linhas 15-18' : 'Todas as categorias estão corretamente classificadas'}
 - Margem de lucro atual: ${Math.floor(Math.random() * 30) + 10}%
 
-💡 **Recomendações**:
+**Recomendações**:
 - Verificar despesas de ${Math.random() > 0.5 ? 'marketing' : 'operacionais'} que cresceram acima da média
 - ${Math.random() > 0.5 ? 'Considere reclassificar alguns gastos como investimentos' : 'Alguns recebimentos podem estar sem a nota fiscal correspondente'}
 
@@ -79,11 +79,11 @@ Para análise mais detalhada, recomendo agendar uma consultoria com nossos espec
 
     return `Analisei seu ${isPdf ? 'PDF' : 'documento'} "${fileName}" e identifiquei que é ${documentType}.
 
-📑 **Informações extraídas**:
+**Informações extraídas**:
 - ${Math.random() > 0.5 ? 'Valor total: R$ ' + (Math.random() * 10000).toFixed(2) : 'Data de emissão: ' + new Date().toLocaleDateString('pt-BR')}
 - ${Math.random() > 0.5 ? 'CNPJ emissor: XX.XXX.XXX/0001-XX' : 'Tributos incluídos: IRRF, ISS, CSLL'}
 
-⚠️ **Atenção necessária**:
+**Atenção necessária**:
 - ${Math.random() > 0.5 ? 'Este documento deve ser anexado à declaração mensal' : 'Recomendo arquivar este documento por 5 anos'}
 - ${Math.random() > 0.5 ? 'Prazo de pagamento próximo: ' + new Date(Date.now() + 7*86400000).toLocaleDateString('pt-BR') : 'Document já classificado e armazenado'}
 
@@ -94,12 +94,12 @@ Este documento foi automaticamente classificado e armazenado em sua conta.`;
     // Module 3 - Image processing
     return `Processei sua imagem "${fileName}" usando nosso sistema OCR.
 
-📷 **Informações extraídas**:
+**Informações extraídas**:
 - ${Math.random() > 0.5 ? 'Recibo de pagamento' : 'Comprovante de transferência'}
 - Valor identificado: R$ ${(Math.random() * 1000).toFixed(2)}
 - Data: ${new Date().toLocaleDateString('pt-BR')}
 
-🔍 **Classificação sugerida**:
+**Classificação sugerida**:
 - Categoria: ${Math.random() > 0.5 ? 'Despesas operacionais' : 'Serviços prestados'}
 - ${Math.random() > 0.5 ? 'Dedutível para ' + (Math.random() > 0.5 ? 'IRPJ' : 'CSLL') : 'Não dedutível para fins fiscais'}
 
@@ -110,7 +110,7 @@ Documento arquivado digitalmente. Recomendo guardar o original físico por 5 ano
     // Generic file handling
     return `Recebi seu arquivo "${fileName}" e o adicionei ao seu registro contábil.
 
-🗂️ **Próximos passos**:
+**Próximos passos**:
 - Arquivo classificado como ${Math.random() > 0.5 ? 'Documento Fiscal' : 'Documento Administrativo'}
 - Disponível para consulta em seu histórico de documentos
 - ${Math.random() > 0.5 ? 'Recomendo classificar manualmente para melhor organização' : 'Processado com sucesso'}
@@ -176,12 +176,12 @@ Para mais detalhes sobre este documento, você pode consultar nossos especialist
           
           response = `Com base no seu regime tributário${userProfile.taxRegime !== 'unknown' ? ' ' + userProfile.taxRegime : ''} e faturamento atual, calculei:
 
-💰 **Tributos do mês corrente**:
+**Tributos do mês corrente**:
 - ${Math.random() > 0.5 ? 'DAS' : 'DARF'}: R$ ${taxValue}
 - Vencimento: ${dueDate}
 - Código de pagamento: ${Math.floor(Math.random() * 10000)}
 
-⚠️ **Atenção**: Verifique também outras obrigações como ${Math.random() > 0.5 ? 'INSS' : 'FGTS'} com vencimento próximo.
+**Atenção**: Verifique também outras obrigações como ${Math.random() > 0.5 ? 'INSS' : 'FGTS'} com vencimento próximo.
 
 Posso gerar a guia de pagamento para você. Gostaria que eu emitisse agora?`;
         }
@@ -191,7 +191,7 @@ Posso gerar a guia de pagamento para você. Gostaria que eu emitisse agora?`;
           
           response = `Posso gerar os seguintes relatórios para sua empresa:
 
-📊 **Relatórios disponíveis**:
+**Relatórios disponíveis**:
 - DRE (Demonstrativo de Resultado)
 - Balanço Patrimonial
 - Fluxo de Caixa
@@ -208,13 +208,13 @@ Qual relatório você gostaria de visualizar? Posso personalizá-lo por período
           
           response = `Aqui está seu calendário de obrigações fiscais para ${currentMonth}:
 
-📅 **Próximos vencimentos**:
+**Próximos vencimentos**:
 - 07/${new Date().getMonth() + 1}: FGTS
 - 15/${new Date().getMonth() + 1}: PIS/COFINS
 - 20/${new Date().getMonth() + 1}: ${userProfile.taxRegime === 'simples' ? 'DAS (Simples Nacional)' : 'IRPJ/CSLL (Estimativa)'}
 - 25/${new Date().getMonth() + 1}: ${Math.random() > 0.5 ? 'IPI' : 'ICMS'}
 
-⏰ Configurei notificações para lembrá-lo 3 dias antes de cada vencimento.
+Configurei notificações para lembrá-lo 3 dias antes de cada vencimento.
 
 Gostaria de ver as obrigações de outro mês específico?`;
         }
@@ -224,12 +224,12 @@ Gostaria de ver as obrigações de outro mês específico?`;
           
           response = `Analisei os dados históricos da sua empresa e identifiquei:
 
-📈 **Insights de negócio**:
+**Insights de negócio**:
 - Crescimento médio: ${Math.floor(Math.random() * 15) + 2}% nos últimos 3 meses
 - Principal categoria de custo: ${Math.random() > 0.5 ? 'Despesas Operacionais' : 'Folha de Pagamento'}
 - Sazonalidade: ${Math.random() > 0.5 ? 'Maior demanda no segundo semestre' : 'Picos de receita no início de cada trimestre'}
 
-💡 **Recomendações**:
+**Recomendações**:
 - ${Math.random() > 0.5 ? 'Considere renegociar contratos com fornecedores' : 'Avalie oportunidades de antecipação de recebíveis'}
 - ${Math.random() > 0.5 ? 'Há potencial para redução de até 12% em custos fixos' : 'Análise sugere espaço para expansão sem aumento proporcional de custos'}
 
@@ -249,11 +249,11 @@ Gostaria que eu gerasse um relatório completo de projeções para os próximos 
       setMessages(prev => [...prev, assistantMessage]);
       setIsLoading(false);
       
-      // Show contextual toasts based on conversation
+      // Show contextual toasts with more professional messaging
       if (Math.random() > 0.6) { // 40% chance to show a toast
         const toasts = [
           "Você pode agendar uma consultoria especializada para aprofundar este assunto.",
-          "Lembre-se de verificar seus próximos vencimentos fiscais no calendário.",
+          "Verifique seus próximos vencimentos fiscais no calendário.",
           "Mantenha seus documentos fiscais organizados para facilitar declarações anuais.",
           "Considere fazer uma revisão tributária trimestral para otimizar impostos.",
           "Seu próximo pagamento de imposto está se aproximando. Verifique o calendário fiscal."
@@ -281,3 +281,4 @@ Gostaria que eu gerasse um relatório completo de projeções para os próximos 
 };
 
 export default AIChat;
+

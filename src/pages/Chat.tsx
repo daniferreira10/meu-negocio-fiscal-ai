@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import AIChat from '@/components/AIChat';
 import { MessageSquare, BookOpen, FileCog, Calculator, UserRound, FileBarChart2, CalendarClock } from 'lucide-react';
@@ -16,23 +17,27 @@ const Chat = () => {
     >
       <div className="relative">
         {/* Decorative elements for tech feel */}
-        <div className="absolute -top-16 -right-16 w-32 h-32 bg-brand-cyan/20 rounded-full blur-3xl"></div>
+        <div className="absolute -top-16 -right-16 w-40 h-40 bg-brand-cyan/10 rounded-full blur-3xl"></div>
         <div className="absolute top-40 -left-16 w-40 h-40 bg-brand-blue/10 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-20 right-20 w-32 h-32 bg-brand-dark-blue/20 rounded-full blur-2xl"></div>
+        
+        {/* Circuit board pattern overlays */}
+        <div className="absolute inset-0 opacity-5 pointer-events-none bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDQwIDQwIj48ZyBmaWxsPSJub25lIiBzdHJva2U9IiNmZmYiIHN0cm9rZS13aWR0aD0iMSI+PHBhdGggZD0iTTAgMjBMMjAgME00MCAyMEwyMCAwTTAgMjBMMjAgNDBNNDAgMjBMMjAgNDAiLz48L2c+PC9zdmc+')]"></div>
         
         <Tabs defaultValue="chat" className="w-full" onValueChange={setActiveTab}>
-          <TabsList className="mb-6 w-full justify-start bg-gray-800/50 backdrop-blur-md border border-gray-700/50 rounded-lg">
-            <TabsTrigger value="chat" className="flex items-center data-[state=active]:bg-brand-blue">
+          <TabsList className="mb-6 w-full justify-start bg-gray-800/80 backdrop-blur-md border border-gray-700/50 rounded-lg shadow-lg">
+            <TabsTrigger value="chat" className="flex items-center data-[state=active]:bg-brand-blue/90 data-[state=active]:shadow-md">
               <MessageSquare className="w-4 h-4 mr-2" />
               <span>Chat</span>
             </TabsTrigger>
-            <TabsTrigger value="topics" className="flex items-center data-[state=active]:bg-brand-blue">
+            <TabsTrigger value="topics" className="flex items-center data-[state=active]:bg-brand-blue/90 data-[state=active]:shadow-md">
               <BookOpen className="w-4 h-4 mr-2" />
               <span>Tópicos</span>
             </TabsTrigger>
           </TabsList>
           
           <TabsContent value="chat" className="mt-0">
-            <div className="h-[600px] shadow-2xl rounded-lg overflow-hidden border border-gray-700/50 bg-gradient-to-b from-gray-900/50 to-brand-dark-blue/50 backdrop-blur-md">
+            <div className="h-[600px] shadow-2xl rounded-lg overflow-hidden border border-gray-700/50 bg-gradient-to-b from-gray-900 to-brand-dark-blue backdrop-blur-md">
               <AIChat />
             </div>
           </TabsContent>
@@ -131,7 +136,7 @@ const Chat = () => {
   );
 };
 
-// Helper component for topic cards
+// Helper component for topic cards with updated design
 interface TopicCardProps {
   icon: React.ReactNode;
   title: string;
@@ -142,11 +147,11 @@ interface TopicCardProps {
 const TopicCard = ({ icon, title, description, onClick }: TopicCardProps) => {
   return (
     <Card 
-      className="p-4 hover:shadow-xl transition-all duration-300 cursor-pointer border-gray-700/30 bg-gradient-to-br from-gray-900/80 to-brand-dark-blue/80 backdrop-blur-sm hover:translate-y-[-3px] hover:border-brand-cyan/30"
+      className="p-4 hover:shadow-xl transition-all duration-300 cursor-pointer border-gray-700/30 bg-gradient-to-br from-gray-900 to-brand-dark-blue backdrop-blur-sm hover:translate-y-[-3px] hover:border-brand-cyan/30"
       onClick={onClick}
     >
       <div className="flex items-start space-x-4">
-        <div className="mt-1 p-2 bg-gradient-to-br from-brand-blue to-brand-cyan rounded-full text-white">
+        <div className="mt-1 p-2 bg-gradient-to-br from-brand-blue to-brand-cyan rounded-md text-white">
           {icon}
         </div>
         <div>

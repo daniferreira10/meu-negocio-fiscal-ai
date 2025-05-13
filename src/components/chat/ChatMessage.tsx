@@ -21,11 +21,11 @@ const ChatMessage = ({ message, isLoading = false }: ChatMessageProps) => {
   if (isLoading) {
     return (
       <div className="mr-auto max-w-[80%] mb-4">
-        <div className="bg-white/10 border border-gray-500/20 p-3 rounded-lg rounded-tl-none text-gray-100 shadow-lg backdrop-blur-sm">
+        <div className="bg-gray-800/80 border border-gray-700/50 p-3 rounded-lg rounded-tl-none text-gray-100 shadow-lg backdrop-blur-sm">
           <div className="flex space-x-2">
-            <div className="w-2 h-2 rounded-full bg-gray-300/70 animate-pulse"></div>
-            <div className="w-2 h-2 rounded-full bg-gray-300/70 animate-pulse delay-75"></div>
-            <div className="w-2 h-2 rounded-full bg-gray-300/70 animate-pulse delay-150"></div>
+            <div className="w-2 h-2 rounded-full bg-brand-cyan/70 animate-pulse"></div>
+            <div className="w-2 h-2 rounded-full bg-brand-cyan/70 animate-pulse delay-75"></div>
+            <div className="w-2 h-2 rounded-full bg-brand-cyan/70 animate-pulse delay-150"></div>
           </div>
         </div>
       </div>
@@ -43,14 +43,14 @@ const ChatMessage = ({ message, isLoading = false }: ChatMessageProps) => {
       <div
         className={`p-3 rounded-lg backdrop-blur-sm ${
           message.role === 'user'
-            ? 'bg-brand-blue/90 text-white rounded-tr-none shadow-lg border border-brand-blue/30'
-            : 'bg-white/10 border border-gray-500/20 text-gray-100 rounded-tl-none shadow-lg'
+            ? 'bg-brand-blue text-white rounded-tr-none shadow-md border border-brand-blue/30'
+            : 'bg-gray-800/80 border border-gray-700/50 text-gray-100 rounded-tl-none shadow-md'
         }`}
       >
-        {message.content}
+        <div className="whitespace-pre-line">{message.content}</div>
         
         {message.attachment && (
-          <div className="mt-2 p-2 bg-gray-700/40 rounded-md flex items-center gap-2 text-sm">
+          <div className="mt-2 p-2 bg-gray-900/60 rounded-md flex items-center gap-2 text-sm border border-gray-700/40">
             {getFileIcon(message.attachment.name)}
             <span className="truncate">{message.attachment.name}</span>
           </div>

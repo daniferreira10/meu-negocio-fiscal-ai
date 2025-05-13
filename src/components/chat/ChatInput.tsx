@@ -74,7 +74,7 @@ const ChatInput = ({ onSendMessage, isLoading }: ChatInputProps) => {
   return (
     <form onSubmit={handleSubmit} className="p-4 border-t border-gray-700/50 bg-gray-800/50 backdrop-blur-md">
       {attachedFile && (
-        <div className="mb-3 p-2 bg-gray-700/40 rounded-md flex items-center justify-between">
+        <div className="mb-3 p-2 bg-gray-700/70 rounded-md flex items-center justify-between border border-gray-600/50">
           <div className="flex items-center gap-2">
             {getFileIcon(attachedFile.name)}
             <span className="text-sm text-gray-200 truncate">{attachedFile.name}</span>
@@ -96,7 +96,7 @@ const ChatInput = ({ onSendMessage, isLoading }: ChatInputProps) => {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Digite sua dúvida contábil ou fiscal..."
-          className="min-h-12 resize-none flex-1 bg-gray-900/50 border-gray-700 text-gray-100 placeholder:text-gray-400 focus-visible:ring-brand-cyan"
+          className="min-h-12 resize-none flex-1 bg-gray-900/80 border-gray-700 text-gray-100 placeholder:text-gray-400 focus-visible:ring-brand-cyan"
         />
         
         <Button 
