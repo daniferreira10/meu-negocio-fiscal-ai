@@ -73,13 +73,13 @@ const RegisterFormContent = () => {
       const success = await registerUser(data.email, data.password);
       
       if (success) {
-        console.log("Registration successful, navigating to dashboard");
+        console.log("Registration successful, navigating to login");
         toast.success("Cadastro realizado com sucesso!");
         
-        // Aguardamos um pouco mais para garantir que o localStorage foi atualizado
+        // Redirecionamento para a página de login em vez do dashboard
         setTimeout(() => {
-          console.log("Redirecting to dashboard after registration");
-          navigate('/dashboard');
+          console.log("Redirecting to login page after registration");
+          navigate('/login');
         }, 1500);
       }
     } catch (error: any) {
