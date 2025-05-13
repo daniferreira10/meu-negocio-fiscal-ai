@@ -1,13 +1,14 @@
 
 import { useState } from 'react';
-import AIChat from '@/components/AIChat';
 import { MessageSquare, BookOpen, FileCog, Calculator, UserRound, FileBarChart2, CalendarClock } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card } from '@/components/ui/card';
 import DashboardLayout from '@/components/DashboardLayout';
+import AIChat from '@/components/AIChat';
+import ContabilidadeAI from '@/components/ContabilidadeAI';
 
 const Chat = () => {
-  const [activeTab, setActiveTab] = useState('chat');
+  const [activeTab, setActiveTab] = useState('contabilidade');
 
   return (
     <DashboardLayout 
@@ -24,17 +25,27 @@ const Chat = () => {
         {/* Circuit board pattern overlays */}
         <div className="absolute inset-0 opacity-5 pointer-events-none bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDQwIDQwIj48ZyBmaWxsPSJub25lIiBzdHJva2U9IiNmZmYiIHN0cm9rZS13aWR0aD0iMSI+PHBhdGggZD0iTTAgMjBMMjAgME00MCAyMEwyMCAwTTAgMjBMMjAgNDBNNDAgMjBMMjAgNDAiLz48L2c+PC9zdmc+')]"></div>
         
-        <Tabs defaultValue="chat" className="w-full" onValueChange={setActiveTab}>
+        <Tabs defaultValue="contabilidade" className="w-full" onValueChange={setActiveTab}>
           <TabsList className="mb-6 w-full justify-start bg-gray-800/80 backdrop-blur-md border border-gray-700/50 rounded-lg shadow-lg">
+            <TabsTrigger value="contabilidade" className="flex items-center data-[state=active]:bg-brand-blue/90 data-[state=active]:shadow-md">
+              <MessageSquare className="w-4 h-4 mr-2" />
+              <span>IA Contábil</span>
+            </TabsTrigger>
             <TabsTrigger value="chat" className="flex items-center data-[state=active]:bg-brand-blue/90 data-[state=active]:shadow-md">
               <MessageSquare className="w-4 h-4 mr-2" />
-              <span>Assistente Contábil</span>
+              <span>Assistente Geral</span>
             </TabsTrigger>
             <TabsTrigger value="topics" className="flex items-center data-[state=active]:bg-brand-blue/90 data-[state=active]:shadow-md">
               <BookOpen className="w-4 h-4 mr-2" />
               <span>Biblioteca Fiscal</span>
             </TabsTrigger>
           </TabsList>
+          
+          <TabsContent value="contabilidade" className="mt-0">
+            <div className="h-[600px] shadow-2xl rounded-lg overflow-hidden border border-gray-700/50 bg-gradient-to-b from-gray-900 to-brand-dark-blue backdrop-blur-md">
+              <ContabilidadeAI />
+            </div>
+          </TabsContent>
           
           <TabsContent value="chat" className="mt-0">
             <div className="h-[600px] shadow-2xl rounded-lg overflow-hidden border border-gray-700/50 bg-gradient-to-b from-gray-900 to-brand-dark-blue backdrop-blur-md">
@@ -49,7 +60,7 @@ const Chat = () => {
                 title="Regularização Empresarial" 
                 description="Constituição societária, elaboração de contratos, registro, obtenção de CNPJ e licenças."
                 onClick={() => {
-                  setActiveTab('chat');
+                  setActiveTab('contabilidade');
                   setTimeout(() => {
                     document.querySelector('textarea')?.focus();
                     document.querySelector('textarea')?.setAttribute('value', 'Como funciona o processo de abertura de uma empresa?');
@@ -63,7 +74,7 @@ const Chat = () => {
                 title="Planejamento Tributário" 
                 description="Enquadramento tributário (Simples Nacional, Lucro Presumido, Lucro Real), otimização da carga tributária."
                 onClick={() => {
-                  setActiveTab('chat');
+                  setActiveTab('contabilidade');
                   setTimeout(() => {
                     document.querySelector('textarea')?.focus();
                     document.querySelector('textarea')?.setAttribute('value', 'Qual o melhor regime tributário para minha empresa?');
@@ -77,7 +88,7 @@ const Chat = () => {
                 title="Contabilidade Digital" 
                 description="Registro automatizado de operações financeiras, geração de demonstrativos contábeis e financeiros."
                 onClick={() => {
-                  setActiveTab('chat');
+                  setActiveTab('contabilidade');
                   setTimeout(() => {
                     document.querySelector('textarea')?.focus();
                     document.querySelector('textarea')?.setAttribute('value', 'Como automatizar a contabilidade da minha empresa?');
@@ -91,7 +102,7 @@ const Chat = () => {
                 title="Obrigações Fiscais" 
                 description="Apuração automática de impostos, geração de guias, envio de declarações acessórias (DCTF, SPED, EFD)."
                 onClick={() => {
-                  setActiveTab('chat');
+                  setActiveTab('contabilidade');
                   setTimeout(() => {
                     document.querySelector('textarea')?.focus();
                     document.querySelector('textarea')?.setAttribute('value', 'Quais são as principais declarações fiscais que minha empresa precisa entregar?');
@@ -105,7 +116,7 @@ const Chat = () => {
                 title="Gestão de RH Integrada" 
                 description="Processamento de folha de pagamento, admissão/demissão, cálculo de benefícios e encargos."
                 onClick={() => {
-                  setActiveTab('chat');
+                  setActiveTab('contabilidade');
                   setTimeout(() => {
                     document.querySelector('textarea')?.focus();
                     document.querySelector('textarea')?.setAttribute('value', 'Como automatizar a folha de pagamento da minha empresa?');
@@ -119,7 +130,7 @@ const Chat = () => {
                 title="Análise Financeira Avançada" 
                 description="Relatórios de desempenho, projeções de fluxo de caixa, indicadores financeiros e recomendações estratégicas."
                 onClick={() => {
-                  setActiveTab('chat');
+                  setActiveTab('contabilidade');
                   setTimeout(() => {
                     document.querySelector('textarea')?.focus();
                     document.querySelector('textarea')?.setAttribute('value', 'Como elaborar projeções financeiras com base nos dados contábeis?');

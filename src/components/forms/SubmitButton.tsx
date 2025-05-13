@@ -4,13 +4,14 @@ import { Button } from '@/components/ui/button';
 interface SubmitButtonProps {
   loading: boolean;
   text: string;
+  className?: string;
 }
 
-const SubmitButton = ({ loading, text }: SubmitButtonProps) => {
+const SubmitButton = ({ loading, text, className }: SubmitButtonProps) => {
   return (
     <Button
       type="submit"
-      className="w-full bg-brand-blue hover:bg-brand-blue/90 text-white"
+      className={`w-full bg-brand-blue hover:bg-brand-blue/90 text-white ${className || ''}`}
       disabled={loading}
     >
       {loading ? (

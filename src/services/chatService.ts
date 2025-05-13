@@ -1,5 +1,4 @@
-
-import { Message, KnowledgeBase } from '@/types/chat';
+import { Message, KnowledgeBase, DevelopmentPhase } from '@/types/chat';
 
 // Expanded knowledge base for accounting and business topics covering all 10 modules
 export const knowledgeBase: KnowledgeBase = {
@@ -98,7 +97,7 @@ export const knowledgeBase: KnowledgeBase = {
   "obrigacoes_anuais": [
     {
       question: "O que é a Declaração de Imposto de Renda Pessoa Jurídica (IRPJ)?",
-      answer: "A Declaração de IRPJ é uma obrigação fiscal anual onde a empresa informa à Receita Federal seus resultados financeiros, apurando o imposto devido. Para empresas no Lucro Real, ela é feita via ECF (Escrituração Contábil Fiscal) até o último dia útil de julho do ano seguinte. Para o Lucro Presumido, a apuração é trimestral. A declaração inclui informações patrimoniais, receitas, despesas, apuração de tributos e outras informações fiscais relevantes. O não cumprimento ou erros na declaração podem resultar em multas e fiscalizações. Nossa equipe especializada garante a elaboração e transmissão correta da sua declaração, maximizando benefícios fiscais legais."
+      answer: "A Declaração de IRPJ é uma obrigação fiscal anual onde a empresa informa à Receita Federal seus resultados financeiros, apurando o imposto devido. Para empresas no Lucro Real, ela é feita via ECF (Escrituração Contábil Fiscal) até o último dia útil de julho do ano seguinte. Para o Lucro Presumido, a apuração é trimestral. A declaração inclui informações patrimoniais, receitas, despesas, apuração de tributos e outras informações fiscais e socioeconômicas. O não cumprimento ou erros na declaração podem resultar em multas e fiscalizações. Nossa equipe especializada garante a elaboração e transmissão correta da sua declaração, maximizando benefícios fiscais legais."
     },
     {
       question: "O que é a DEFIS e quem deve entregar?",
@@ -166,6 +165,172 @@ export const knowledgeBase: KnowledgeBase = {
     }
   ]
 };
+
+// Detalhamento do plano de desenvolvimento
+export const developmentPlan: DevelopmentPhase[] = [
+  {
+    phase: 1,
+    title: "Fundações e Cadastro Aprimorado",
+    description: "Solidificação da base da plataforma e implementação do sistema de cadastro detalhado",
+    status: "in_progress",
+    progressPercentage: 15,
+    sections: [
+      {
+        id: "1.1",
+        title: "Revisão e Confirmação da Arquitetura da Plataforma",
+        description: "Garantir que a arquitetura existente está pronta para suportar as novas funcionalidades",
+        status: "in_progress",
+        tasks: [
+          { description: "Analisar a escalabilidade da API do LLM escolhida", completed: true },
+          { description: "Verificar a estrutura atual do banco de dados PostgreSQL", completed: false },
+          { description: "Confirmar robustez do sistema de autenticação JWT", completed: false }
+        ]
+      },
+      {
+        id: "1.2",
+        title: "Implementação do Cadastro Inteligente do Usuário",
+        description: "Criar formulários de cadastro distintos e detalhados para Pessoa Física (PF) e Pessoa Jurídica (PJ)",
+        status: "in_progress",
+        tasks: [
+          { description: "Desenvolver componentes de formulário reutilizáveis", completed: true },
+          { description: "Criar o fluxo de cadastro para PF", completed: true },
+          { description: "Criar o fluxo de cadastro para PJ", completed: true },
+          { description: "Implementar validações de entrada para todos os campos", completed: false },
+          { description: "Criar endpoints para processar dados de cadastro", completed: false },
+          { description: "Implementar lógica de validação no backend", completed: false }
+        ]
+      },
+      {
+        id: "1.3",
+        title: "Ajustes no Modelo de Banco de Dados",
+        description: "Expandir o modelo de dados para acomodar informações coletadas no cadastro e futuras funcionalidades",
+        status: "not_started",
+        tasks: [
+          { description: "Criar/Ajustar tabelas users e companies", completed: false },
+          { description: "Criar tabelas para profiles_pf e profiles_pj", completed: false },
+          { description: "Criar tabelas para dependents, user_assets, user_debts, company_debts", completed: false },
+          { description: "Definir relacionamentos, índices e constraints", completed: false },
+          { description: "Manter tabela audit_logs", completed: false }
+        ]
+      }
+    ]
+  },
+  {
+    phase: 2,
+    title: "Funcionalidades Essenciais da IA Contábil",
+    description: "Implementação de apuração de impostos e geração de obrigações acessórias",
+    status: "not_started",
+    progressPercentage: 0,
+    sections: [
+      {
+        id: "2.1",
+        title: "Apuração de Impostos com IA",
+        description: "Automatizar o cálculo de impostos para PF e PJ",
+        status: "not_started",
+        tasks: [
+          { description: "Desenvolver lógica para cálculo automático do IRPF", completed: false },
+          { description: "Integrar com o LLM para regras fiscais complexas", completed: false },
+          { description: "Desenvolver geração da prévia da declaração de IR", completed: false },
+          { description: "Desenvolver apuração mensal do DAS (Simples Nacional)", completed: false },
+          { description: "Desenvolver apuração de outros impostos conforme regime", completed: false },
+          { description: "Criar endpoints para cálculos e guias", completed: false }
+        ]
+      },
+      {
+        id: "2.2",
+        title: "Geração de Obrigações Acessórias",
+        description: "Automatizar a geração de obrigações acessórias para PJ",
+        status: "not_started",
+        tasks: [
+          { description: "Mapear dados necessários para cada obrigação", completed: false },
+          { description: "Desenvolver lógica de geração dos arquivos", completed: false },
+          { description: "Criar tabela tax_reports", completed: false }
+        ]
+      }
+    ]
+  },
+  {
+    phase: 3,
+    title: "Gestão Financeira e de Pessoal com IA",
+    description: "Implementação de folha de pagamento automatizada e análise financeira",
+    status: "not_started",
+    progressPercentage: 0,
+    sections: [
+      {
+        id: "3.1",
+        title: "Folha de Pagamento Automatizada",
+        description: "Implementar um módulo completo para gestão da folha de pagamento",
+        status: "not_started",
+        tasks: [
+          { description: "Criar interface para cadastro de funcionários", completed: false },
+          { description: "Criar tabela employees", completed: false },
+          { description: "Desenvolver lógica para cálculo de salários e encargos", completed: false },
+          { description: "Gerar holerites", completed: false },
+          { description: "Gerar guias para obrigações trabalhistas", completed: false }
+        ]
+      },
+      {
+        id: "3.2",
+        title: "Análise Financeira Automatizada com IA",
+        description: "Fornecer dashboards e insights financeiros",
+        status: "not_started",
+        tasks: [
+          { description: "Desenvolver componentes de dashboard", completed: false },
+          { description: "Criar/Ajustar tabela financial_data", completed: false },
+          { description: "Desenvolver APIs para processar dados financeiros", completed: false },
+          { description: "Implementar lógica para identificar inconsistências", completed: false },
+          { description: "Gerar alertas e notificações", completed: false },
+          { description: "Desenvolver sistema de recomendações", completed: false }
+        ]
+      }
+    ]
+  },
+  {
+    phase: 4,
+    title: "Suporte Inteligente e Funcionalidades Adicionais",
+    description: "Implementação de suporte preditivo, exportação de documentos e funcionalidades extras",
+    status: "not_started",
+    progressPercentage: 0,
+    sections: [
+      {
+        id: "4.1",
+        title: "Suporte Preditivo com IA",
+        description: "Tornar a IA mais proativa e oferecer suporte especializado",
+        status: "not_started",
+        tasks: [
+          { description: "Desenvolver sugestões de planejamento tributário", completed: false },
+          { description: "Expandir alertas para cobrir riscos fiscais", completed: false },
+          { description: "Implementar interface de chatbot fiscal", completed: false },
+          { description: "Integrar LLM para responder dúvidas fiscais", completed: false }
+        ]
+      },
+      {
+        id: "4.2",
+        title: "Exportação de Documentos e Integrações",
+        description: "Permitir exportação de dados e integração com outros sistemas",
+        status: "not_started",
+        tasks: [
+          { description: "Implementar geração de PDFs", completed: false },
+          { description: "Desenvolver envio automático por e-mail", completed: false },
+          { description: "Planejar integração com API da Receita Federal", completed: false },
+          { description: "Planejar exportação para softwares contábeis", completed: false }
+        ]
+      },
+      {
+        id: "4.3",
+        title: "Funcionalidades Extras da Plataforma",
+        description: "Melhorar a usabilidade e a gestão da plataforma",
+        status: "not_started",
+        tasks: [
+          { description: "Implementar 'Salvar e Continuar Depois'", completed: false },
+          { description: "Internacionalizar o frontend", completed: false },
+          { description: "Ajustar para suporte a múltiplas empresas", completed: false },
+          { description: "Desenvolver painel administrativo", completed: false }
+        ]
+      }
+    ]
+  }
+];
 
 // Enhanced function to find the best response based on user input with better categorization
 export const findBestResponse = (userInput: string, includeFile: boolean = false) => {
@@ -274,4 +439,69 @@ export const findBestResponse = (userInput: string, includeFile: boolean = false
   }
 
   return response;
+};
+
+// Nova função para informações sobre as fases do projeto
+export const getPhaseInfo = (phaseNumber: number): DevelopmentPhase | undefined => {
+  return developmentPlan.find(phase => phase.phase === phaseNumber);
+};
+
+// Nova função para informações sobre seções específicas
+export const getSectionInfo = (sectionId: string): PhaseSection | undefined => {
+  for (const phase of developmentPlan) {
+    const section = phase.sections.find(section => section.id === sectionId);
+    if (section) {
+      return section;
+    }
+  }
+  return undefined;
+};
+
+// Nova função para responder perguntas sobre o desenvolvimento
+export const getDevelopmentInfo = (userInput: string): string => {
+  const inputLower = userInput.toLowerCase();
+  
+  // Verifica se a pergunta é sobre uma fase específica
+  if (inputLower.includes("fase 1") || inputLower.includes("fundações") || inputLower.includes("cadastro")) {
+    const phase = getPhaseInfo(1);
+    if (phase) {
+      return `**${phase.title}**: ${phase.description}\n\nStatus: ${formatStatus(phase.status)}\nProgresso: ${phase.progressPercentage}%\n\nSeções principais:\n${phase.sections.map(s => `- ${s.title}: ${formatStatus(s.status)}`).join('\n')}`;
+    }
+  }
+  
+  if (inputLower.includes("fase 2") || inputLower.includes("impostos") || inputLower.includes("obrigações")) {
+    const phase = getPhaseInfo(2);
+    if (phase) {
+      return `**${phase.title}**: ${phase.description}\n\nStatus: ${formatStatus(phase.status)}\nProgresso: ${phase.progressPercentage}%\n\nSeções principais:\n${phase.sections.map(s => `- ${s.title}: ${formatStatus(s.status)}`).join('\n')}`;
+    }
+  }
+  
+  if (inputLower.includes("fase 3") || inputLower.includes("folha") || inputLower.includes("análise financeira")) {
+    const phase = getPhaseInfo(3);
+    if (phase) {
+      return `**${phase.title}**: ${phase.description}\n\nStatus: ${formatStatus(phase.status)}\nProgresso: ${phase.progressPercentage}%\n\nSeções principais:\n${phase.sections.map(s => `- ${s.title}: ${formatStatus(s.status)}`).join('\n')}`;
+    }
+  }
+  
+  if (inputLower.includes("fase 4") || inputLower.includes("suporte") || inputLower.includes("exportação")) {
+    const phase = getPhaseInfo(4);
+    if (phase) {
+      return `**${phase.title}**: ${phase.description}\n\nStatus: ${formatStatus(phase.status)}\nProgresso: ${phase.progressPercentage}%\n\nSeções principais:\n${phase.sections.map(s => `- ${s.title}: ${formatStatus(s.status)}`).join('\n')}`;
+    }
+  }
+  
+  // Resposta geral sobre o plano de desenvolvimento
+  return `**Plano de Desenvolvimento da IA Contábil**\n\nO plano está dividido em 4 fases principais:\n\n1. ${developmentPlan[0].title} (${formatStatus(developmentPlan[0].status)}, ${developmentPlan[0].progressPercentage}%)\n2. ${developmentPlan[1].title} (${formatStatus(developmentPlan[1].status)}, ${developmentPlan[1].progressPercentage}%)\n3. ${developmentPlan[2].title} (${formatStatus(developmentPlan[2].status)}, ${developmentPlan[2].progressPercentage}%)\n4. ${developmentPlan[3].title} (${formatStatus(developmentPlan[3].status)}, ${developmentPlan[3].progressPercentage}%)\n\nPergunte sobre uma fase específica para mais detalhes.`;
+};
+
+// Função auxiliar para formatar status
+const formatStatus = (status: 'not_started' | 'in_progress' | 'completed'): string => {
+  switch (status) {
+    case 'not_started':
+      return '⚪ Não iniciado';
+    case 'in_progress':
+      return '🟠 Em andamento';
+    case 'completed':
+      return '🟢 Concluído';
+  }
 };

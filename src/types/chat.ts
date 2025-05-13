@@ -10,13 +10,19 @@ export interface Message {
     category?: string;
     confidence?: number;
     processingTime?: number;
-    suggestionType?: 'tax' | 'document' | 'financial' | 'compliance' | 'general';
+    suggestionType?: 'tax' | 'document' | 'financial' | 'compliance' | 'general' | 'development';
+    phase?: 'cadastro' | 'impostos' | 'obrigacoes' | 'folha_pagamento' | 'analise_financeira' | 'suporte_preditivo';
+    referencePhase?: number; // 1, 2, 3, 4 (conforme as fases do plano)
+    referenceSection?: string; // ex: "1.2", "3.1", etc.
+    actionRequired?: boolean;
   };
 }
 
 export interface KnowledgeQA {
   question: string;
   answer: string;
+  phase?: number; // 1-4, indicando a fase do plano
+  section?: string; // ex: "1.2", "3.1"
 }
 
 export interface KnowledgeBase {
@@ -50,4 +56,26 @@ export interface BusinessRecommendation {
   description: string;
   impact: 'high' | 'medium' | 'low';
   category: string;
+}
+
+export interface DevelopmentPhase {
+  phase: number;
+  title: string;
+  description: string;
+  sections: PhaseSection[];
+  status: 'not_started' | 'in_progress' | 'completed';
+  progressPercentage: number;
+}
+
+export interface PhaseSection {
+  id: string; // ex: "1.1", "2.3"
+  title: string;
+  description: string;
+  tasks: PhaseTask[];
+  status: 'not_started' | 'in_progress' | 'completed';
+}
+
+export interface PhaseTask {
+  description: string;
+  completed: boolean;
 }

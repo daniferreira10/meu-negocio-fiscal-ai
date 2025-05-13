@@ -4,11 +4,20 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 
 export interface TextareaProps
-  extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {}
+  extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+  onEnterPressed?: () => void;
+}
 
 const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
-  ({ className, ...props }, ref) => {
-    // Add support for controlling value via value prop
+  ({ className, onEnterPressed, ...props }, ref) => {
+    // Add support for controlling value via value prop and handle Enter key press
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      if (e.key === 'Enter' && !e.shiftKey && onEnterPressed) {
+        e.preventDefault();
+        onEnterPressed();
+      }
+    };
+    
     const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       const { onChange } = props;
       if (onChange) onChange(e);
@@ -22,6 +31,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         )}
         ref={ref}
         onChange={handleChange}
+        onKeyDown={handleKeyDown}
         {...props}
       />
     )
