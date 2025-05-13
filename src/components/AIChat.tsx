@@ -5,6 +5,16 @@ import ChatInput from './chat/ChatInput';
 import { Message } from '@/types/chat';
 import { findBestResponse } from '@/services/chatService';
 import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import { Info } from 'lucide-react';
+import { 
+  Dialog,
+  DialogContent, 
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger 
+} from '@/components/ui/dialog';
 
 const AIChat = () => {
   const [messages, setMessages] = useState<Message[]>([
@@ -28,6 +38,7 @@ Como posso ajudar sua empresa hoje?`
     businessType: 'unknown', // "cpf", "cnpj", "unknown"
     taxRegime: 'unknown', // "simples", "presumido", "real", "unknown"
   });
+  const [showRoadmapInfo, setShowRoadmapInfo] = useState(false);
 
   // Attempt to load user profile data from localStorage
   useEffect(() => {
@@ -268,6 +279,144 @@ Gostaria que eu gerasse um relatório completo de projeções para os próximos 
 
   return (
     <div className="flex flex-col h-full bg-gradient-to-br from-gray-900 to-brand-dark-blue">
+      <div className="flex items-center justify-between px-4 py-2 border-b border-gray-700/30">
+        <h2 className="text-sm font-medium text-gray-200">Assistente Contábil Inteligente</h2>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button 
+              variant="ghost" 
+              size="icon"
+              className="hover:bg-gray-800/50"
+            >
+              <Info size={18} className="text-brand-cyan" />
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-xl font-bold text-brand-blue mb-2">
+                Plano de Desenvolvimento - Sistema Contábil Inteligente
+              </DialogTitle>
+              <DialogDescription className="text-gray-300 text-sm">
+                Este roteiro descreve o plano de desenvolvimento da nossa plataforma contábil.
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-6 text-sm text-gray-200">
+              <div>
+                <h3 className="text-lg font-semibold text-brand-cyan mb-2">Fase 1: Fundações e Cadastro Aprimorado</h3>
+                <div className="pl-4 space-y-3 border-l-2 border-gray-700">
+                  <div>
+                    <h4 className="text-md font-medium text-white">1.1. Revisão e Confirmação da Arquitetura da Plataforma</h4>
+                    <p className="text-gray-300 mb-1">Objetivo: Garantir que a arquitetura existente está pronta para suportar as novas funcionalidades.</p>
+                    <ul className="list-disc pl-5 text-gray-400">
+                      <li>Analisar a escalabilidade da API do LLM escolhida</li>
+                      <li>Verificar a estrutura atual do banco de dados PostgreSQL</li>
+                      <li>Confirmar se o sistema de autenticação JWT está robusto</li>
+                    </ul>
+                  </div>
+                  
+                  <div>
+                    <h4 className="text-md font-medium text-white">1.2. Implementação do Cadastro Inteligente do Usuário</h4>
+                    <p className="text-gray-300 mb-1">Objetivo: Criar formulários de cadastro distintos e detalhados para Pessoa Física (PF) e Pessoa Jurídica (PJ).</p>
+                    <p className="text-gray-300 mb-1"><span className="text-brand-cyan">Frontend:</span> Formulários para PF e PJ com validações</p>
+                    <p className="text-gray-300 mb-1"><span className="text-brand-cyan">Backend:</span> APIs para processamento de cadastros</p>
+                  </div>
+                  
+                  <div>
+                    <h4 className="text-md font-medium text-white">1.3. Ajustes no Modelo de Banco de Dados</h4>
+                    <p className="text-gray-300 mb-1">Objetivo: Expandir o modelo de dados para acomodar todas as informações coletadas.</p>
+                    <p className="text-gray-300">Criação de tabelas para perfis, dependentes, bens, dívidas, etc.</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div>
+                <h3 className="text-lg font-semibold text-brand-cyan mb-2">Fase 2: Funcionalidades Essenciais da IA Contábil</h3>
+                <div className="pl-4 space-y-3 border-l-2 border-gray-700">
+                  <div>
+                    <h4 className="text-md font-medium text-white">2.1. Apuração de Impostos com IA</h4>
+                    <p className="text-gray-300 mb-1">Objetivo: Automatizar o cálculo de impostos para PF e PJ.</p>
+                    <p className="text-gray-300">Para PF: IRPF com base nos dados de perfil</p>
+                    <p className="text-gray-300">Para PJ: DAS, PIS, COFINS, ICMS, ISS, IRPJ, CSLL</p>
+                  </div>
+                  
+                  <div>
+                    <h4 className="text-md font-medium text-white">2.2. Geração de Obrigações Acessórias (PJ)</h4>
+                    <p className="text-gray-300 mb-1">Objetivo: Automatizar a geração de obrigações acessórias para PJ.</p>
+                    <p className="text-gray-300">DCTF, EFD Contribuições, ECD/ECF, DIRF, RAIS, GFIP/SEFIP</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div>
+                <h3 className="text-lg font-semibold text-brand-cyan mb-2">Fase 3: Gestão Financeira e de Pessoal com IA</h3>
+                <div className="pl-4 space-y-3 border-l-2 border-gray-700">
+                  <div>
+                    <h4 className="text-md font-medium text-white">3.1. Folha de Pagamento Automatizada (PJ)</h4>
+                    <p className="text-gray-300 mb-1">Objetivo: Implementar um módulo completo para gestão da folha de pagamento.</p>
+                    <p className="text-gray-300">Cálculo de salários, férias, 13º, INSS, FGTS, IRRF</p>
+                  </div>
+                  
+                  <div>
+                    <h4 className="text-md font-medium text-white">3.2. Análise Financeira Automatizada com IA</h4>
+                    <p className="text-gray-300 mb-1">Objetivo: Fornecer dashboards e insights financeiros.</p>
+                    <p className="text-gray-300">Dashboards, identificação de inconsistências, alertas</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div>
+                <h3 className="text-lg font-semibold text-brand-cyan mb-2">Fase 4: Suporte Inteligente e Funcionalidades Adicionais</h3>
+                <div className="pl-4 space-y-3 border-l-2 border-gray-700">
+                  <div>
+                    <h4 className="text-md font-medium text-white">4.1. Suporte Preditivo com IA</h4>
+                    <p className="text-gray-300 mb-1">Objetivo: Tornar a IA mais proativa e oferecer suporte especializado.</p>
+                    <p className="text-gray-300">Planejamento tributário, alertas de risco fiscal, chatbot</p>
+                  </div>
+                  
+                  <div>
+                    <h4 className="text-md font-medium text-white">4.2. Exportação de Documentos e Integrações</h4>
+                    <p className="text-gray-300 mb-1">Objetivo: Permitir que o usuário exporte dados e integre com outros sistemas.</p>
+                    <p className="text-gray-300">PDFs, emails, WhatsApp, integração com Receita Federal</p>
+                  </div>
+                  
+                  <div>
+                    <h4 className="text-md font-medium text-white">4.3. Funcionalidades Extras da Plataforma</h4>
+                    <p className="text-gray-300 mb-1">Objetivo: Melhorar a usabilidade e a gestão da plataforma.</p>
+                    <p className="text-gray-300">Salvar e continuar, multilíngue, múltiplas empresas</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-gray-800/50 border border-gray-700 rounded-md p-3">
+                <h3 className="text-md font-semibold text-white mb-1">Considerações Gerais</h3>
+                <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 text-gray-300">
+                  <li className="flex items-start gap-2">
+                    <span className="text-brand-cyan">•</span> Segurança em todas as etapas
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-brand-cyan">•</span> Testes unitários e de integração
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-brand-cyan">•</span> Documentação atualizada
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-brand-cyan">•</span> UX intuitivo e fácil de usar
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-brand-cyan">•</span> Coleta de feedback dos usuários
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-brand-cyan">•</span> Integração otimizada com LLM
+                  </li>
+                </ul>
+              </div>
+              
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+      
       <div className="flex-1 p-4 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent">
         {messages.map((message, index) => (
           <ChatMessage key={index} message={message} />
@@ -281,4 +430,3 @@ Gostaria que eu gerasse um relatório completo de projeções para os próximos 
 };
 
 export default AIChat;
-
