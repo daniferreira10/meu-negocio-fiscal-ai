@@ -11,7 +11,8 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormControl
+  FormControl,
+  FormMessage
 } from '@/components/ui/form';
 
 import EmailInput from './EmailInput';
@@ -20,6 +21,8 @@ import SubmitButton from './SubmitButton';
 import FormHeader from './FormHeader';
 import FormFooter from './FormFooter';
 import { loginUser } from '@/services/authService';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertCircle } from 'lucide-react';
 
 // Schema de validação para login
 const loginSchema = z.object({
@@ -35,6 +38,7 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 const LoginFormContent = () => {
   const [loading, setLoading] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
   const navigate = useNavigate();
 
   // Form para login
@@ -49,19 +53,24 @@ const LoginFormContent = () => {
 
   const onLoginSubmit = async (data: LoginFormValues) => {
     setLoading(true);
+    setLoginError(null);
     console.log("Login data:", data);
     
     try {
-      // Use the login service function - now allows any login
-      const success = await loginUser(data.email, data.password, data.rememberMe || false);
+      // Use the login service function with specific error handling
+      const result = await loginUser(data.email, data.password, data.rememberMe || false);
       
-      if (success) {
-        toast.success("Login realizado com sucesso!");
+      if (result.success) {
+        toast.success(result.message);
         navigate('/dashboard');
+      } else {
+        // Display specific error message
+        setLoginError(result.message);
       }
     } catch (error: any) {
       toast.error("Erro ao fazer login. Tente novamente.");
       console.error("Erro no login:", error);
+      setLoginError("Ocorreu um erro ao tentar fazer login. Tente novamente mais tarde.");
     } finally {
       setLoading(false);
     }
@@ -73,6 +82,13 @@ const LoginFormContent = () => {
         title="Entrar na sua conta"
         subtitle="Acesse sua contabilidade automatizada"
       />
+
+      {loginError && (
+        <Alert variant="destructive" className="mb-6 bg-red-50 border-red-200 text-red-800">
+          <AlertCircle className="h-4 w-4 text-red-800" />
+          <AlertDescription>{loginError}</AlertDescription>
+        </Alert>
+      )}
 
       <Form {...loginForm}>
         <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-6">

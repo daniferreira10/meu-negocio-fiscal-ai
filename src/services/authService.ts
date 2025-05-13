@@ -115,7 +115,6 @@ export const registerUser = async (email: string, password: string): Promise<boo
   };
   
   try {
-    // Importante: Garantimos que os usuários existentes sejam carregados primeiro
     const registeredUsers = getRegisteredUsers();
     
     // Store user password (in a real app, this would be hashed)
@@ -151,44 +150,69 @@ export const registerUser = async (email: string, password: string): Promise<boo
 };
 
 /**
- * Attempts to log in a user with the provided credentials
- * MODIFIED: Now allows any email and password
+ * Verifies if the email exists in the system
  */
-export const loginUser = async (email: string, password: string, rememberMe: boolean): Promise<boolean> => {
+const checkEmailExists = (email: string): User | null => {
+  const allUsers = getAllUsers();
+  const user = allUsers.find(u => u.email.toLowerCase() === email.toLowerCase());
+  return user || null;
+}
+
+/**
+ * Verify password for a specific user
+ */
+const verifyPassword = (userId: string, password: string): boolean => {
+  const storedPassword = localStorage.getItem(`password_${userId}`);
+  return storedPassword === password;
+}
+
+/**
+ * Attempts to log in a user with the provided credentials
+ */
+export const loginUser = async (email: string, password: string, rememberMe: boolean): Promise<{ success: boolean, message: string }> => {
   // Simulate API request delay
   await new Promise(resolve => setTimeout(resolve, 800));
   
   try {
-    // Modified to allow any login
     console.log('Login attempt with email:', email);
     
-    // Instead of finding an existing user, create a temporary one if email doesn't exist
-    let user = getAllUsers().find(u => u.email.toLowerCase() === email.toLowerCase());
+    // Check if email exists
+    const user = checkEmailExists(email);
     
-    // If user doesn't exist, create a temporary one
+    // If email doesn't exist
     if (!user) {
-      console.log('Creating temporary user for:', email);
-      user = {
-        id: `user_${Math.random().toString(36).substring(2)}`,
-        email,
-        name: email.split('@')[0], // Use the first part of the email as name
-        role: 'user',
+      console.log('Email not found:', email);
+      return { 
+        success: false, 
+        message: 'E-mail não encontrado. Verifique o e-mail digitado ou cadastre uma nova conta.' 
       };
     }
     
-    // Generate a token regardless of user authenticity
-    const token = `token_${Math.random().toString(36).substring(2)}`;
+    // Verify password
+    const isPasswordValid = verifyPassword(user.id, password);
     
-    // Store auth data
+    if (!isPasswordValid) {
+      console.log('Invalid password for user:', email);
+      return { 
+        success: false, 
+        message: 'Senha incorreta. Por favor, tente novamente.' 
+      };
+    }
+    
+    // Login successful - create token and store user data
+    const token = `token_${Math.random().toString(36).substring(2)}`;
     localStorage.setItem(AUTH_TOKEN_KEY, token);
     localStorage.setItem(USER_DATA_KEY, JSON.stringify(user));
     
     console.log('User successfully logged in:', user);
     
-    return true;
+    return { success: true, message: 'Login realizado com sucesso!' };
   } catch (error) {
     console.error('Error during login:', error);
-    throw error;
+    return { 
+      success: false, 
+      message: 'Ocorreu um erro ao tentar fazer login. Tente novamente mais tarde.' 
+    };
   }
 };
 
@@ -215,4 +239,3 @@ export const getCurrentUser = (): User | null => {
   const userData = localStorage.getItem(USER_DATA_KEY);
   return userData ? JSON.parse(userData) : null;
 };
-
