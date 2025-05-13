@@ -49,10 +49,28 @@ const ChatMessage = ({ message, isLoading = false }: ChatMessageProps) => {
       >
         <div className="whitespace-pre-line">{message.content}</div>
         
+        {message.metadata?.category && (
+          <div className="mt-2 text-xs font-mono opacity-70">
+            {message.metadata.category} | Confiança: {message.metadata.confidence}%
+          </div>
+        )}
+
         {message.attachment && (
           <div className="mt-2 p-2 bg-gray-900/60 rounded-md flex items-center gap-2 text-sm border border-gray-700/40">
             {getFileIcon(message.attachment.name)}
             <span className="truncate">{message.attachment.name}</span>
+          </div>
+        )}
+
+        {message.metadata?.suggestionType && (
+          <div className="mt-2 flex items-center gap-2">
+            <span className="text-xs px-1.5 py-0.5 rounded bg-brand-cyan/20 text-brand-cyan border border-brand-cyan/30">
+              {message.metadata.suggestionType === 'tax' && 'Sugestão Fiscal'}
+              {message.metadata.suggestionType === 'document' && 'Documento Requerido'}
+              {message.metadata.suggestionType === 'financial' && 'Análise Financeira'}
+              {message.metadata.suggestionType === 'compliance' && 'Conformidade'}
+              {message.metadata.suggestionType === 'general' && 'Informação Geral'}
+            </span>
           </div>
         )}
       </div>

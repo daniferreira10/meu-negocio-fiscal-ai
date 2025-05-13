@@ -11,8 +11,8 @@ const Chat = () => {
 
   return (
     <DashboardLayout 
-      title="Assistente Contábil com IA" 
-      subtitle="Tire suas dúvidas sobre contabilidade, impostos e obrigações fiscais"
+      title="Sistema Contábil Inteligente" 
+      subtitle="Assistência fiscal, contábil e tributária com processamento automático"
       activeItem="chat"
     >
       <div className="relative">
@@ -28,11 +28,11 @@ const Chat = () => {
           <TabsList className="mb-6 w-full justify-start bg-gray-800/80 backdrop-blur-md border border-gray-700/50 rounded-lg shadow-lg">
             <TabsTrigger value="chat" className="flex items-center data-[state=active]:bg-brand-blue/90 data-[state=active]:shadow-md">
               <MessageSquare className="w-4 h-4 mr-2" />
-              <span>Chat</span>
+              <span>Assistente Contábil</span>
             </TabsTrigger>
             <TabsTrigger value="topics" className="flex items-center data-[state=active]:bg-brand-blue/90 data-[state=active]:shadow-md">
               <BookOpen className="w-4 h-4 mr-2" />
-              <span>Tópicos</span>
+              <span>Biblioteca Fiscal</span>
             </TabsTrigger>
           </TabsList>
           
@@ -46,8 +46,8 @@ const Chat = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <TopicCard 
                 icon={<FileCog />}
-                title="Abertura e Regularização de Empresas" 
-                description="Escolha do tipo societário, elaboração de contratos, registro na junta comercial, obtenção de CNPJ e licenças."
+                title="Regularização Empresarial" 
+                description="Constituição societária, elaboração de contratos, registro, obtenção de CNPJ e licenças."
                 onClick={() => {
                   setActiveTab('chat');
                   setTimeout(() => {
@@ -61,7 +61,7 @@ const Chat = () => {
               <TopicCard 
                 icon={<Calculator />}
                 title="Planejamento Tributário" 
-                description="Enquadramento no regime ideal (Simples Nacional, Lucro Presumido, Lucro Real), redução legal da carga tributária."
+                description="Enquadramento tributário (Simples Nacional, Lucro Presumido, Lucro Real), otimização da carga tributária."
                 onClick={() => {
                   setActiveTab('chat');
                   setTimeout(() => {
@@ -74,13 +74,13 @@ const Chat = () => {
               />
               <TopicCard 
                 icon={<FileBarChart2 />}
-                title="Escrituração Contábil" 
-                description="Registro de movimentações financeiras, elaboração de balanço patrimonial e demonstrativos de resultado."
+                title="Contabilidade Digital" 
+                description="Registro automatizado de operações financeiras, geração de demonstrativos contábeis e financeiros."
                 onClick={() => {
                   setActiveTab('chat');
                   setTimeout(() => {
                     document.querySelector('textarea')?.focus();
-                    document.querySelector('textarea')?.setAttribute('value', 'Por que preciso de contabilidade para minha empresa?');
+                    document.querySelector('textarea')?.setAttribute('value', 'Como automatizar a contabilidade da minha empresa?');
                     const event = new Event('change', { bubbles: true });
                     document.querySelector('textarea')?.dispatchEvent(event);
                   }, 100);
@@ -89,12 +89,12 @@ const Chat = () => {
               <TopicCard 
                 icon={<FileCog />}
                 title="Obrigações Fiscais" 
-                description="Apuração e cálculo de impostos, geração de guias, entrega de declarações acessórias."
+                description="Apuração automática de impostos, geração de guias, envio de declarações acessórias (DCTF, SPED, EFD)."
                 onClick={() => {
                   setActiveTab('chat');
                   setTimeout(() => {
                     document.querySelector('textarea')?.focus();
-                    document.querySelector('textarea')?.setAttribute('value', 'Quais são as principais declarações que minha empresa precisa entregar?');
+                    document.querySelector('textarea')?.setAttribute('value', 'Quais são as principais declarações fiscais que minha empresa precisa entregar?');
                     const event = new Event('change', { bubbles: true });
                     document.querySelector('textarea')?.dispatchEvent(event);
                   }, 100);
@@ -102,13 +102,13 @@ const Chat = () => {
               />
               <TopicCard 
                 icon={<UserRound />}
-                title="Departamento Pessoal" 
-                description="Admissão e demissão de funcionários, folha de pagamento, cálculo de encargos e obrigações trabalhistas."
+                title="Gestão de RH Integrada" 
+                description="Processamento de folha de pagamento, admissão/demissão, cálculo de benefícios e encargos."
                 onClick={() => {
                   setActiveTab('chat');
                   setTimeout(() => {
                     document.querySelector('textarea')?.focus();
-                    document.querySelector('textarea')?.setAttribute('value', 'Quais documentos preciso para contratar um funcionário?');
+                    document.querySelector('textarea')?.setAttribute('value', 'Como automatizar a folha de pagamento da minha empresa?');
                     const event = new Event('change', { bubbles: true });
                     document.querySelector('textarea')?.dispatchEvent(event);
                   }, 100);
@@ -116,13 +116,13 @@ const Chat = () => {
               />
               <TopicCard 
                 icon={<CalendarClock />}
-                title="Assessoria e Obrigações Anuais" 
-                description="Análise de fluxo de caixa, relatórios de desempenho, declarações anuais e planejamento financeiro."
+                title="Análise Financeira Avançada" 
+                description="Relatórios de desempenho, projeções de fluxo de caixa, indicadores financeiros e recomendações estratégicas."
                 onClick={() => {
                   setActiveTab('chat');
                   setTimeout(() => {
                     document.querySelector('textarea')?.focus();
-                    document.querySelector('textarea')?.setAttribute('value', 'Como elaborar um fluxo de caixa eficiente?');
+                    document.querySelector('textarea')?.setAttribute('value', 'Como elaborar projeções financeiras com base nos dados contábeis?');
                     const event = new Event('change', { bubbles: true });
                     document.querySelector('textarea')?.dispatchEvent(event);
                   }, 100);

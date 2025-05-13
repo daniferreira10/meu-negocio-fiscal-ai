@@ -95,7 +95,7 @@ const ChatInput = ({ onSendMessage, isLoading }: ChatInputProps) => {
         <Textarea
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Digite sua dúvida contábil ou fiscal..."
+          placeholder="Digite sua consulta contábil ou fiscal..."
           className="min-h-12 resize-none flex-1 bg-gray-900/80 border-gray-700 text-gray-100 placeholder:text-gray-400 focus-visible:ring-brand-cyan"
         />
         
