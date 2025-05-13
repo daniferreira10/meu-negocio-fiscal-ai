@@ -5,136 +5,55 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { toast } from 'sonner';
-import { 
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-  FormDescription
-} from '@/components/ui/form';
-import {
-  RadioGroup,
-  RadioGroupItem
-} from '@/components/ui/radio-group';
-import { 
-  UserIcon, 
-  IdCardIcon, 
-  MailIcon, 
-  PhoneIcon, 
-  MapPinIcon,
-  BriefcaseIcon,
-  BanknoteIcon,
-  KeyIcon,
-  HomeIcon
-} from 'lucide-react';
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger
-} from '@/components/ui/accordion';
+import { ArrowLeft, PlusCircle, MinusCircle } from 'lucide-react';
 
-// Validação de CPF
-const validateCPF = (cpf: string) => {
-  // Remove non-numeric characters
-  cpf = cpf.replace(/[^\d]/g, '');
-  
-  // Check if it has 11 digits
-  if (cpf.length !== 11) return false;
-  
-  // Check if all digits are the same
-  if (/^(\d)\1+$/.test(cpf)) return false;
-  
-  // Validate first check digit
-  let sum = 0;
-  for (let i = 0; i < 9; i++) {
-    sum += parseInt(cpf.charAt(i)) * (10 - i);
-  }
-  let remainder = (sum * 10) % 11;
-  if (remainder === 10 || remainder === 11) remainder = 0;
-  if (remainder !== parseInt(cpf.charAt(9))) return false;
-  
-  // Validate second check digit
-  sum = 0;
-  for (let i = 0; i < 10; i++) {
-    sum += parseInt(cpf.charAt(i)) * (11 - i);
-  }
-  remainder = (sum * 10) % 11;
-  if (remainder === 10 || remainder === 11) remainder = 0;
-  if (remainder !== parseInt(cpf.charAt(10))) return false;
-  
-  return true;
-};
-
-const currencyFormatter = new Intl.NumberFormat('pt-BR', {
-  style: 'currency',
-  currency: 'BRL',
+// Schema para dependente
+const dependentSchema = z.object({
+  name: z.string().min(1, { message: "Nome do dependente é obrigatório" }),
+  age: z.string().min(1, { message: "Idade é obrigatória" }),
+  relationship: z.string().min(1, { message: "Grau de parentesco é obrigatório" })
 });
 
-const cpfFormSchema = z.object({
-  // Dados pessoais
-  fullName: z.string().min(3, { message: "Nome completo deve ter pelo menos 3 caracteres." }),
-  cpf: z.string()
-    .regex(/^\d{3}\.\d{3}\.\d{3}\-\d{2}$/, { message: "CPF deve estar no formato: 000.000.000-00" })
-    .refine((cpf) => validateCPF(cpf), { message: "CPF inválido." }),
-  email: z.string().email({ message: "E-mail inválido." }),
-  phone: z.string()
-    .regex(/^\(\d{2}\)\s\d{5}\-\d{4}$/, { message: "Telefone deve estar no formato: (00) 00000-0000" }),
+// Schema para bem
+const assetSchema = z.object({
+  type: z.string().min(1, { message: "Tipo do bem é obrigatório" }),
+  description: z.string().min(1, { message: "Descrição é obrigatória" }),
+  value: z.string().min(1, { message: "Valor é obrigatório" })
+});
+
+// Schema para dívida
+const debtSchema = z.object({
+  description: z.string().min(1, { message: "Descrição é obrigatória" }),
+  amount: z.string().min(1, { message: "Valor é obrigatório" }),
+  installments: z.string().optional()
+});
+
+// Schema principal para PF
+const cpfSchema = z.object({
+  fullName: z.string().min(3, { message: "Nome completo deve ter pelo menos 3 caracteres" }),
+  cpf: z.string().regex(/^\d{3}\.\d{3}\.\d{3}\-\d{2}$/, { 
+    message: "CPF deve estar no formato: 000.000.000-00" 
+  }),
+  monthlyIncome: z.string().min(1, { message: "Renda mensal é obrigatória" }),
+  monthlyExpenses: z.string().min(1, { message: "Despesas mensais são obrigatórias" }),
   
-  // Endereço
-  address: z.string().min(5, { message: "Endereço deve ter pelo menos 5 caracteres." }),
-  city: z.string().min(2, { message: "Cidade deve ter pelo menos 2 caracteres." }),
-  state: z.string().min(2, { message: "Estado é obrigatório." }),
-  zipCode: z.string()
-    .regex(/^\d{5}-\d{3}$/, { message: "CEP deve estar no formato: 00000-000" }),
+  // Campos opcionais com arrays
+  dependents: z.array(dependentSchema).optional().default([]),
+  assets: z.array(assetSchema).optional().default([]),
+  debts: z.array(debtSchema).optional().default([]),
   
-  // Dados financeiros e ocupacionais
-  occupation: z.string().min(2, { message: "Ocupação é obrigatória." }),
-  monthlyIncome: z.string().min(1, { message: "Renda mensal é obrigatória." }),
-  otherIncome: z.string().optional(),
-  healthExpenses: z.string().optional(),
+  // Gastos dedutíveis
   educationExpenses: z.string().optional(),
-  dependents: z.array(
-    z.object({
-      name: z.string().min(3, { message: "Nome completo do dependente é obrigatório." }),
-      cpf: z.string()
-        .regex(/^\d{3}\.\d{3}\.\d{3}\-\d{2}$/, { message: "CPF deve estar no formato: 000.000.000-00" })
-        .refine((cpf) => validateCPF(cpf), { message: "CPF inválido." }).optional(),
-      age: z.string().min(1, { message: "Idade é obrigatória." }).optional(),
-    })
-  ).default([]),
-  socialSecurity: z.string().optional(),
-  assets: z.string().optional(),
-  debts: z.string().optional(),
-  taxFreeIncome: z.string().optional(),
-  
-  // Dados profissionais (opcional)
-  tradeName: z.string().optional(),
-  businessArea: z.string().optional(),
-  
-  // Acesso
-  password: z.string()
-    .min(8, { message: "A senha deve ter pelo menos 8 caracteres." })
-    .regex(/^(?=.*[A-Za-z])(?=.*\d)/, { message: "A senha deve incluir letras e números." }),
-  confirmPassword: z.string(),
-  acceptTerms: z.boolean().refine(val => val === true, { message: "Você precisa aceitar os termos para continuar." })
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "As senhas não coincidem.",
-  path: ["confirmPassword"],
+  healthExpenses: z.string().optional(),
+  privateRetirement: z.string().optional()
 });
 
-type CpfFormValues = z.infer<typeof cpfFormSchema>;
+// Tipo para o formulário
+type CpfFormValues = z.infer<typeof cpfSchema>;
 
 interface CpfRegistrationFormProps {
   onRegistrationComplete: () => void;
@@ -143,792 +62,504 @@ interface CpfRegistrationFormProps {
 
 const CpfRegistrationForm = ({ onRegistrationComplete, onBack }: CpfRegistrationFormProps) => {
   const [loading, setLoading] = useState(false);
-  const [saveAndContinueLater, setSaveAndContinueLater] = useState(false);
 
   const form = useForm<CpfFormValues>({
-    resolver: zodResolver(cpfFormSchema),
+    resolver: zodResolver(cpfSchema),
     defaultValues: {
       fullName: "",
       cpf: "",
-      email: "",
-      phone: "",
-      address: "",
-      city: "",
-      state: "",
-      zipCode: "",
-      occupation: "",
       monthlyIncome: "",
-      otherIncome: "",
-      healthExpenses: "",
-      educationExpenses: "",
+      monthlyExpenses: "",
       dependents: [],
-      socialSecurity: "",
-      assets: "",
-      debts: "",
-      taxFreeIncome: "",
-      tradeName: "",
-      businessArea: "",
-      password: "",
-      confirmPassword: "",
-      acceptTerms: false
+      assets: [],
+      debts: [],
+      educationExpenses: "",
+      healthExpenses: "",
+      privateRetirement: ""
     }
   });
 
-  // Formatadores para campos monetários
-  const formatAndSetCurrencyValue = (e: React.ChangeEvent<HTMLInputElement>, onChange: (...event: any[]) => void) => {
-    let value = e.target.value.replace(/\D/g, '');
-    if (value) {
-      value = (parseInt(value) / 100).toLocaleString('pt-BR', {
-        style: 'currency',
-        currency: 'BRL',
-      });
-    }
-    onChange(value);
+  // Função para adicionar um novo dependente
+  const addDependent = () => {
+    const currentDependents = form.getValues().dependents || [];
+    form.setValue("dependents", [
+      ...currentDependents, 
+      { name: "", age: "", relationship: "" }
+    ]);
+  };
+
+  // Função para remover um dependente
+  const removeDependent = (index: number) => {
+    const currentDependents = form.getValues().dependents || [];
+    form.setValue("dependents", 
+      currentDependents.filter((_, i) => i !== index)
+    );
+  };
+
+  // Função para adicionar um novo bem
+  const addAsset = () => {
+    const currentAssets = form.getValues().assets || [];
+    form.setValue("assets", [
+      ...currentAssets, 
+      { type: "", description: "", value: "" }
+    ]);
+  };
+
+  // Função para remover um bem
+  const removeAsset = (index: number) => {
+    const currentAssets = form.getValues().assets || [];
+    form.setValue("assets", 
+      currentAssets.filter((_, i) => i !== index)
+    );
+  };
+
+  // Função para adicionar uma nova dívida
+  const addDebt = () => {
+    const currentDebts = form.getValues().debts || [];
+    form.setValue("debts", [
+      ...currentDebts, 
+      { description: "", amount: "", installments: "" }
+    ]);
+  };
+
+  // Função para remover uma dívida
+  const removeDebt = (index: number) => {
+    const currentDebts = form.getValues().debts || [];
+    form.setValue("debts", 
+      currentDebts.filter((_, i) => i !== index)
+    );
   };
 
   const onSubmit = async (data: CpfFormValues) => {
     setLoading(true);
-    console.log("Dados de registro CPF:", data);
+    console.log("Dados de PF:", data);
     
     try {
-      // Simulação de API - aqui você faria a integração com seu backend
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Aqui seria a integração com um serviço de cadastro
+      await new Promise(resolve => setTimeout(resolve, 1500)); // Simula uma chamada de API
       
-      if (saveAndContinueLater) {
-        toast.success("Dados salvos com sucesso! Você poderá continuar o cadastro mais tarde.");
-        // Aqui você salvaria os dados parciais
-      } else {
-        toast.success("Cadastro realizado com sucesso!");
-        onRegistrationComplete();
-      }
+      toast.success("Cadastro de Pessoa Física realizado com sucesso!");
+      onRegistrationComplete();
     } catch (error) {
-      toast.error("Erro ao realizar cadastro. Tente novamente.");
-      console.error("Erro no cadastro:", error);
+      console.error("Erro no cadastro de PF:", error);
+      toast.error("Erro ao cadastrar. Tente novamente.");
     } finally {
       setLoading(false);
     }
   };
 
-  const addDependentField = () => {
-    const currentDependents = form.getValues("dependents") || [];
-    form.setValue("dependents", [...currentDependents, { name: "", cpf: "", age: "" }]);
-  };
-
-  const removeDependentField = (index: number) => {
-    const currentDependents = form.getValues("dependents") || [];
-    form.setValue(
-      "dependents",
-      currentDependents.filter((_, i) => i !== index)
-    );
-  };
-
   return (
     <div className="space-y-6">
-      <div className="text-center">
-        <h2 className="text-2xl font-bold text-brand-dark">Cadastro de Pessoa Física</h2>
-        <p className="text-gray-600 mt-2">Preencha seus dados pessoais para criar sua conta</p>
+      <div className="flex items-center mb-4">
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={onBack} 
+          className="mr-2"
+        >
+          <ArrowLeft className="h-4 w-4 mr-1" />
+          Voltar
+        </Button>
+        <h2 className="text-xl font-bold">Cadastro de Pessoa Física</h2>
       </div>
-      
-      <Button 
-        variant="outline" 
-        onClick={onBack} 
-        className="mb-4"
-        type="button"
-      >
-        ← Voltar para seleção de tipo
-      </Button>
-      
+
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          {/* Dados Pessoais */}
-          <Accordion type="single" collapsible defaultValue="personal">
-            <AccordionItem value="personal">
-              <AccordionTrigger className="text-lg font-semibold text-brand-dark">
-                Dados Pessoais
-              </AccordionTrigger>
-              <AccordionContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
-                  {/* Nome Completo */}
-                  <FormField
-                    control={form.control}
-                    name="fullName"
-                    render={({ field }) => (
-                      <FormItem className="md:col-span-2">
-                        <FormLabel>Nome Completo</FormLabel>
-                        <div className="relative">
-                          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                            <UserIcon className="h-5 w-5 text-gray-400" />
-                          </div>
-                          <FormControl>
-                            <Input placeholder="Seu nome completo" className="pl-10" {...field} />
-                          </FormControl>
-                        </div>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          {/* Dados Básicos */}
+          <div className="p-4 bg-gray-50 rounded-lg">
+            <h3 className="text-lg font-semibold mb-4">Dados Básicos</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="fullName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nome Completo*</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Nome completo" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="cpf"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>CPF*</FormLabel>
+                    <FormControl>
+                      <Input placeholder="000.000.000-00" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="monthlyIncome"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Renda Mensal (R$)*</FormLabel>
+                    <FormControl>
+                      <Input type="text" placeholder="0,00" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="monthlyExpenses"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Despesas Mensais (R$)*</FormLabel>
+                    <FormControl>
+                      <Input type="text" placeholder="0,00" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </div>
 
-                  {/* CPF */}
-                  <FormField
-                    control={form.control}
-                    name="cpf"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>CPF</FormLabel>
-                        <div className="relative">
-                          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                            <IdCardIcon className="h-5 w-5 text-gray-400" />
-                          </div>
-                          <FormControl>
-                            <Input placeholder="000.000.000-00" className="pl-10" {...field} />
-                          </FormControl>
-                        </div>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+          {/* Dependentes */}
+          <div className="p-4 bg-gray-50 rounded-lg">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">Dependentes</h3>
+              <Button 
+                type="button" 
+                variant="outline"
+                className="text-brand-blue border-brand-blue hover:bg-brand-light-blue"
+                onClick={addDependent}
+              >
+                <PlusCircle className="h-4 w-4 mr-1" />
+                Adicionar Dependente
+              </Button>
+            </div>
 
-                  {/* Email */}
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>E-mail</FormLabel>
-                        <div className="relative">
-                          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                            <MailIcon className="h-5 w-5 text-gray-400" />
-                          </div>
-                          <FormControl>
-                            <Input type="email" placeholder="seu.email@exemplo.com" className="pl-10" {...field} />
-                          </FormControl>
-                        </div>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {/* Telefone */}
-                  <FormField
-                    control={form.control}
-                    name="phone"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Telefone</FormLabel>
-                        <div className="relative">
-                          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                            <PhoneIcon className="h-5 w-5 text-gray-400" />
-                          </div>
-                          <FormControl>
-                            <Input placeholder="(00) 00000-0000" className="pl-10" {...field} />
-                          </FormControl>
-                        </div>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {/* Ocupação */}
-                  <FormField
-                    control={form.control}
-                    name="occupation"
-                    render={({ field }) => (
-                      <FormItem className="md:col-span-2">
-                        <FormLabel>Ocupação</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecione sua ocupação" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="Empregado CLT">Empregado CLT</SelectItem>
-                            <SelectItem value="Autônomo">Autônomo</SelectItem>
-                            <SelectItem value="Empresário">Empresário</SelectItem>
-                            <SelectItem value="Servidor Público">Servidor Público</SelectItem>
-                            <SelectItem value="Aposentado">Aposentado</SelectItem>
-                            <SelectItem value="Investidor">Investidor</SelectItem>
-                            <SelectItem value="Estudante">Estudante</SelectItem>
-                            <SelectItem value="Outro">Outro</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-            
-            {/* Endereço */}
-            <AccordionItem value="address">
-              <AccordionTrigger className="text-lg font-semibold text-brand-dark">
-                Endereço
-              </AccordionTrigger>
-              <AccordionContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
-                  {/* Endereço */}
-                  <FormField
-                    control={form.control}
-                    name="address"
-                    render={({ field }) => (
-                      <FormItem className="md:col-span-2">
-                        <FormLabel>Endereço</FormLabel>
-                        <div className="relative">
-                          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                            <MapPinIcon className="h-5 w-5 text-gray-400" />
-                          </div>
-                          <FormControl>
-                            <Input placeholder="Rua, número, complemento" className="pl-10" {...field} />
-                          </FormControl>
-                        </div>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {/* Cidade */}
-                  <FormField
-                    control={form.control}
-                    name="city"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Cidade</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Sua cidade" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {/* Estado */}
-                  <FormField
-                    control={form.control}
-                    name="state"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Estado</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecione o estado" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="AC">Acre</SelectItem>
-                            <SelectItem value="AL">Alagoas</SelectItem>
-                            <SelectItem value="AP">Amapá</SelectItem>
-                            <SelectItem value="AM">Amazonas</SelectItem>
-                            <SelectItem value="BA">Bahia</SelectItem>
-                            <SelectItem value="CE">Ceará</SelectItem>
-                            <SelectItem value="DF">Distrito Federal</SelectItem>
-                            <SelectItem value="ES">Espírito Santo</SelectItem>
-                            <SelectItem value="GO">Goiás</SelectItem>
-                            <SelectItem value="MA">Maranhão</SelectItem>
-                            <SelectItem value="MT">Mato Grosso</SelectItem>
-                            <SelectItem value="MS">Mato Grosso do Sul</SelectItem>
-                            <SelectItem value="MG">Minas Gerais</SelectItem>
-                            <SelectItem value="PA">Pará</SelectItem>
-                            <SelectItem value="PB">Paraíba</SelectItem>
-                            <SelectItem value="PR">Paraná</SelectItem>
-                            <SelectItem value="PE">Pernambuco</SelectItem>
-                            <SelectItem value="PI">Piauí</SelectItem>
-                            <SelectItem value="RJ">Rio de Janeiro</SelectItem>
-                            <SelectItem value="RN">Rio Grande do Norte</SelectItem>
-                            <SelectItem value="RS">Rio Grande do Sul</SelectItem>
-                            <SelectItem value="RO">Rondônia</SelectItem>
-                            <SelectItem value="RR">Roraima</SelectItem>
-                            <SelectItem value="SC">Santa Catarina</SelectItem>
-                            <SelectItem value="SP">São Paulo</SelectItem>
-                            <SelectItem value="SE">Sergipe</SelectItem>
-                            <SelectItem value="TO">Tocantins</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {/* CEP */}
-                  <FormField
-                    control={form.control}
-                    name="zipCode"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>CEP</FormLabel>
-                        <FormControl>
-                          <Input placeholder="00000-000" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-            
-            {/* Dados Financeiros */}
-            <AccordionItem value="financial">
-              <AccordionTrigger className="text-lg font-semibold text-brand-dark">
-                Dados Financeiros
-              </AccordionTrigger>
-              <AccordionContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
-                  {/* Renda Mensal */}
-                  <FormField
-                    control={form.control}
-                    name="monthlyIncome"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Renda Mensal Total</FormLabel>
-                        <div className="relative">
-                          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                            <BanknoteIcon className="h-5 w-5 text-gray-400" />
-                          </div>
-                          <FormControl>
-                            <Input 
-                              placeholder="R$ 0,00" 
-                              className="pl-10" 
-                              onChange={(e) => formatAndSetCurrencyValue(e, field.onChange)}
-                              value={field.value}
-                            />
-                          </FormControl>
-                        </div>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {/* Outras fontes de renda */}
-                  <FormField
-                    control={form.control}
-                    name="otherIncome"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Outras Fontes de Renda</FormLabel>
-                        <div className="relative">
-                          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                            <BanknoteIcon className="h-5 w-5 text-gray-400" />
-                          </div>
-                          <FormControl>
-                            <Input 
-                              placeholder="R$ 0,00" 
-                              className="pl-10"
-                              onChange={(e) => formatAndSetCurrencyValue(e, field.onChange)}
-                              value={field.value}
-                            />
-                          </FormControl>
-                        </div>
-                        <FormDescription>
-                          Aluguéis, dividendos, etc.
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {/* Gastos com Saúde */}
-                  <FormField
-                    control={form.control}
-                    name="healthExpenses"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Gastos Anuais com Saúde</FormLabel>
-                        <div className="relative">
-                          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                            <BanknoteIcon className="h-5 w-5 text-gray-400" />
-                          </div>
-                          <FormControl>
-                            <Input 
-                              placeholder="R$ 0,00" 
-                              className="pl-10"
-                              onChange={(e) => formatAndSetCurrencyValue(e, field.onChange)}
-                              value={field.value}
-                            />
-                          </FormControl>
-                        </div>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {/* Gastos com Educação */}
-                  <FormField
-                    control={form.control}
-                    name="educationExpenses"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Gastos Anuais com Educação</FormLabel>
-                        <div className="relative">
-                          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                            <BanknoteIcon className="h-5 w-5 text-gray-400" />
-                          </div>
-                          <FormControl>
-                            <Input 
-                              placeholder="R$ 0,00" 
-                              className="pl-10"
-                              onChange={(e) => formatAndSetCurrencyValue(e, field.onChange)}
-                              value={field.value}
-                            />
-                          </FormControl>
-                        </div>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {/* Previdência */}
-                  <FormField
-                    control={form.control}
-                    name="socialSecurity"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Gastos com Previdência (INSS ou Privada)</FormLabel>
-                        <div className="relative">
-                          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                            <BanknoteIcon className="h-5 w-5 text-gray-400" />
-                          </div>
-                          <FormControl>
-                            <Input 
-                              placeholder="R$ 0,00" 
-                              className="pl-10"
-                              onChange={(e) => formatAndSetCurrencyValue(e, field.onChange)}
-                              value={field.value}
-                            />
-                          </FormControl>
-                        </div>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {/* Bens */}
-                  <FormField
-                    control={form.control}
-                    name="assets"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Valor Total de Bens em Nome Próprio</FormLabel>
-                        <div className="relative">
-                          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                            <HomeIcon className="h-5 w-5 text-gray-400" />
-                          </div>
-                          <FormControl>
-                            <Input 
-                              placeholder="R$ 0,00" 
-                              className="pl-10"
-                              onChange={(e) => formatAndSetCurrencyValue(e, field.onChange)}
-                              value={field.value}
-                            />
-                          </FormControl>
-                        </div>
-                        <FormDescription>
-                          Imóveis, veículos, aplicações financeiras
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {/* Dívidas */}
-                  <FormField
-                    control={form.control}
-                    name="debts"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Valor Total de Dívidas Ativas</FormLabel>
-                        <div className="relative">
-                          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                            <BanknoteIcon className="h-5 w-5 text-gray-400" />
-                          </div>
-                          <FormControl>
-                            <Input 
-                              placeholder="R$ 0,00" 
-                              className="pl-10"
-                              onChange={(e) => formatAndSetCurrencyValue(e, field.onChange)}
-                              value={field.value}
-                            />
-                          </FormControl>
-                        </div>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {/* Rendimentos Isentos */}
-                  <FormField
-                    control={form.control}
-                    name="taxFreeIncome"
-                    render={({ field }) => (
-                      <FormItem className="md:col-span-2">
-                        <FormLabel>Valor Recebido via Rendimentos Isentos</FormLabel>
-                        <div className="relative">
-                          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                            <BanknoteIcon className="h-5 w-5 text-gray-400" />
-                          </div>
-                          <FormControl>
-                            <Input 
-                              placeholder="R$ 0,00" 
-                              className="pl-10"
-                              onChange={(e) => formatAndSetCurrencyValue(e, field.onChange)}
-                              value={field.value}
-                            />
-                          </FormControl>
-                        </div>
-                        <FormDescription>
-                          Ex: rendimentos de poupança, dividendos, etc.
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+            {form.getValues().dependents.map((_, index) => (
+              <div key={index} className="p-4 bg-white rounded-md mb-4 border border-gray-200">
+                <div className="flex justify-between items-center mb-3">
+                  <h4 className="font-medium">Dependente {index + 1}</h4>
+                  <Button 
+                    type="button" 
+                    variant="ghost" 
+                    size="sm"
+                    className="text-red-500 hover:text-red-700"
+                    onClick={() => removeDependent(index)}
+                  >
+                    <MinusCircle className="h-4 w-4 mr-1" />
+                    Remover
+                  </Button>
                 </div>
                 
-                {/* Dependentes */}
-                <div className="mt-6 border-t pt-4">
-                  <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-base font-medium text-brand-dark">Dependentes</h3>
-                    <Button 
-                      type="button" 
-                      variant="outline"
-                      size="sm"
-                      onClick={addDependentField}
-                      className="text-brand-blue border-brand-blue"
-                    >
-                      + Adicionar Dependente
-                    </Button>
-                  </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <FormField
+                    control={form.control}
+                    name={`dependents.${index}.name`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nome*</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Nome do dependente" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                   
-                  {form.watch("dependents").map((_, index) => (
-                    <div key={index} className="mb-6 p-4 border border-gray-200 rounded-md">
-                      <div className="flex justify-between items-center mb-4">
-                        <h4 className="text-sm font-medium">Dependente {index + 1}</h4>
-                        <Button 
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          className="text-red-500 hover:text-red-700"
-                          onClick={() => removeDependentField(index)}
-                        >
-                          Remover
-                        </Button>
-                      </div>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        {/* Nome do Dependente */}
-                        <FormField
-                          control={form.control}
-                          name={`dependents.${index}.name`}
-                          render={({ field }) => (
-                            <FormItem className="md:col-span-2">
-                              <FormLabel>Nome Completo</FormLabel>
-                              <FormControl>
-                                <Input placeholder="Nome do dependente" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        
-                        {/* Idade do Dependente */}
-                        <FormField
-                          control={form.control}
-                          name={`dependents.${index}.age`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Idade</FormLabel>
-                              <FormControl>
-                                <Input placeholder="Idade" type="number" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        
-                        {/* CPF do Dependente */}
-                        <FormField
-                          control={form.control}
-                          name={`dependents.${index}.cpf`}
-                          render={({ field }) => (
-                            <FormItem className="md:col-span-3">
-                              <FormLabel>CPF</FormLabel>
-                              <FormControl>
-                                <Input placeholder="000.000.000-00 (opcional)" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-            
-            {/* Dados Profissionais */}
-            <AccordionItem value="professional">
-              <AccordionTrigger className="text-lg font-semibold text-brand-dark">
-                Dados Profissionais (Opcional)
-              </AccordionTrigger>
-              <AccordionContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
-                  {/* Nome Fantasia (opcional) */}
                   <FormField
                     control={form.control}
-                    name="tradeName"
+                    name={`dependents.${index}.age`}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Nome Fantasia (opcional)</FormLabel>
-                        <div className="relative">
-                          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                            <BriefcaseIcon className="h-5 w-5 text-gray-400" />
-                          </div>
-                          <FormControl>
-                            <Input placeholder="Nome da sua marca ou negócio" className="pl-10" {...field} />
-                          </FormControl>
-                        </div>
+                        <FormLabel>Idade*</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Idade" {...field} />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
+                  
+                  <FormField
+                    control={form.control}
+                    name={`dependents.${index}.relationship`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Parentesco*</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione..." />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="filho(a)">Filho(a)</SelectItem>
+                            <SelectItem value="cônjuge">Cônjuge</SelectItem>
+                            <SelectItem value="pai/mãe">Pai/Mãe</SelectItem>
+                            <SelectItem value="outro">Outro</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+            ))}
 
-                  {/* Área de Atuação (opcional) */}
-                  <FormField
-                    control={form.control}
-                    name="businessArea"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Área de Atuação (opcional)</FormLabel>
-                        <div className="relative">
-                          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                            <BriefcaseIcon className="h-5 w-5 text-gray-400" />
-                          </div>
-                          <FormControl>
-                            <Input placeholder="Ex: Consultoria, Marketing, etc." className="pl-10" {...field} />
-                          </FormControl>
-                        </div>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-            
-            {/* Dados de Acesso */}
-            <AccordionItem value="access">
-              <AccordionTrigger className="text-lg font-semibold text-brand-dark">
-                Dados de Acesso
-              </AccordionTrigger>
-              <AccordionContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
-                  {/* Senha */}
-                  <FormField
-                    control={form.control}
-                    name="password"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Senha</FormLabel>
-                        <div className="relative">
-                          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                            <KeyIcon className="h-5 w-5 text-gray-400" />
-                          </div>
-                          <FormControl>
-                            <Input type="password" placeholder="Mínimo 8 caracteres" className="pl-10" {...field} />
-                          </FormControl>
-                        </div>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {/* Confirmar Senha */}
-                  <FormField
-                    control={form.control}
-                    name="confirmPassword"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Confirmar Senha</FormLabel>
-                        <div className="relative">
-                          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                            <KeyIcon className="h-5 w-5 text-gray-400" />
-                          </div>
-                          <FormControl>
-                            <Input type="password" placeholder="Confirme sua senha" className="pl-10" {...field} />
-                          </FormControl>
-                        </div>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
-
-          {/* Aceitar Termos */}
-          <FormField
-            control={form.control}
-            name="acceptTerms"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md">
-                <FormControl>
-                  <Checkbox
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-                <div className="space-y-1 leading-none">
-                  <FormLabel>
-                    Li e concordo com os <a href="#" className="text-brand-blue hover:underline">Termos de Serviço</a> e <a href="#" className="text-brand-blue hover:underline">Política de Privacidade</a>
-                  </FormLabel>
-                  <FormMessage />
-                </div>
-              </FormItem>
+            {form.getValues().dependents.length === 0 && (
+              <p className="text-gray-500 text-sm italic">Nenhum dependente informado.</p>
             )}
-          />
+          </div>
 
-          <div className="flex flex-col sm:flex-row gap-3 pt-4">
-            <Button 
-              type="button" 
+          {/* Bens */}
+          <div className="p-4 bg-gray-50 rounded-lg">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">Bens</h3>
+              <Button 
+                type="button" 
+                variant="outline"
+                className="text-brand-blue border-brand-blue hover:bg-brand-light-blue"
+                onClick={addAsset}
+              >
+                <PlusCircle className="h-4 w-4 mr-1" />
+                Adicionar Bem
+              </Button>
+            </div>
+
+            {form.getValues().assets.map((_, index) => (
+              <div key={index} className="p-4 bg-white rounded-md mb-4 border border-gray-200">
+                <div className="flex justify-between items-center mb-3">
+                  <h4 className="font-medium">Bem {index + 1}</h4>
+                  <Button 
+                    type="button" 
+                    variant="ghost" 
+                    size="sm"
+                    className="text-red-500 hover:text-red-700"
+                    onClick={() => removeAsset(index)}
+                  >
+                    <MinusCircle className="h-4 w-4 mr-1" />
+                    Remover
+                  </Button>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <FormField
+                    control={form.control}
+                    name={`assets.${index}.type`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Tipo*</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione..." />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="imóvel">Imóvel</SelectItem>
+                            <SelectItem value="veículo">Veículo</SelectItem>
+                            <SelectItem value="investimento">Investimento</SelectItem>
+                            <SelectItem value="outro">Outro</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name={`assets.${index}.description`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Descrição*</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Descrição do bem" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name={`assets.${index}.value`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Valor (R$)*</FormLabel>
+                        <FormControl>
+                          <Input placeholder="0,00" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+            ))}
+
+            {form.getValues().assets.length === 0 && (
+              <p className="text-gray-500 text-sm italic">Nenhum bem informado.</p>
+            )}
+          </div>
+
+          {/* Dívidas e Financiamentos */}
+          <div className="p-4 bg-gray-50 rounded-lg">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">Dívidas e Financiamentos</h3>
+              <Button 
+                type="button" 
+                variant="outline"
+                className="text-brand-blue border-brand-blue hover:bg-brand-light-blue"
+                onClick={addDebt}
+              >
+                <PlusCircle className="h-4 w-4 mr-1" />
+                Adicionar Dívida
+              </Button>
+            </div>
+
+            {form.getValues().debts.map((_, index) => (
+              <div key={index} className="p-4 bg-white rounded-md mb-4 border border-gray-200">
+                <div className="flex justify-between items-center mb-3">
+                  <h4 className="font-medium">Dívida {index + 1}</h4>
+                  <Button 
+                    type="button" 
+                    variant="ghost" 
+                    size="sm"
+                    className="text-red-500 hover:text-red-700"
+                    onClick={() => removeDebt(index)}
+                  >
+                    <MinusCircle className="h-4 w-4 mr-1" />
+                    Remover
+                  </Button>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <FormField
+                    control={form.control}
+                    name={`debts.${index}.description`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Descrição*</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Descrição da dívida" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name={`debts.${index}.amount`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Valor Total (R$)*</FormLabel>
+                        <FormControl>
+                          <Input placeholder="0,00" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name={`debts.${index}.installments`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Parcelas (opcional)</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Número de parcelas" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+            ))}
+
+            {form.getValues().debts.length === 0 && (
+              <p className="text-gray-500 text-sm italic">Nenhuma dívida informada.</p>
+            )}
+          </div>
+
+          {/* Gastos Dedutíveis */}
+          <div className="p-4 bg-gray-50 rounded-lg">
+            <h3 className="text-lg font-semibold mb-4">Gastos Dedutíveis (Opcional)</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <FormField
+                control={form.control}
+                name="educationExpenses"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Gastos com Educação (R$/ano)</FormLabel>
+                    <FormControl>
+                      <Input placeholder="0,00" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="healthExpenses"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Gastos com Saúde (R$/ano)</FormLabel>
+                    <FormControl>
+                      <Input placeholder="0,00" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="privateRetirement"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Previdência Privada (R$/ano)</FormLabel>
+                    <FormControl>
+                      <Input placeholder="0,00" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end pt-4">
+            <Button
+              type="button"
               variant="outline"
-              className="border-brand-blue text-brand-blue hover:bg-brand-light-blue"
-              onClick={() => {
-                setSaveAndContinueLater(true);
-                form.handleSubmit(onSubmit)();
-              }}
-              disabled={loading}
+              onClick={onBack}
+              className="mr-2"
             >
-              Salvar e continuar depois
+              Cancelar
             </Button>
-            
             <Button 
               type="submit" 
-              className="w-full bg-brand-blue hover:bg-brand-blue/90 text-white"
-              onClick={() => setSaveAndContinueLater(false)}
+              className="bg-brand-blue hover:bg-brand-blue/90 text-white"
               disabled={loading}
             >
-              {loading ? (
-                <>
-                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Processando...
-                </>
-              ) : "Criar Conta"}
+              {loading ? "Processando..." : "Concluir Cadastro"}
             </Button>
           </div>
         </form>
       </Form>
-      
-      <div className="text-center">
-        <p className="text-gray-600">
-          Já possui uma conta? <a href="/login" className="text-brand-blue hover:underline">Entrar</a>
-        </p>
-      </div>
     </div>
   );
 };
