@@ -12,7 +12,7 @@ const Hero = () => {
                 Plataforma Inteligente
               </span>
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
+            <h1 className="text-4xl mb-6 leading-tight md:text-4xl font-semibold">
               Contabilidade automatizada com <span className="bg-gradient-brand bg-clip-text text-transparent">Inteligência Artificial</span>
             </h1>
             <p className="text-xl text-gray-300 mb-8">
@@ -26,7 +26,7 @@ const Hero = () => {
                 </Button>
               </Link>
               <Link to="/pricing">
-                <Button variant="outline" className="w-full sm:w-auto border-white px-8 py-6 text-lg text-cyan-600 bg-slate-50">
+                <Button variant="outline" className="w-full sm:w-auto border-white px-8 py-6 text-cyan-600 bg-slate-50 text-base">
                   Ver Planos
                 </Button>
               </Link>
