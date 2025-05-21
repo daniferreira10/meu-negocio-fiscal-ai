@@ -1,4 +1,3 @@
-
 export interface ChatMessage {
   id: string;
   text: string;
@@ -151,6 +150,9 @@ export interface FiscalAnalysisData {
   regime_tributario: 'simples_nacional' | 'lucro_presumido' | 'lucro_real';
   setor: string;
   numero_funcionarios?: number;
+  receita?: number;
+  despesa?: number;
+  folha_pagamento?: number;
 }
 
 export interface FiscalAnalysisResult {
@@ -167,4 +169,5 @@ export interface FiscalAnalysisResult {
     economia_estimada: number;
   }[];
   risco_fiscal: 'alto' | 'medio' | 'baixo';
+  alertas?: string[];
 }

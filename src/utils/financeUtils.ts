@@ -216,6 +216,7 @@ export function analiseFiscal(dados: FiscalAnalysisData): FiscalAnalysisResult {
   const recomendacoes = [];
   const oportunidades = [];
   let riscoFiscal: 'alto' | 'medio' | 'baixo' = 'baixo';
+  let alertas: string[] = [];
   
   // Analyze based on sector and tax regime to generate recommendations
   if (dados.regime_tributario === 'simples_nacional' && dados.faturamento_mensal > 300000) {
@@ -277,12 +278,38 @@ export function analiseFiscal(dados: FiscalAnalysisData): FiscalAnalysisResult {
     impacto: 'medio' as const
   });
   
+  // New logic from the Python implementation
+  if (dados.receita && dados.despesa) {
+    if (dados.receita < dados.despesa) {
+      alertas.push("Empresa operando no prejuízo.");
+      recomendacoes.push({
+        titulo: 'Redução de despesas',
+        descricao: 'Receita menor que despesa, operando no prejuízo',
+        impacto: 'alto'
+      });
+      riscoFiscal = 'alto';
+    }
+  }
+  
+  if (dados.folha_pagamento && dados.receita) {
+    if (dados.folha_pagamento > 0.5 * dados.receita) {
+      alertas.push("Folha muito alta em relação à receita.");
+      recomendacoes.push({
+        titulo: 'Revisão da folha de pagamento',
+        descricao: 'Custo com pessoal excede 50% da receita',
+        impacto: 'alto'
+      });
+      riscoFiscal = 'alto';
+    }
+  }
+
   return {
     carga_tributaria: cargaTributaria,
     economia_potencial: economiaPotencial,
     recomendacoes: recomendacoes,
     oportunidades: oportunidades,
-    risco_fiscal: riscoFiscal
+    risco_fiscal: riscoFiscal,
+    alertas: alertas
   };
 }
 
@@ -338,6 +365,9 @@ export function getSampleFiscalAnalysisData(): FiscalAnalysisData {
     custos_variaveis: 30000,
     regime_tributario: 'simples_nacional',
     setor: 'tecnologia',
-    numero_funcionarios: 8
+    numero_funcionarios: 8,
+    receita: 120000,
+    despesa: 70000,
+    folha_pagamento: 35000
   };
 }

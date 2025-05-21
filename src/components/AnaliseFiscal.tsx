@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/components/ui/use-toast';
 import { motion } from 'framer-motion';
-import { ChevronLeft, BarChart2, TrendingUp, AlertTriangle } from 'lucide-react';
+import { ChevronLeft, BarChart2, TrendingUp, AlertTriangle, FileChartLine, InfoIcon } from 'lucide-react';
 import { FiscalAnalysisData, FiscalAnalysisResult } from '@/types/chat';
 import { analiseFiscal, getSampleFiscalAnalysisData } from '@/utils/financeUtils';
 
@@ -162,6 +162,48 @@ const AnaliseFiscal: React.FC<AnaliseFiscalProps> = ({ onClose }) => {
                   />
                 </div>
               </div>
+
+              {/* New fields for detailed analysis */}
+              <div className="mt-6 border-t pt-4">
+                <h3 className="text-md font-semibold mb-3 flex items-center">
+                  <FileChartLine className="mr-2" size={18} />
+                  Análise de Rentabilidade
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="receita">Receita Total (R$)</Label>
+                    <Input
+                      id="receita"
+                      name="receita"
+                      type="number"
+                      value={formData.receita || 0}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="despesa">Despesa Total (R$)</Label>
+                    <Input
+                      id="despesa"
+                      name="despesa"
+                      type="number"
+                      value={formData.despesa || 0}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="folha_pagamento">Folha de Pagamento (R$)</Label>
+                    <Input
+                      id="folha_pagamento"
+                      name="folha_pagamento"
+                      type="number"
+                      value={formData.folha_pagamento || 0}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
           ) : (
             <div className="space-y-6">
@@ -215,6 +257,26 @@ const AnaliseFiscal: React.FC<AnaliseFiscalProps> = ({ onClose }) => {
                   </CardContent>
                 </Card>
               </div>
+              
+              {/* Display alerts if they exist */}
+              {result.alertas && result.alertas.length > 0 && (
+                <div className="mb-4">
+                  <h3 className="text-lg font-semibold mb-3 flex items-center">
+                    <AlertTriangle className="mr-2" size={18} />
+                    Alertas Encontrados
+                  </h3>
+                  <div className="bg-amber-50 border-l-4 border-amber-400 p-4 rounded">
+                    <ul className="space-y-2">
+                      {result.alertas.map((alerta, index) => (
+                        <li key={index} className="flex items-start">
+                          <InfoIcon className="text-amber-500 mt-1 mr-2 flex-shrink-0" size={16} />
+                          <span>{alerta}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              )}
               
               <div>
                 <h3 className="text-lg font-semibold mb-3 flex items-center">
