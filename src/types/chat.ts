@@ -40,21 +40,44 @@ export interface Project {
 
 // Adding missing types required by other components
 export interface Message {
-  id: string;
-  text: string;
-  sender: 'user' | 'assistant';
-  timestamp: Date;
+  role: 'user' | 'assistant';
+  content: string;
+  metadata?: {
+    category?: string;
+    confidence?: number;
+    processingTime?: number;
+    suggestionType?: 'tax' | 'document' | 'financial' | 'compliance' | 'development' | 'general';
+  };
+  attachment?: {
+    name: string;
+    type: string;
+  };
 }
 
 export interface KnowledgeBase {
   id: string;
   title: string;
   content: string;
+  "consultoria_contabil"?: any;
 }
 
 export interface DevelopmentPhase {
   id: string;
   name: string;
-  status: 'pending' | 'in-progress' | 'completed';
+  phase: number;
+  title: string;
+  description: string;
+  status: 'completed' | 'in_progress' | 'not_started';
+  sections: {
+    id: string;
+    title: string;
+    description: string;
+    status: 'completed' | 'in_progress' | 'not_started';
+    tasks: {
+      description: string;
+      completed: boolean;
+    }[];
+  }[];
+  progressPercentage: number;
   tasks: Task[];
 }
