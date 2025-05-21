@@ -53,9 +53,9 @@ export function gerarLivroCaixa(dados: {
 }
 
 /**
- * Emits a DAS Simples Nacional document based on CNPJ data
- * @param dadosCnpj Object containing CNPJ data for tax calculation
- * @returns DAS document with payment information
+ * Calculates and generates a DAS Simples Nacional document based on financial data
+ * @param dados Object containing revenue (receitas) data
+ * @returns DAS Simples Nacional document with payment information
  */
 export function emitirDASSimples(dadosCnpj: { 
   cnpj: string,
