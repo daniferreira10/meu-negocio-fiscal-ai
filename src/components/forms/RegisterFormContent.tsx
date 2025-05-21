@@ -15,16 +15,18 @@ import {
   FormMessage
 } from '@/components/ui/form';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 
 import EmailInput from './EmailInput';
 import PasswordInput from './PasswordInput';
 import SubmitButton from './SubmitButton';
 import FormHeader from './FormHeader';
 import FormFooter from './FormFooter';
+import { Input } from '@/components/ui/input';
 import { registerUser } from '@/services/authService';
 
-// Schema de validação para registro
-const registerSchema = z.object({
+// Schema de validação para pessoa física
+const pessoaFisicaSchema = z.object({
   email: z.string()
     .email({ message: "E-mail inválido" })
     .min(1, { message: "E-mail é obrigatório" }),
@@ -33,6 +35,10 @@ const registerSchema = z.object({
     .min(8, { message: "A senha deve ter pelo menos 8 caracteres" }),
   confirmPassword: z.string()
     .min(1, { message: "Confirme sua senha" }),
+  fullName: z.string()
+    .min(3, { message: "Nome completo deve ter pelo menos 3 caracteres" }),
+  cpf: z.string()
+    .min(11, { message: "CPF deve ter 11 dígitos" }),
   acceptTerms: z.boolean().refine(val => val === true, {
     message: "Você deve aceitar os termos e condições"
   })
@@ -46,44 +52,116 @@ const registerSchema = z.object({
   }
 });
 
-type RegisterFormValues = z.infer<typeof registerSchema>;
+// Schema de validação para pessoa jurídica
+const pessoaJuridicaSchema = z.object({
+  email: z.string()
+    .email({ message: "E-mail inválido" })
+    .min(1, { message: "E-mail é obrigatório" }),
+  password: z.string()
+    .min(1, { message: "Senha é obrigatória" })
+    .min(8, { message: "A senha deve ter pelo menos 8 caracteres" }),
+  confirmPassword: z.string()
+    .min(1, { message: "Confirme sua senha" }),
+  razaoSocial: z.string()
+    .min(3, { message: "Razão social deve ter pelo menos 3 caracteres" }),
+  cnpj: z.string()
+    .min(14, { message: "CNPJ deve ter 14 dígitos" }),
+  responsavel: z.string()
+    .min(3, { message: "Nome do responsável deve ter pelo menos 3 caracteres" }),
+  acceptTerms: z.boolean().refine(val => val === true, {
+    message: "Você deve aceitar os termos e condições"
+  })
+}).superRefine(({confirmPassword, password}, ctx) => {
+  if (confirmPassword !== password) {
+    ctx.addIssue({
+      code: "custom",
+      message: "As senhas não coincidem",
+      path: ["confirmPassword"]
+    });
+  }
+});
+
+type PessoaFisicaFormValues = z.infer<typeof pessoaFisicaSchema>;
+type PessoaJuridicaFormValues = z.infer<typeof pessoaJuridicaSchema>;
 
 const RegisterFormContent = () => {
   const [loading, setLoading] = useState(false);
+  const [accountType, setAccountType] = useState('cpf');
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigate = useNavigate();
 
-  // Form para registro
-  const registerForm = useForm<RegisterFormValues>({
-    resolver: zodResolver(registerSchema),
+  // Form para pessoa física
+  const pfForm = useForm<PessoaFisicaFormValues>({
+    resolver: zodResolver(pessoaFisicaSchema),
     defaultValues: {
       email: "",
       password: "",
       confirmPassword: "",
+      fullName: "",
+      cpf: "",
       acceptTerms: false
     }
   });
 
-  const onRegisterSubmit = async (data: RegisterFormValues) => {
+  // Form para pessoa jurídica
+  const pjForm = useForm<PessoaJuridicaFormValues>({
+    resolver: zodResolver(pessoaJuridicaSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+      confirmPassword: "",
+      razaoSocial: "",
+      cnpj: "",
+      responsavel: "",
+      acceptTerms: false
+    }
+  });
+
+  const onSubmitPF = async (data: PessoaFisicaFormValues) => {
     setLoading(true);
-    console.log("Registration data:", data);
+    console.log("Dados de cadastro PF:", data);
     
     try {
       // Registra o usuário usando o serviço de autenticação
       const success = await registerUser(data.email, data.password);
       
       if (success) {
-        console.log("Registration successful, navigating to login");
+        console.log("Cadastro PF realizado com sucesso");
         toast.success("Cadastro realizado com sucesso!");
         
-        // Redirecionamento para a página de login em vez do dashboard
-        setTimeout(() => {
-          console.log("Redirecting to login page after registration");
-          navigate('/login');
-        }, 1500);
+        // Redirecionamento para o registro completo
+        navigate('/register');
       }
     } catch (error: any) {
-      console.error("Registration error:", error);
+      console.error("Erro no cadastro:", error);
+      
+      if (error.message === 'EMAIL_ALREADY_EXISTS') {
+        toast.error("Este e-mail já está em uso. Tente outro ou faça login.");
+      } else {
+        toast.error("Erro ao criar conta. Tente novamente.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onSubmitPJ = async (data: PessoaJuridicaFormValues) => {
+    setLoading(true);
+    console.log("Dados de cadastro PJ:", data);
+    
+    try {
+      // Registra o usuário usando o serviço de autenticação
+      const success = await registerUser(data.email, data.password);
+      
+      if (success) {
+        console.log("Cadastro PJ realizado com sucesso");
+        toast.success("Cadastro realizado com sucesso!");
+        
+        // Redirecionamento para o registro completo
+        navigate('/register');
+      }
+    } catch (error: any) {
+      console.error("Erro no cadastro:", error);
       
       if (error.message === 'EMAIL_ALREADY_EXISTS') {
         toast.error("Este e-mail já está em uso. Tente outro ou faça login.");
@@ -102,90 +180,206 @@ const RegisterFormContent = () => {
         subtitle="Comece a usar nossa contabilidade automatizada com IA"
       />
 
-      <Form {...registerForm}>
-        <form onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="space-y-6">
-          <EmailInput 
-            form={registerForm}
-            name="email"
-            label="E-mail"
-            placeholder="exemplo@empresa.com.br"
-          />
+      <Tabs value={accountType} onValueChange={setAccountType} className="w-full mb-6">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="cpf">Pessoa Física</TabsTrigger>
+          <TabsTrigger value="cnpj">Pessoa Jurídica</TabsTrigger>
+        </TabsList>
+      </Tabs>
 
-          <PasswordInput 
-            form={registerForm}
-            name="password"
-            label="Senha"
-            placeholder="Mínimo 8 caracteres"
-          />
+      {accountType === "cpf" ? (
+        <Form {...pfForm}>
+          <form onSubmit={pfForm.handleSubmit(onSubmitPF)} className="space-y-4">
+            <div className="space-y-4">
+              <FormField
+                control={pfForm.control}
+                name="fullName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nome Completo</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Seu nome completo" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <EmailInput 
+                form={pfForm}
+                name="email"
+                label="E-mail"
+                placeholder="exemplo@email.com.br"
+              />
+              
+              <PasswordInput 
+                form={pfForm}
+                name="password"
+                label="Senha"
+                placeholder="Mínimo 8 caracteres"
+              />
+              
+              <FormField
+                control={pfForm.control}
+                name="confirmPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Confirmar Senha</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type={showConfirmPassword ? "text" : "password"}
+                        placeholder="Confirme sua senha" 
+                        {...field} 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={pfForm.control}
+                name="cpf"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>CPF</FormLabel>
+                    <FormControl>
+                      <Input placeholder="000.000.000-00" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={pfForm.control}
+                name="acceptTerms"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox 
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>
+                        Li e concordo com os <a href="#" className="text-brand-blue hover:underline">Termos de Serviço</a> e <a href="#" className="text-brand-blue hover:underline">Política de Privacidade</a>
+                      </FormLabel>
+                      <FormMessage />
+                    </div>
+                  </FormItem>
+                )}
+              />
+            </div>
 
-          <FormField
-            control={registerForm.control}
-            name="confirmPassword"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Confirmar Senha</FormLabel>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                    <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                      <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                    </svg>
-                  </div>
-                  <FormControl>
-                    <input 
-                      type={showConfirmPassword ? "text" : "password"} 
-                      placeholder="Confirme sua senha" 
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm pl-10 pr-10"
-                      {...field} 
-                    />
-                  </FormControl>
-                  <button 
-                    type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute inset-y-0 right-0 flex items-center pr-3"
-                  >
-                    {showConfirmPassword ? (
-                      <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
-                        <line x1="1" y1="1" x2="23" y2="23"></line>
-                      </svg>
-                    ) : (
-                      <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                        <circle cx="12" cy="12" r="3"></circle>
-                      </svg>
-                    )}
-                  </button>
-                </div>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            <SubmitButton loading={loading} text="Criar Conta" />
+          </form>
+        </Form>
+      ) : (
+        <Form {...pjForm}>
+          <form onSubmit={pjForm.handleSubmit(onSubmitPJ)} className="space-y-4">
+            <div className="space-y-4">
+              <FormField
+                control={pjForm.control}
+                name="razaoSocial"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Razão Social</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Razão social da empresa" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <EmailInput 
+                form={pjForm}
+                name="email"
+                label="E-mail"
+                placeholder="contato@empresa.com.br"
+              />
+              
+              <PasswordInput 
+                form={pjForm}
+                name="password"
+                label="Senha"
+                placeholder="Mínimo 8 caracteres"
+              />
+              
+              <FormField
+                control={pjForm.control}
+                name="confirmPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Confirmar Senha</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type={showConfirmPassword ? "text" : "password"}
+                        placeholder="Confirme sua senha" 
+                        {...field} 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={pjForm.control}
+                name="cnpj"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>CNPJ</FormLabel>
+                    <FormControl>
+                      <Input placeholder="00.000.000/0001-00" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={pjForm.control}
+                name="responsavel"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nome do Responsável</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Nome do responsável legal" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={pjForm.control}
+                name="acceptTerms"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox 
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>
+                        Li e concordo com os <a href="#" className="text-brand-blue hover:underline">Termos de Serviço</a> e <a href="#" className="text-brand-blue hover:underline">Política de Privacidade</a>
+                      </FormLabel>
+                      <FormMessage />
+                    </div>
+                  </FormItem>
+                )}
+              />
+            </div>
 
-          <FormField
-            control={registerForm.control}
-            name="acceptTerms"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                <FormControl>
-                  <Checkbox 
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-                <div className="space-y-1 leading-none">
-                  <FormLabel>
-                    Li e concordo com os <a href="#" className="text-brand-blue hover:underline">Termos de Serviço</a> e <a href="#" className="text-brand-blue hover:underline">Política de Privacidade</a>
-                  </FormLabel>
-                  <FormMessage />
-                </div>
-              </FormItem>
-            )}
-          />
-
-          <SubmitButton loading={loading} text="Criar Conta" />
-        </form>
-      </Form>
+            <SubmitButton loading={loading} text="Criar Conta" />
+          </form>
+        </Form>
+      )}
 
       <FormFooter text="Ao criar uma conta, você concorda com nossos Termos de Serviço e Política de Privacidade." />
     </div>
