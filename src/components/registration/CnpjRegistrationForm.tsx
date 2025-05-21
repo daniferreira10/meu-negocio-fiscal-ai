@@ -3,364 +3,300 @@ import { useState } from 'react';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Button } from '@/components/ui/button';
+import { 
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage 
+} from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
-import { Textarea } from '@/components/ui/textarea';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
-import { ArrowLeft, PlusCircle, MinusCircle } from 'lucide-react';
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import SubmitButton from '../forms/SubmitButton';
+import EmailInput from '../forms/EmailInput';
+import PasswordInput from '../forms/PasswordInput';
 
-// Schema para obrigações acessórias
-const obligationSchema = z.object({
-  name: z.string().min(1, { message: "Nome da obrigação é obrigatório" }),
-  frequency: z.string().min(1, { message: "Frequência é obrigatória" }),
-  dueDate: z.string().optional()
-});
-
-// Schema para dívidas da empresa
-const companyDebtSchema = z.object({
-  description: z.string().min(1, { message: "Descrição é obrigatória" }),
-  amount: z.string().min(1, { message: "Valor é obrigatório" }),
-  installments: z.string().optional(),
-  dueDate: z.string().optional()
-});
-
-// Schema principal para PJ
-const cnpjSchema = z.object({
-  companyName: z.string().min(3, { message: "Razão social deve ter pelo menos 3 caracteres" }),
-  tradeName: z.string().min(1, { message: "Nome fantasia é obrigatório" }),
-  cnpj: z.string().regex(/^\d{2}\.\d{3}\.\d{3}\/\d{4}\-\d{2}$/, { 
-    message: "CNPJ deve estar no formato: 00.000.000/0001-00" 
-  }),
-  taxRegime: z.string().min(1, { message: "Regime tributário é obrigatório" }),
-  monthlyRevenue: z.string().min(1, { message: "Faturamento mensal é obrigatório" }),
-  operationalExpenses: z.string().min(1, { message: "Despesas operacionais são obrigatórias" }),
-  payroll: z.string().min(1, { message: "Folha de pagamento é obrigatória" }),
-  employeesCount: z.string().min(1, { message: "Quantidade de funcionários é obrigatória" }),
-  issuesInvoices: z.boolean().default(false),
-  
-  // Campos opcionais com arrays
-  obligations: z.array(obligationSchema).optional().default([]),
-  debts: z.array(companyDebtSchema).optional().default([])
-});
-
-// Tipo para o formulário
-type CnpjFormValues = z.infer<typeof cnpjSchema>;
+// Importando o serviço de autenticação para registro
+import { registerUser } from '@/services/authService';
 
 interface CnpjRegistrationFormProps {
   onRegistrationComplete: () => void;
   onBack: () => void;
 }
 
+// Schema de validação para PJ
+const cnpjSchema = z.object({
+  email: z.string()
+    .email({ message: "E-mail inválido" })
+    .min(1, { message: "E-mail é obrigatório" }),
+  password: z.string()
+    .min(8, { message: "A senha deve ter pelo menos 8 caracteres" }),
+  confirmPassword: z.string()
+    .min(1, { message: "Confirme sua senha" }),
+  companyName: z.string()
+    .min(2, { message: "Nome da empresa deve ter pelo menos 2 caracteres" }),
+  tradingName: z.string()
+    .min(2, { message: "Nome fantasia deve ter pelo menos 2 caracteres" }),
+  cnpj: z.string()
+    .min(14, { message: "CNPJ deve ter 14 dígitos" })
+    .regex(/^\d{2}\.\d{3}\.\d{3}\/\d{4}\-\d{2}$/, { 
+      message: "CNPJ deve estar no formato: 00.000.000/0001-00" 
+    }),
+  taxRegime: z.string({ required_error: "Selecione o regime tributário" }),
+  companySize: z.string({ required_error: "Selecione o porte da empresa" }),
+  activityArea: z.string({ required_error: "Selecione a área de atividade" }),
+  foundingDate: z.string().optional(),
+  address: z.string().min(5, { message: "Endereço deve ter pelo menos 5 caracteres" }),
+  city: z.string().min(2, { message: "Cidade deve ter pelo menos 2 caracteres" }),
+  state: z.string().min(2, { message: "Estado deve ter pelo menos 2 caracteres" }),
+  zipCode: z.string().regex(/^\d{5}\-\d{3}$/, { message: "CEP deve estar no formato: 00000-000" }),
+  phoneNumber: z.string().min(10, { message: "Telefone deve ter pelo menos 10 dígitos" }),
+}).superRefine(({confirmPassword, password}, ctx) => {
+  if (confirmPassword !== password) {
+    ctx.addIssue({
+      code: "custom",
+      message: "As senhas não coincidem",
+      path: ["confirmPassword"]
+    });
+  }
+});
+
+type CnpjFormValues = z.infer<typeof cnpjSchema>;
+
 const CnpjRegistrationForm = ({ onRegistrationComplete, onBack }: CnpjRegistrationFormProps) => {
   const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState('account');
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const form = useForm<CnpjFormValues>({
     resolver: zodResolver(cnpjSchema),
     defaultValues: {
+      email: "",
+      password: "",
+      confirmPassword: "",
       companyName: "",
-      tradeName: "",
+      tradingName: "",
       cnpj: "",
       taxRegime: "",
-      monthlyRevenue: "",
-      operationalExpenses: "",
-      payroll: "",
-      employeesCount: "",
-      issuesInvoices: false,
-      obligations: [],
-      debts: []
+      companySize: "",
+      activityArea: "",
+      foundingDate: "",
+      address: "",
+      city: "",
+      state: "",
+      zipCode: "",
+      phoneNumber: "",
     }
   });
-
-  // Função para adicionar uma nova obrigação acessória
-  const addObligation = () => {
-    const currentObligations = form.getValues().obligations || [];
-    form.setValue("obligations", [
-      ...currentObligations, 
-      { name: "", frequency: "", dueDate: "" }
-    ]);
-  };
-
-  // Função para remover uma obrigação
-  const removeObligation = (index: number) => {
-    const currentObligations = form.getValues().obligations || [];
-    form.setValue("obligations", 
-      currentObligations.filter((_, i) => i !== index)
-    );
-  };
-
-  // Função para adicionar uma nova dívida
-  const addDebt = () => {
-    const currentDebts = form.getValues().debts || [];
-    form.setValue("debts", [
-      ...currentDebts, 
-      { description: "", amount: "", installments: "", dueDate: "" }
-    ]);
-  };
-
-  // Função para remover uma dívida
-  const removeDebt = (index: number) => {
-    const currentDebts = form.getValues().debts || [];
-    form.setValue("debts", 
-      currentDebts.filter((_, i) => i !== index)
-    );
-  };
 
   const onSubmit = async (data: CnpjFormValues) => {
     setLoading(true);
     console.log("Dados de PJ:", data);
     
     try {
-      // Aqui seria a integração com um serviço de cadastro
-      await new Promise(resolve => setTimeout(resolve, 1500)); // Simula uma chamada de API
+      // Registrar usuário com email e senha
+      const success = await registerUser(data.email, data.password);
       
-      toast.success("Cadastro de Pessoa Jurídica realizado com sucesso!");
-      onRegistrationComplete();
-    } catch (error) {
-      console.error("Erro no cadastro de PJ:", error);
-      toast.error("Erro ao cadastrar. Tente novamente.");
+      if (success) {
+        toast.success("Cadastro realizado com sucesso!");
+        onRegistrationComplete();
+      }
+    } catch (error: any) {
+      console.error("Erro no cadastro:", error);
+      
+      if (error.message === 'EMAIL_ALREADY_EXISTS') {
+        toast.error("Este e-mail já está em uso. Tente outro ou faça login.");
+      } else {
+        toast.error("Erro ao criar conta. Tente novamente.");
+      }
     } finally {
       setLoading(false);
     }
   };
 
+  const handleNextTab = () => {
+    if (activeTab === 'account') {
+      // Verificar validação dos campos da conta antes de avançar
+      const accountValid = form.trigger(['email', 'password', 'confirmPassword']);
+      if (accountValid) {
+        setActiveTab('company');
+      }
+    } else if (activeTab === 'company') {
+      // Verificar validação dos campos da empresa antes de avançar
+      const companyValid = form.trigger(['companyName', 'tradingName', 'cnpj', 'taxRegime', 'companySize', 'activityArea']);
+      if (companyValid) {
+        setActiveTab('address');
+      }
+    }
+  };
+
   return (
-    <div className="space-y-6">
-      <div className="flex items-center mb-4">
+    <div>
+      <div className="flex items-center mb-6">
         <Button 
           variant="ghost" 
-          size="sm" 
-          onClick={onBack} 
-          className="mr-2"
+          className="mr-2 p-0 h-8 w-8"
+          onClick={onBack}
         >
-          <ArrowLeft className="h-4 w-4 mr-1" />
-          Voltar
+          <ArrowLeft className="h-5 w-5" />
         </Button>
-        <h2 className="text-xl font-bold">Cadastro de Pessoa Jurídica</h2>
+        <h2 className="text-xl font-semibold">Cadastro de Pessoa Jurídica</h2>
       </div>
-
+      
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          {/* Dados Básicos da Empresa */}
-          <div className="p-4 bg-gray-50 rounded-lg">
-            <h3 className="text-lg font-semibold mb-4">Dados da Empresa</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="companyName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Razão Social*</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Razão social completa" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="tradeName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nome Fantasia*</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Nome fantasia" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="cnpj"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>CNPJ*</FormLabel>
-                    <FormControl>
-                      <Input placeholder="00.000.000/0001-00" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="taxRegime"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Regime Tributário*</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione o regime tributário" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="simples_nacional">Simples Nacional</SelectItem>
-                        <SelectItem value="lucro_presumido">Lucro Presumido</SelectItem>
-                        <SelectItem value="lucro_real">Lucro Real</SelectItem>
-                        <SelectItem value="mei">MEI</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          </div>
-
-          {/* Dados Financeiros */}
-          <div className="p-4 bg-gray-50 rounded-lg">
-            <h3 className="text-lg font-semibold mb-4">Informações Financeiras</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="monthlyRevenue"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Faturamento Mensal (R$)*</FormLabel>
-                    <FormControl>
-                      <Input placeholder="0,00" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="operationalExpenses"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Despesas Operacionais (R$)*</FormLabel>
-                    <FormControl>
-                      <Input placeholder="0,00" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="payroll"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Folha de Pagamento (R$)*</FormLabel>
-                    <FormControl>
-                      <Input placeholder="0,00" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="employeesCount"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Quantidade de Funcionários*</FormLabel>
-                    <FormControl>
-                      <Input type="number" placeholder="0" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="issuesInvoices"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
-                    <div className="space-y-0.5">
-                      <FormLabel>Emite Notas Fiscais?</FormLabel>
-                      <FormDescription>
-                        Sua empresa emite notas fiscais regularmente?
-                      </FormDescription>
-                    </div>
-                    <FormControl>
-                      <Switch
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-            </div>
-          </div>
-
-          {/* Obrigações Acessórias */}
-          <div className="p-4 bg-gray-50 rounded-lg">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold">Obrigações Acessórias</h3>
-              <Button 
-                type="button" 
-                variant="outline"
-                className="text-brand-blue border-brand-blue hover:bg-brand-light-blue"
-                onClick={addObligation}
-              >
-                <PlusCircle className="h-4 w-4 mr-1" />
-                Adicionar Obrigação
-              </Button>
-            </div>
-
-            {form.getValues().obligations.map((_, index) => (
-              <div key={index} className="p-4 bg-white rounded-md mb-4 border border-gray-200">
-                <div className="flex justify-between items-center mb-3">
-                  <h4 className="font-medium">Obrigação {index + 1}</h4>
-                  <Button 
-                    type="button" 
-                    variant="ghost" 
-                    size="sm"
-                    className="text-red-500 hover:text-red-700"
-                    onClick={() => removeObligation(index)}
-                  >
-                    <MinusCircle className="h-4 w-4 mr-1" />
-                    Remover
-                  </Button>
-                </div>
+        <form onSubmit={form.handleSubmit(onSubmit)}>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid grid-cols-3 mb-6">
+              <TabsTrigger value="account">Conta</TabsTrigger>
+              <TabsTrigger value="company">Dados da Empresa</TabsTrigger>
+              <TabsTrigger value="address">Endereço e Contato</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="account" className="space-y-6">
+              <div className="space-y-4">
+                <EmailInput
+                  form={form}
+                  name="email"
+                  label="E-mail"
+                  placeholder="contato@empresa.com.br"
+                />
                 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <FormField
-                    control={form.control}
-                    name={`obligations.${index}.name`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Nome*</FormLabel>
+                <PasswordInput
+                  form={form}
+                  name="password"
+                  label="Senha"
+                  placeholder="Mínimo 8 caracteres"
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="confirmPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Confirmar Senha</FormLabel>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                          <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                          </svg>
+                        </div>
                         <FormControl>
-                          <Input placeholder="Nome da obrigação" {...field} />
+                          <input 
+                            type={showConfirmPassword ? "text" : "password"} 
+                            placeholder="Confirme sua senha" 
+                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 pl-10 pr-10"
+                            {...field} 
+                          />
                         </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
+                        <button 
+                          type="button"
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          className="absolute inset-y-0 right-0 flex items-center pr-3"
+                        >
+                          {showConfirmPassword ? (
+                            <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                              <line x1="1" y1="1" x2="23" y2="23"></line>
+                            </svg>
+                          ) : (
+                            <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                              <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                          )}
+                        </button>
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <div className="flex justify-end pt-4">
+                <Button 
+                  type="button" 
+                  onClick={handleNextTab}
+                  className="bg-brand-blue hover:bg-brand-blue/90 text-white"
+                >
+                  Próximo
+                </Button>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="company" className="space-y-6">
+              <div className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="companyName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Razão Social</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Digite a razão social" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="tradingName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nome Fantasia</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Digite o nome fantasia" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="cnpj"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>CNPJ</FormLabel>
+                      <FormControl>
+                        <Input placeholder="00.000.000/0001-00" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
-                    name={`obligations.${index}.frequency`}
+                    name="taxRegime"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Frequência*</FormLabel>
+                        <FormLabel>Regime Tributário</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Selecione..." />
+                              <SelectValue placeholder="Selecione" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="mensal">Mensal</SelectItem>
-                            <SelectItem value="trimestral">Trimestral</SelectItem>
-                            <SelectItem value="semestral">Semestral</SelectItem>
-                            <SelectItem value="anual">Anual</SelectItem>
+                            <SelectItem value="simples_nacional">Simples Nacional</SelectItem>
+                            <SelectItem value="lucro_presumido">Lucro Presumido</SelectItem>
+                            <SelectItem value="lucro_real">Lucro Real</SelectItem>
+                            <SelectItem value="mei">MEI</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -370,66 +306,114 @@ const CnpjRegistrationForm = ({ onRegistrationComplete, onBack }: CnpjRegistrati
                   
                   <FormField
                     control={form.control}
-                    name={`obligations.${index}.dueDate`}
+                    name="companySize"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Vencimento (opcional)</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Dia ou data de vencimento" {...field} />
-                        </FormControl>
+                        <FormLabel>Porte da Empresa</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="mei">MEI</SelectItem>
+                            <SelectItem value="microempresa">Microempresa</SelectItem>
+                            <SelectItem value="pequeno_porte">Empresa de Pequeno Porte</SelectItem>
+                            <SelectItem value="medio_porte">Empresa de Médio Porte</SelectItem>
+                            <SelectItem value="grande_porte">Empresa de Grande Porte</SelectItem>
+                          </SelectContent>
+                        </Select>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                </div>
-              </div>
-            ))}
-
-            {form.getValues().obligations.length === 0 && (
-              <p className="text-gray-500 text-sm italic">Nenhuma obrigação acessória informada.</p>
-            )}
-          </div>
-
-          {/* Dívidas e Financiamentos */}
-          <div className="p-4 bg-gray-50 rounded-lg">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold">Dívidas e Financiamentos</h3>
-              <Button 
-                type="button" 
-                variant="outline"
-                className="text-brand-blue border-brand-blue hover:bg-brand-light-blue"
-                onClick={addDebt}
-              >
-                <PlusCircle className="h-4 w-4 mr-1" />
-                Adicionar Dívida
-              </Button>
-            </div>
-
-            {form.getValues().debts.map((_, index) => (
-              <div key={index} className="p-4 bg-white rounded-md mb-4 border border-gray-200">
-                <div className="flex justify-between items-center mb-3">
-                  <h4 className="font-medium">Dívida {index + 1}</h4>
-                  <Button 
-                    type="button" 
-                    variant="ghost" 
-                    size="sm"
-                    className="text-red-500 hover:text-red-700"
-                    onClick={() => removeDebt(index)}
-                  >
-                    <MinusCircle className="h-4 w-4 mr-1" />
-                    Remover
-                  </Button>
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="activityArea"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Área de Atividade</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="comercio">Comércio</SelectItem>
+                          <SelectItem value="servicos">Serviços</SelectItem>
+                          <SelectItem value="industria">Indústria</SelectItem>
+                          <SelectItem value="agronegocio">Agronegócio</SelectItem>
+                          <SelectItem value="tecnologia">Tecnologia</SelectItem>
+                          <SelectItem value="outro">Outro</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="foundingDate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Data de Fundação</FormLabel>
+                      <FormControl>
+                        <Input type="date" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <div className="flex justify-between pt-4">
+                <Button 
+                  type="button" 
+                  variant="outline"
+                  onClick={() => setActiveTab('account')}
+                >
+                  Voltar
+                </Button>
+                <Button 
+                  type="button" 
+                  onClick={handleNextTab}
+                  className="bg-brand-blue hover:bg-brand-blue/90 text-white"
+                >
+                  Próximo
+                </Button>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="address" className="space-y-6">
+              <div className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="address"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Endereço</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Rua, número, complemento" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <FormField
                     control={form.control}
-                    name={`debts.${index}.description`}
+                    name="city"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Descrição*</FormLabel>
+                        <FormLabel>Cidade</FormLabel>
                         <FormControl>
-                          <Input placeholder="Descrição da dívida" {...field} />
+                          <Input placeholder="Cidade" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -438,13 +422,46 @@ const CnpjRegistrationForm = ({ onRegistrationComplete, onBack }: CnpjRegistrati
                   
                   <FormField
                     control={form.control}
-                    name={`debts.${index}.amount`}
+                    name="state"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Valor Total (R$)*</FormLabel>
-                        <FormControl>
-                          <Input placeholder="0,00" {...field} />
-                        </FormControl>
+                        <FormLabel>Estado</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="UF" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="AC">AC</SelectItem>
+                            <SelectItem value="AL">AL</SelectItem>
+                            <SelectItem value="AP">AP</SelectItem>
+                            <SelectItem value="AM">AM</SelectItem>
+                            <SelectItem value="BA">BA</SelectItem>
+                            <SelectItem value="CE">CE</SelectItem>
+                            <SelectItem value="DF">DF</SelectItem>
+                            <SelectItem value="ES">ES</SelectItem>
+                            <SelectItem value="GO">GO</SelectItem>
+                            <SelectItem value="MA">MA</SelectItem>
+                            <SelectItem value="MT">MT</SelectItem>
+                            <SelectItem value="MS">MS</SelectItem>
+                            <SelectItem value="MG">MG</SelectItem>
+                            <SelectItem value="PA">PA</SelectItem>
+                            <SelectItem value="PB">PB</SelectItem>
+                            <SelectItem value="PR">PR</SelectItem>
+                            <SelectItem value="PE">PE</SelectItem>
+                            <SelectItem value="PI">PI</SelectItem>
+                            <SelectItem value="RJ">RJ</SelectItem>
+                            <SelectItem value="RN">RN</SelectItem>
+                            <SelectItem value="RS">RS</SelectItem>
+                            <SelectItem value="RO">RO</SelectItem>
+                            <SelectItem value="RR">RR</SelectItem>
+                            <SelectItem value="SC">SC</SelectItem>
+                            <SelectItem value="SP">SP</SelectItem>
+                            <SelectItem value="SE">SE</SelectItem>
+                            <SelectItem value="TO">TO</SelectItem>
+                          </SelectContent>
+                        </Select>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -452,57 +469,46 @@ const CnpjRegistrationForm = ({ onRegistrationComplete, onBack }: CnpjRegistrati
                   
                   <FormField
                     control={form.control}
-                    name={`debts.${index}.installments`}
+                    name="zipCode"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Parcelas (opcional)</FormLabel>
+                        <FormLabel>CEP</FormLabel>
                         <FormControl>
-                          <Input placeholder="Número de parcelas" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name={`debts.${index}.dueDate`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Vencimento (opcional)</FormLabel>
-                        <FormControl>
-                          <Input type="date" {...field} />
+                          <Input placeholder="00000-000" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
                 </div>
+                
+                <FormField
+                  control={form.control}
+                  name="phoneNumber"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Telefone</FormLabel>
+                      <FormControl>
+                        <Input placeholder="(00) 00000-0000" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
-            ))}
-
-            {form.getValues().debts.length === 0 && (
-              <p className="text-gray-500 text-sm italic">Nenhuma dívida informada.</p>
-            )}
-          </div>
-
-          <div className="flex justify-end pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onBack}
-              className="mr-2"
-            >
-              Cancelar
-            </Button>
-            <Button 
-              type="submit" 
-              className="bg-brand-blue hover:bg-brand-blue/90 text-white"
-              disabled={loading}
-            >
-              {loading ? "Processando..." : "Concluir Cadastro"}
-            </Button>
-          </div>
+              
+              <div className="flex justify-between pt-4">
+                <Button 
+                  type="button" 
+                  variant="outline"
+                  onClick={() => setActiveTab('company')}
+                >
+                  Voltar
+                </Button>
+                <SubmitButton loading={loading} text="Finalizar Cadastro" />
+              </div>
+            </TabsContent>
+          </Tabs>
         </form>
       </Form>
     </div>
