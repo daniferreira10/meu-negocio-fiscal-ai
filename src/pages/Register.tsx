@@ -10,7 +10,8 @@ import CpfRegistrationForm from '@/components/registration/CpfRegistrationForm';
 import CnpjRegistrationForm from '@/components/registration/CnpjRegistrationForm';
 import { useNavigate } from 'react-router-dom';
 
-// Definindo interfaces para garantir compatibilidade de tipos
+// These interfaces should match the actual component props
+// They are defined here for type checking but the actual components should implement them
 interface RegisterFormContentProps {
   accountType: 'cpf' | 'cnpj';
   onSubmit: () => void;

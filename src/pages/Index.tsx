@@ -1,4 +1,3 @@
-
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import Navbar from '@/components/Navbar';
@@ -17,83 +16,8 @@ const Index = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <Hero />
       
-      <AnimatedElement variants={fadeIn} className="w-full">
-        <Features />
-      </AnimatedElement>
-      
-      {/* AI Technology Section */}
-      <section className="py-16 bg-gradient-to-b from-white to-brand-light-blue relative overflow-hidden">
-        <CircuitBackground />
-        <div className="container mx-auto px-4 relative z-10">
-          <AnimatedElement variants={fadeInUp} className="text-center mb-12">
-            <div className="bg-brand-light-blue p-2 w-fit mx-auto rounded-full mb-4">
-              <Database className="h-6 w-6 text-brand-blue" />
-            </div>
-            <h2 className="text-3xl md:text-4xl font-bold text-brand-dark mb-4">
-              Tecnologia de Ponta
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Nossa plataforma utiliza algoritmos avançados para transformar dados em insights contábeis.
-            </p>
-          </AnimatedElement>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <AnimatedElement variants={scaleIn} className="order-2 lg:order-1">
-              <div className="relative">
-                <div className="absolute inset-0 bg-gradient-brand blur-xl opacity-20 rounded-xl"></div>
-                <div className="relative z-10">
-                  <AIFlowAnimation />
-                </div>
-              </div>
-            </AnimatedElement>
-            
-            <motion.div 
-              className="order-1 lg:order-2"
-              variants={staggerContainer}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-            >
-              {[
-                {
-                  icon: <FileText className="h-6 w-6 text-brand-blue" />,
-                  title: "Processamento Inteligente de Documentos",
-                  description: "Nossa IA extrai dados de notas fiscais e recibos automaticamente"
-                },
-                {
-                  icon: <CheckCircle className="h-6 w-6 text-brand-green" />,
-                  title: "Validação em Tempo Real",
-                  description: "Cruzamento de informações com bancos de dados oficiais"
-                },
-                {
-                  icon: <PieChart className="h-6 w-6 text-brand-blue" />,
-                  title: "Análise Preditiva",
-                  description: "Previsão de impostos e alertas de obrigações fiscais"
-                }
-              ].map((item, index) => (
-                <AnimatedElement 
-                  key={index}
-                  variants={fadeInUp}
-                  delay={index * 0.2}
-                  className="flex items-start mb-8 hover:translate-y-[-5px] transition-transform duration-300"
-                >
-                  <div className="bg-white rounded-full p-3 mr-4 shadow-md">
-                    {item.icon}
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-semibold mb-2 text-brand-dark">{item.title}</h3>
-                    <p className="text-gray-600">{item.description}</p>
-                  </div>
-                </AnimatedElement>
-              ))}
-            </motion.div>
-          </div>
-        </div>
-      </section>
-      
-      {/* About Us Section */}
+      {/* About Us Section - Moved to the top */}
       <section className="py-16 bg-white relative overflow-hidden">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center gap-10">
@@ -169,6 +93,82 @@ const Index = () => {
                 </motion.div>
               </div>
             </AnimatedElement>
+          </div>
+        </div>
+      </section>
+      
+      <Hero />
+      
+      <AnimatedElement variants={fadeIn} className="w-full">
+        <Features />
+      </AnimatedElement>
+      
+      {/* AI Technology Section */}
+      <section className="py-16 bg-gradient-to-b from-white to-brand-light-blue relative overflow-hidden">
+        <CircuitBackground />
+        <div className="container mx-auto px-4 relative z-10">
+          <AnimatedElement variants={fadeInUp} className="text-center mb-12">
+            <div className="bg-brand-light-blue p-2 w-fit mx-auto rounded-full mb-4">
+              <Database className="h-6 w-6 text-brand-blue" />
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold text-brand-dark mb-4">
+              Tecnologia de Ponta
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Nossa plataforma utiliza algoritmos avançados para transformar dados em insights contábeis.
+            </p>
+          </AnimatedElement>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <AnimatedElement variants={scaleIn} className="order-2 lg:order-1">
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-brand blur-xl opacity-20 rounded-xl"></div>
+                <div className="relative z-10">
+                  <AIFlowAnimation />
+                </div>
+              </div>
+            </AnimatedElement>
+            
+            <motion.div 
+              className="order-1 lg:order-2"
+              variants={staggerContainer}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+            >
+              {[
+                {
+                  icon: <FileText className="h-6 w-6 text-brand-blue" />,
+                  title: "Processamento Inteligente de Documentos",
+                  description: "Nossa IA extrai dados de notas fiscais e recibos automaticamente"
+                },
+                {
+                  icon: <CheckCircle className="h-6 w-6 text-brand-green" />,
+                  title: "Validação em Tempo Real",
+                  description: "Cruzamento de informações com bancos de dados oficiais"
+                },
+                {
+                  icon: <PieChart className="h-6 w-6 text-brand-blue" />,
+                  title: "Análise Preditiva",
+                  description: "Previsão de impostos e alertas de obrigações fiscais"
+                }
+              ].map((item, index) => (
+                <AnimatedElement 
+                  key={index}
+                  variants={fadeInUp}
+                  delay={index * 0.2}
+                  className="flex items-start mb-8 hover:translate-y-[-5px] transition-transform duration-300"
+                >
+                  <div className="bg-white rounded-full p-3 mr-4 shadow-md">
+                    {item.icon}
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold mb-2 text-brand-dark">{item.title}</h3>
+                    <p className="text-gray-600">{item.description}</p>
+                  </div>
+                </AnimatedElement>
+              ))}
+            </motion.div>
           </div>
         </div>
       </section>
