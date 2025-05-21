@@ -2,7 +2,7 @@
  * Utility functions for financial calculations and transformations
  */
 
-import { FinancialTransaction, LivroCaixaItem, LivroCaixaResult, DASSimples, IRResult } from '@/types/chat';
+import { FinancialTransaction, LivroCaixaItem, LivroCaixaResult, DASSimples, IRResult, SimpleIRData, SimpleIRResult } from '@/types/chat';
 
 /**
  * Generates a cash book (Livro Caixa) from financial data
@@ -100,7 +100,7 @@ export function emitirDASSimples(dadosCnpj: {
 }
 
 /**
- * Calculates Income Tax (IR) based on financial data
+ * Calculates Income Tax (IR) based on financial data - Complex version
  * @param dados Object containing income and deductions data
  * @returns Calculated IR with detailed breakdown
  */
@@ -172,6 +172,30 @@ export function calcularIR(dados: {
   };
 }
 
+/**
+ * Simplified Income Tax (IR) calculation based on the provided Python function
+ * @param dados Object containing taxpayer type and income
+ * @returns Calculated tax amount
+ */
+export function calcularIRSimples(dados: SimpleIRData): SimpleIRResult {
+  const { tipo, rendimento } = dados;
+  
+  let aliquota: number;
+  
+  if (tipo === 'PF') {
+    aliquota = rendimento < 50000 ? 0.15 : 0.275;
+  } else {
+    aliquota = rendimento < 240000 ? 0.10 : 0.15;
+  }
+  
+  const imposto_devido = rendimento * aliquota;
+  
+  return {
+    tipo: tipo,
+    imposto_devido: imposto_devido
+  };
+}
+
 // Sample data generator for testing
 export function getSampleFinancialData() {
   const currentYear = new Date().getFullYear();
@@ -201,5 +225,15 @@ export function getSampleIRData() {
     rendimentos_tributaveis: 5000,
     rendimentos_isentos: 1200,
     deducoes: 1100,
+  };
+}
+
+/**
+ * Sample data for Simple IR calculation
+ */
+export function getSampleSimpleIRData(): SimpleIRData {
+  return {
+    tipo: 'PF',
+    rendimento: 60000
   };
 }

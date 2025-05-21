@@ -1,3 +1,4 @@
+
 export interface ChatMessage {
   id: string;
   text: string;
@@ -127,4 +128,17 @@ export interface IRResult {
     aliquota: number;
     imposto_na_faixa: number;
   }[];
+  tipo?: 'PF' | 'PJ'; // Added for the new implementation
+}
+
+// New Simple IR Data interface for the simpler calculation
+export interface SimpleIRData {
+  tipo: 'PF' | 'PJ';
+  rendimento: number;
+}
+
+// New Simple IR Result interface
+export interface SimpleIRResult {
+  tipo: 'PF' | 'PJ';
+  imposto_devido: number;
 }
