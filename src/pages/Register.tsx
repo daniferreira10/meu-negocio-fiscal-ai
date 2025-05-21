@@ -38,9 +38,8 @@ const Register = () => {
                 <>
                   <FormHeader 
                     title="Criar sua conta"
+                    subtitle="Preencha os dados para acessar a plataforma"
                   />
-                  
-                  <p className="text-gray-400 mb-6">Preencha os dados para acessar a plataforma</p>
                   
                   <Tabs defaultValue={accountType} onValueChange={(v) => setAccountType(v as 'cpf' | 'cnpj')} className="mb-6">
                     <TabsList className="grid w-full grid-cols-2">
@@ -50,13 +49,13 @@ const Register = () => {
                   </Tabs>
                   
                   <RegisterFormContent 
-                    accountType={accountType}
+                    accountType={accountType as any}
                     onSubmit={() => setStep('registration')}
                   />
                   
                   <FormFooter
-                    actionText="Entrar agora"
-                    actionHref="/login"
+                    linkText="Entrar agora"
+                    href="/login"
                     question="Já tem uma conta?"
                   />
                 </>
