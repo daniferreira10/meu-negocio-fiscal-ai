@@ -3,25 +3,7 @@
  * Utility functions for financial calculations and transformations
  */
 
-interface FinancialTransaction {
-  data: string;
-  valor: number;
-  descricao?: string;
-  categoria?: string;
-}
-
-interface LivroCaixaItem {
-  data: string;
-  valor: number;
-  tipo: 'receita' | 'despesa';
-  descricao?: string;
-  categoria?: string;
-}
-
-interface LivroCaixaResult {
-  livro_caixa: LivroCaixaItem[];
-  saldo_final: number;
-}
+import { FinancialTransaction, LivroCaixaItem, LivroCaixaResult, DASSimples } from '@/types/chat';
 
 /**
  * Generates a cash book (Livro Caixa) from financial data
@@ -67,6 +49,54 @@ export function gerarLivroCaixa(dados: {
   return { 
     livro_caixa: livro_ordenado,
     saldo_final
+  };
+}
+
+/**
+ * Emits a DAS Simples Nacional document based on CNPJ data
+ * @param dadosCnpj Object containing CNPJ data for tax calculation
+ * @returns DAS document with payment information
+ */
+export function emitirDASSimples(dadosCnpj: { 
+  cnpj: string,
+  periodo: string,
+  faturamento: number,
+  anexo?: number
+}): DASSimples {
+  // Simulate tax calculation based on revenue
+  const aliquota = dadosCnpj.faturamento <= 180000 ? 0.04 : 
+                   dadosCnpj.faturamento <= 360000 ? 0.073 :
+                   dadosCnpj.faturamento <= 720000 ? 0.095 :
+                   dadosCnpj.faturamento <= 1800000 ? 0.107 :
+                   dadosCnpj.faturamento <= 3600000 ? 0.143 :
+                   dadosCnpj.faturamento <= 4800000 ? 0.19 : 0.33;
+  
+  // Calculate tax amount
+  const valorImposto = Math.round(dadosCnpj.faturamento * aliquota * 100) / 100;
+  
+  // Generate due date (20th of next month)
+  const [year, month] = dadosCnpj.periodo.split('-').map(Number);
+  let dueMonth = month + 1;
+  let dueYear = year;
+  
+  if (dueMonth > 12) {
+    dueMonth = 1;
+    dueYear += 1;
+  }
+  
+  const dataVencimento = `${dueYear}-${String(dueMonth).padStart(2, '0')}-20`;
+  
+  // Generate dummy barcode and URL
+  const codigoBarras = `${Math.floor(10000000000000000000 + Math.random() * 90000000000000000000)}`;
+  const urlBoleto = `https://emissao.das.gov.br/${dadosCnpj.cnpj}/${dadosCnpj.periodo}`;
+  
+  return {
+    cnpj: dadosCnpj.cnpj,
+    periodo: dadosCnpj.periodo,
+    valor: valorImposto,
+    data_vencimento: dataVencimento,
+    codigo_barras: codigoBarras,
+    url_boleto: urlBoleto
   };
 }
 

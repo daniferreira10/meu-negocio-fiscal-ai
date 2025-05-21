@@ -59,6 +59,7 @@ export interface KnowledgeBase {
   title: string;
   content: string;
   "consultoria_contabil"?: any;
+  "planejamento_tributario"?: any;
 }
 
 export interface DevelopmentPhase {
@@ -80,4 +81,35 @@ export interface DevelopmentPhase {
   }[];
   progressPercentage: number;
   tasks: Task[];
+}
+
+// Export the LivroCaixaResult interface to fix the import error
+export interface FinancialTransaction {
+  data: string;
+  valor: number;
+  descricao?: string;
+  categoria?: string;
+}
+
+export interface LivroCaixaItem {
+  data: string;
+  valor: number;
+  tipo: 'receita' | 'despesa';
+  descricao?: string;
+  categoria?: string;
+}
+
+export interface LivroCaixaResult {
+  livro_caixa: LivroCaixaItem[];
+  saldo_final: number;
+}
+
+// New interface for DAS Simples Nacional
+export interface DASSimples {
+  cnpj: string;
+  periodo: string;
+  valor: number;
+  data_vencimento: string;
+  codigo_barras?: string;
+  url_boleto?: string;
 }

@@ -7,6 +7,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { motion } from 'framer-motion';
 import DashboardLayout from '@/components/DashboardLayout';
 import LivroCaixa from '@/components/LivroCaixa';
+import EmitirDAS from '@/components/EmitirDAS';
 
 const Dashboard = () => {
   const [accountType, setAccountType] = useState('cpf');
@@ -44,6 +45,8 @@ const Dashboard = () => {
       >
         {activeModule === 'livro-caixa' ? (
           <LivroCaixa onClose={handleCloseModule} />
+        ) : activeModule === 'emitir-das' ? (
+          <EmitirDAS onClose={handleCloseModule} />
         ) : (
           <Card className="rounded-2xl shadow-xl bg-white dark:bg-gray-800">
             <CardContent className="p-6">
@@ -99,7 +102,12 @@ const Dashboard = () => {
                     >
                       Gerar Livro Caixa
                     </Button>
-                    <Button className="w-full">Emitir DAS Simples Nacional</Button>
+                    <Button 
+                      className="w-full"
+                      onClick={() => handleModuleSelect('emitir-das')}
+                    >
+                      Emitir DAS Simples Nacional
+                    </Button>
                     <Button className="w-full">Calcular IRPF / IRPJ</Button>
                     <Button className="w-full">Análise Fiscal Completa</Button>
                     <Button className="w-full">Previsão de Impostos</Button>
