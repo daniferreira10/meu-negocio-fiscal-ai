@@ -1,116 +1,99 @@
+
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Card } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { TrendingUp } from 'lucide-react';
-import Dashboard from '@/components/Dashboard';
-import TransactionForm from '@/components/TransactionForm';
-import AIChat from '@/components/AIChat';
+import { Card, CardContent } from '@/components/ui/card';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { motion } from 'framer-motion';
 import DashboardLayout from '@/components/DashboardLayout';
 
-const DashboardPage = () => {
-  const [activeTab, setActiveTab] = useState('overview');
-  const navigate = useNavigate();
-  
-  const handleAnalyzeWithAI = () => {
-    navigate('/ai-analysis');
+const Dashboard = () => {
+  const [accountType, setAccountType] = useState('cpf');
+  const [step, setStep] = useState('init');
+
+  const handleContinue = () => {
+    setStep('collect');
   };
-  
-  const renderActions = () => {
-    if (activeTab === 'overview') {
-      return <Button 
-          className="bg-brand-blue hover:bg-brand-blue/90 text-white"
-          onClick={handleAnalyzeWithAI}
-        >
-          <TrendingUp className="w-4 h-4 mr-2" />
-          Analisar com IA
-        </Button>;
-    }
-    return null;
+
+  const handleSubmitData = (e: React.FormEvent) => {
+    e.preventDefault();
+    setStep('ai');
   };
-  
-  const getTitle = () => {
-    switch (activeTab) {
-      case 'overview':
-        return 'Dashboard';
-      case 'transactions':
-        return 'Nova Transação';
-      case 'reports':
-        return 'Relatórios';
-      case 'ai-assistant':
-        return 'Assistente IA';
-      case 'calendar':
-        return 'Calendário Fiscal';
-      default:
-        return 'Dashboard';
-    }
-  };
-  
-  const getSubtitle = () => {
-    return 'Empresa: Minha Empresa LTDA - CNPJ: 00.000.000/0001-00';
-  };
-  
-  return <DashboardLayout activeItem="dashboard" title={getTitle()} subtitle={getSubtitle()} actions={renderActions()}>
-      {/* Dashboard tabs */}
-      <div className="mb-6">
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList>
-            <TabsTrigger value="overview">Visão Geral</TabsTrigger>
-            <TabsTrigger value="transactions">Nova Transação</TabsTrigger>
-            <TabsTrigger value="reports">Relatórios</TabsTrigger>
-            <TabsTrigger value="ai-assistant">Assistente IA</TabsTrigger>
-          </TabsList>
-        </Tabs>
-      </div>
-      
-      {/* Dashboard Content */}
-      {activeTab === 'overview' && <Dashboard />}
-      
-      {/* Transactions Form */}
-      {activeTab === 'transactions' && <TransactionForm />}
-      
-      {/* Reports */}
-      {activeTab === 'reports' && <Card className="p-6">
-          <h2 className="text-xl font-bold text-brand-dark mb-6">Relatórios Contábeis</h2>
-          <Tabs defaultValue="dre">
-            <TabsList className="mb-6">
-              <TabsTrigger value="dre">DRE</TabsTrigger>
-              <TabsTrigger value="balanco">Balanço</TabsTrigger>
-              <TabsTrigger value="fluxo">Fluxo de Caixa</TabsTrigger>
-            </TabsList>
-            <TabsContent value="dre" className="space-y-4">
-              <p className="text-gray-600">
-                Esta é a Demonstração de Resultado do Exercício de sua empresa.
-              </p>
-              <div className="bg-gray-50 p-4 rounded-md">
-                <p className="text-center text-gray-500 italic">Funcionalidade disponível apenas no plano Premium</p>
+
+  return (
+    <DashboardLayout 
+      activeItem="dashboard" 
+      title="IA Contábil" 
+      subtitle="Contabilidade automatizada com IA"
+    >
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="max-w-4xl mx-auto"
+      >
+        <Card className="rounded-2xl shadow-xl bg-white dark:bg-gray-800">
+          <CardContent className="p-6">
+            {step === 'init' && (
+              <div>
+                <h1 className="text-3xl font-bold mb-4 text-center text-gray-900 dark:text-white">Bem-vindo ao Painel da IA Contábil</h1>
+                <p className="mb-6 text-center text-gray-600 dark:text-gray-300">
+                  Para começar, selecione o tipo de conta e insira as informações básicas para ativar a automação contábil.
+                </p>
+                <Tabs defaultValue="cpf" onValueChange={setAccountType} className="mb-4">
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="cpf">Pessoa Física</TabsTrigger>
+                    <TabsTrigger value="cnpj">Pessoa Jurídica</TabsTrigger>
+                  </TabsList>
+                </Tabs>
+                <Button onClick={handleContinue} className="w-full">Começar cadastro</Button>
               </div>
-            </TabsContent>
-            <TabsContent value="balanco" className="space-y-4">
-              <p className="text-gray-600">
-                Este é o Balanço Patrimonial de sua empresa.
-              </p>
-              <div className="bg-gray-50 p-4 rounded-md">
-                <p className="text-center text-gray-500 italic">Funcionalidade disponível apenas no plano Premium</p>
+            )}
+
+            {step === 'collect' && (
+              <form onSubmit={handleSubmitData} className="space-y-4">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Informações {accountType === 'cpf' ? 'Pessoais' : 'da Empresa'}</h2>
+                <Input placeholder={accountType === 'cpf' ? 'Nome completo' : 'Razão Social'} required />
+                <Input placeholder="E-mail" type="email" required />
+                <Input placeholder={accountType === 'cpf' ? 'CPF' : 'CNPJ'} required />
+                {accountType === 'cnpj' && (
+                  <>
+                    <Input placeholder="Nome do responsável" required />
+                    <Input placeholder="Faturamento mensal estimado" required />
+                    <Input placeholder="Número de funcionários" required />
+                  </>
+                )}
+                {accountType === 'cpf' && (
+                  <>
+                    <Input placeholder="Profissão / Renda principal" required />
+                    <Input placeholder="Despesas mensais estimadas" required />
+                  </>
+                )}
+                <Button type="submit" className="w-full">Ativar IA Contábil</Button>
+              </form>
+            )}
+
+            {step === 'ai' && (
+              <div>
+                <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Inteligência Artificial Ativada</h2>
+                <p className="mb-4 text-gray-600 dark:text-gray-300">
+                  A IA está agora processando os dados e irá gerar recomendações personalizadas com base na legislação contábil do Brasil.
+                </p>
+                <div className="grid gap-3">
+                  <Button className="w-full">Gerar Livro Caixa</Button>
+                  <Button className="w-full">Emitir DAS Simples Nacional</Button>
+                  <Button className="w-full">Calcular IRPF / IRPJ</Button>
+                  <Button className="w-full">Análise Fiscal Completa</Button>
+                  <Button className="w-full">Previsão de Impostos</Button>
+                  <Button className="w-full">Relatório Contábil Inteligente</Button>
+                </div>
               </div>
-            </TabsContent>
-            <TabsContent value="fluxo" className="space-y-4">
-              <p className="text-gray-600">
-                Este é o Fluxo de Caixa de sua empresa.
-              </p>
-              <div className="bg-gray-50 p-4 rounded-md">
-                <p className="text-center text-gray-500 italic">Funcionalidade disponível apenas no plano Premium</p>
-              </div>
-            </TabsContent>
-          </Tabs>
-        </Card>}
-      
-      {/* AI Assistant */}
-      {activeTab === 'ai-assistant' && <div className="h-[calc(100vh-12rem)]">
-          <AIChat />
-        </div>}
-    </DashboardLayout>;
+            )}
+          </CardContent>
+        </Card>
+      </motion.div>
+    </DashboardLayout>
+  );
 };
 
-export default DashboardPage;
+export default Dashboard;

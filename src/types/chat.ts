@@ -1,3 +1,4 @@
+
 export interface ChatMessage {
   id: string;
   text: string;
@@ -35,4 +36,25 @@ export interface Project {
   description: string;
   phases: PhaseSection[];
   teamMembers: string[];
+}
+
+// Adding missing types required by other components
+export interface Message {
+  id: string;
+  text: string;
+  sender: 'user' | 'assistant';
+  timestamp: Date;
+}
+
+export interface KnowledgeBase {
+  id: string;
+  title: string;
+  content: string;
+}
+
+export interface DevelopmentPhase {
+  id: string;
+  name: string;
+  status: 'pending' | 'in-progress' | 'completed';
+  tasks: Task[];
 }
