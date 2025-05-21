@@ -1,4 +1,3 @@
-
 export interface ChatMessage {
   id: string;
   text: string;
@@ -242,4 +241,25 @@ export interface IntelligentReportResult {
     mensal: any[];
     categorias: Record<string, any>;
   };
+}
+
+// Adicionando uma interface para a resposta de consulta de CNPJ
+export interface CNPJResponse {
+  status: string;
+  nome: string;
+  fantasia: string;
+  atividade_principal: Array<{
+    code: string;
+    text: string;
+  }>;
+  situacao: string;
+  data_abertura: string;
+  endereco: string;
+  bairro: string;
+  municipio: string;
+  uf: string;
+  cep: string;
+  telefone: string;
+  email: string;
+  message?: string;
 }
