@@ -1,4 +1,3 @@
-
 export interface ChatMessage {
   id: string;
   text: string;
@@ -151,7 +150,7 @@ export interface FiscalAnalysisData {
   regime_tributario: 'simples_nacional' | 'lucro_presumido' | 'lucro_real';
   setor: string;
   numero_funcionarios?: number;
-  receita?: number;
+  receita?: number; // Added for compatibility with Python function
   despesa?: number;
   folha_pagamento?: number;
 }
@@ -180,6 +179,7 @@ export interface TaxPredictionData {
   regime_tributario: 'simples_nacional' | 'lucro_presumido' | 'lucro_real';
   periodo_meses: number;
   setor?: string;
+  receita?: number; // Added for compatibility with Python function
 }
 
 export interface TaxPredictionResult {

@@ -319,99 +319,67 @@ export function analiseFiscal(dados: FiscalAnalysisData): FiscalAnalysisResult {
  * @returns Predicted taxes by month and type
  */
 export function preverImpostos(dados: TaxPredictionData): TaxPredictionResult {
-  const { faturamento_previsto, despesas_previstas, regime_tributario, periodo_meses, setor } = dados;
+  // Calculate projected revenue with 10% increase
+  const receitaProjetada = dados.faturamento_previsto * 1.10;
+  // Calculate estimated taxes at 8% of projected revenue
+  const impostosEstimados = receitaProjetada * 0.08;
   
-  // Calculate monthly values
-  const faturamentoMensal = faturamento_previsto / periodo_meses;
-  const despesasMensais = despesas_previstas / periodo_meses;
-  
-  // Define tax rates based on regime
-  const taxRates = {
-    simples_nacional: { 
-      darf: 0.06, 
-      iss: 0.02, 
-      inss: 0.0 
-    },
-    lucro_presumido: { 
-      irpj: 0.048, 
-      csll: 0.0288, 
-      pis: 0.0065, 
-      cofins: 0.03, 
-      iss: 0.02, 
-      inss: 0.0 
-    },
-    lucro_real: { 
-      irpj: 0.15, 
-      csll: 0.09, 
-      pis: 0.0165, 
-      cofins: 0.076, 
-      iss: 0.02, 
-      inss: 0.0 
-    }
-  };
-  
-  const rates = taxRates[regime_tributario];
   const currentDate = new Date();
-  
-  // Generate monthly predictions
   const impostosMensais = [];
-  let totalImpostos = 0;
   
-  for (let i = 0; i < periodo_meses; i++) {
+  // Distribute the taxes across the months
+  for (let i = 0; i < dados.periodo_meses; i++) {
     const date = new Date(currentDate);
     date.setMonth(currentDate.getMonth() + i);
     const monthYear = `${date.toLocaleString('default', { month: 'long' })} ${date.getFullYear()}`;
     
-    // Calculate taxes based on regime
-    if (regime_tributario === 'simples_nacional') {
-      const valorImposto = faturamentoMensal * rates.darf;
-      impostosMensais.push({
-        mes: monthYear,
-        valor: valorImposto,
-        tipo: 'DAS'
-      });
-      totalImpostos += valorImposto;
-    } else {
-      // For lucro_presumido and lucro_real
-      Object.entries(rates).forEach(([tipo, aliquota]) => {
-        if (aliquota > 0) {
-          const base = tipo === 'inss' ? despesasMensais * 0.4 : faturamentoMensal;
-          const valorImposto = base * aliquota;
-          
-          impostosMensais.push({
-            mes: monthYear,
-            valor: valorImposto,
-            tipo: tipo.toUpperCase()
-          });
-          totalImpostos += valorImposto;
-        }
-      });
-    }
+    // Calculate monthly tax amount
+    const valorMensal = impostosEstimados / dados.periodo_meses;
+    
+    impostosMensais.push({
+      mes: monthYear,
+      valor: valorMensal,
+      tipo: dados.regime_tributario === 'simples_nacional' ? 'DAS' : 'Imposto'
+    });
   }
-  
-  // Calculate monthly average
-  const mediaMensal = totalImpostos / periodo_meses;
   
   // Generate detailed breakdown by tax type
   const impostosDetalhados = [];
-  const impostosPorTipo = impostosMensais.reduce((acc, item) => {
-    if (!acc[item.tipo]) acc[item.tipo] = 0;
-    acc[item.tipo] += item.valor;
-    return acc;
-  }, {});
   
-  Object.entries(impostosPorTipo).forEach(([tipo, total]) => {
+  if (dados.regime_tributario === 'simples_nacional') {
     impostosDetalhados.push({
-      tipo,
-      total: total as number,
-      percentual: (total as number) / totalImpostos
+      tipo: 'DAS',
+      total: impostosEstimados,
+      percentual: 1.0
     });
-  });
+  } else {
+    // Simplified tax breakdown for other regimes
+    impostosDetalhados.push({
+      tipo: 'IRPJ',
+      total: impostosEstimados * 0.4,
+      percentual: 0.4
+    });
+    impostosDetalhados.push({
+      tipo: 'CSLL',
+      total: impostosEstimados * 0.2,
+      percentual: 0.2
+    });
+    impostosDetalhados.push({
+      tipo: 'PIS/COFINS',
+      total: impostosEstimados * 0.3,
+      percentual: 0.3
+    });
+    impostosDetalhados.push({
+      tipo: 'ISS',
+      total: impostosEstimados * 0.1,
+      percentual: 0.1
+    });
+  }
   
   return {
     impostos_mensais: impostosMensais,
-    total_periodo: totalImpostos,
-    media_mensal: mediaMensal,
+    total_periodo: impostosEstimados,
+    media_mensal: impostosEstimados / dados.periodo_meses,
     impostos_detalhados: impostosDetalhados
   };
 }
