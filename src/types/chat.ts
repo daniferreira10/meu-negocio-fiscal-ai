@@ -60,6 +60,7 @@ export interface KnowledgeBase {
   "consultoria_contabil"?: any;
   "planejamento_tributario"?: any;
   "contabilidade"?: any;
+  "obrigacoes_fiscais"?: any; // Adding the missing property
 }
 
 export interface DevelopmentPhase {
