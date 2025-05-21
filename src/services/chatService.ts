@@ -505,3 +505,131 @@ const formatStatus = (status: 'not_started' | 'in_progress' | 'completed'): stri
       return '🟢 Concluído';
   }
 };
+
+// Nova função para informações sobre as fases do projeto
+export const getPhases = (): DevelopmentPhase[] => {
+  return [
+    {
+      id: '1',
+      name: 'Planning',
+      phase: 1,
+      title: 'Planejamento de Implementação',
+      description: 'Definição de requisitos e escopo do projeto',
+      status: 'in_progress',
+      progressPercentage: 75,
+      tasks: [],
+      sections: [
+        {
+          id: '1-1',
+          title: 'Levantamento de Requisitos',
+          description: 'Identificar todas as necessidades do cliente',
+          status: 'in_progress',
+          tasks: [
+            { description: 'Entrevistar stakeholders', completed: true },
+            { description: 'Documentar requisitos funcionais', completed: true },
+            { description: 'Documentar requisitos não-funcionais', completed: false }
+          ]
+        },
+        {
+          id: '1-2',
+          title: 'Definição de Arquitetura',
+          description: 'Estabelecer a estrutura técnica do sistema',
+          status: 'in_progress',
+          tasks: [
+            { description: 'Escolher stack tecnológica', completed: true },
+            { description: 'Desenhar diagrama de arquitetura', completed: false }
+          ]
+        }
+      ]
+    },
+    {
+      id: '2',
+      name: 'Development',
+      phase: 2,
+      title: 'Desenvolvimento do Sistema',
+      description: 'Codificação e implementação das funcionalidades',
+      status: 'not_started',
+      progressPercentage: 0,
+      tasks: [],
+      sections: [
+        {
+          id: '2-1',
+          title: 'Frontend',
+          description: 'Desenvolvimento da interface do usuário',
+          status: 'not_started',
+          tasks: [
+            { description: 'Criar componentes base', completed: false },
+            { description: 'Implementar páginas principais', completed: false },
+            { description: 'Integrar com API', completed: false }
+          ]
+        }
+      ]
+    },
+    {
+      id: '3',
+      name: 'Testing',
+      phase: 3,
+      title: 'Testes e Qualidade',
+      description: 'Verificação e validação do sistema',
+      status: 'not_started',
+      progressPercentage: 0,
+      tasks: [],
+      sections: [
+        {
+          id: '3-1',
+          title: 'Testes Unitários',
+          description: 'Testar componentes individuais',
+          status: 'not_started',
+          tasks: [
+            { description: 'Configurar ambiente de testes', completed: false },
+            { description: 'Escrever testes para componentes críticos', completed: false }
+          ]
+        }
+      ]
+    },
+    {
+      id: '4',
+      name: 'Deployment',
+      phase: 4,
+      title: 'Implantação e Entrega',
+      description: 'Colocar o sistema em produção',
+      status: 'not_started',
+      progressPercentage: 0,
+      tasks: [],
+      sections: [
+        {
+          id: '4-1',
+          title: 'Configuração de Ambiente',
+          description: 'Preparar servidores e infraestrutura',
+          status: 'not_started',
+          tasks: [
+            { description: 'Configurar servidor de produção', completed: false },
+            { description: 'Configurar pipeline de CI/CD', completed: false }
+          ]
+        }
+      ]
+    }
+  ];
+};
+
+// Nova função para informações sobre as fases do projeto
+export const getKnowledgeBase = async (): Promise<KnowledgeBase[]> => {
+  // Simulated knowledge base data
+  return [
+    {
+      id: '1',
+      title: 'Simples Nacional',
+      content: 'O Simples Nacional é um regime tributário simplificado...',
+    },
+    {
+      id: '2',
+      title: 'Imposto de Renda PF',
+      content: 'O Imposto de Renda Pessoa Física (IRPF) é um tributo federal...',
+    },
+    {
+      id: '3',
+      title: 'Livro Caixa',
+      content: 'O Livro Caixa é um registro contábil onde são lançadas todas as entradas e saídas...',
+    }
+  ];
+};

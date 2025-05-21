@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,7 +9,7 @@ import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { ArrowUp, ArrowDown, Minus, ChevronLeft, Download, Share2 } from 'lucide-react';
-import { ReportData, IntelligentReportResult, FinancialTransaction } from '@/types/chat';
+import { ReportData, IntelligentReportResult, FinancialTransaction, ReportSection } from '@/types/chat';
 import { gerarRelatorioInteligente, getSampleReportData } from '@/utils/financeUtils';
 import { toast } from '@/components/ui/use-toast';
 

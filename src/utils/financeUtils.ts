@@ -2,7 +2,7 @@
  * Utility functions for financial calculations and transformations
  */
 
-import { FinancialTransaction, LivroCaixaItem, LivroCaixaResult, DASSimples, IRResult, SimpleIRData, SimpleIRResult, FiscalAnalysisData, FiscalAnalysisResult, TaxPredictionData, TaxPredictionResult, ReportData, IntelligentReportResult } from '@/types/chat';
+import { FinancialTransaction, LivroCaixaItem, LivroCaixaResult, DASSimples, IRResult, SimpleIRData, SimpleIRResult, FiscalAnalysisData, FiscalAnalysisResult, TaxPredictionData, TaxPredictionResult, ReportData, IntelligentReportResult, ReportSection } from '@/types/chat';
 
 /**
  * Generates a cash book (Livro Caixa) from financial data
@@ -402,7 +402,9 @@ export function gerarRelatorioInteligente(dados: ReportData): IntelligentReportR
   const totalReceitas = dados.receitas.reduce((total, item) => total + item.valor, 0);
   const totalDespesas = dados.despesas.reduce((total, item) => total + item.valor, 0);
   const resultado = totalReceitas - totalDespesas;
-  const margemResultado = totalReceitas > 0 ? (resultado / totalReceitas * 100).toFixed(2) : '0';
+  
+  // Following the Python implementation
+  const resumo = `Receita: R$${totalReceitas} | Despesa: R$${totalDespesas} | Lucro: R$${resultado}`;
   
   // Generate title based on data
   const titulo = dados.tipo === 'PJ' 
@@ -429,69 +431,21 @@ export function gerarRelatorioInteligente(dados: ReportData): IntelligentReportR
       categoriasReceitas[receita.categoria] += receita.valor;
     }
   });
-  
-  // Calculate tax estimate based on regime and revenue
-  let estimativaImpostos = 0;
-  if (dados.tipo === 'PJ' && dados.regime_tributario) {
-    switch (dados.regime_tributario) {
-      case 'simples_nacional':
-        estimativaImpostos = totalReceitas * 0.06;
-        break;
-      case 'lucro_presumido':
-        estimativaImpostos = totalReceitas * 0.115;
-        break;
-      case 'lucro_real':
-        estimativaImpostos = Math.max(0, resultado) * 0.34;
-        break;
-      default:
-        estimativaImpostos = totalReceitas * 0.06;
+
+  // Prepare data for charts that matches the Python function structure
+  const graficos = {
+    mensal: [],
+    categorias: {
+      receitas: categoriasReceitas,
+      despesas: categoriasDespesas
     }
-  } else {
-    // Person tax simplified calculation
-    estimativaImpostos = Math.max(0, resultado) * 0.27;
-  }
-  
-  // Generate recommendations based on the data analysis
-  const recomendacoes: string[] = [];
-  
-  if (totalDespesas > totalReceitas) {
-    recomendacoes.push("Reduzir despesas para equilibrar o fluxo de caixa e evitar endividamento");
-  }
-  
-  if (totalDespesas > 0 && totalReceitas > 0) {
-    // Identify largest expense categories
-    let maiorCategoria = '';
-    let maiorValor = 0;
-    
-    Object.entries(categoriasDespesas).forEach(([categoria, valor]) => {
-      if (valor > maiorValor) {
-        maiorValor = valor;
-        maiorCategoria = categoria;
-      }
-    });
-    
-    if (maiorCategoria && maiorValor > totalDespesas * 0.4) {
-      recomendacoes.push(`Revisar gastos na categoria ${maiorCategoria} que corresponde a mais de 40% das despesas totais`);
-    }
-  }
-  
-  if (dados.tipo === 'PJ' && resultado > 0 && resultado > totalReceitas * 0.3) {
-    recomendacoes.push("Avaliar oportunidades de investimento ou expansão do negócio para otimizar o capital excedente");
-  }
-  
-  // Add standard recommendations
-  recomendacoes.push("Implementar um planejamento tributário para reduzir a carga fiscal dentro da legalidade");
-  recomendacoes.push("Manter um fundo de reserva equivalente a pelo menos 3 meses de despesas fixas");
+  };
   
   // Generate report sections
   const secoes: ReportSection[] = [
     {
       titulo: "Visão Geral",
-      conteudo: `Este relatório apresenta a análise financeira ${dados.tipo === 'PJ' ? 'da empresa' : 'pessoal'} para o período ${dados.periodo}. ${
-        dados.tipo === 'PJ' 
-          ? `A empresa atua no setor de ${dados.atividade || 'serviços'} sob o regime tributário ${dados.regime_tributario || 'não informado'}.`
-          : `As informações apresentadas correspondem às finanças pessoais ${dados.pessoa_nome ? 'de ' + dados.pessoa_nome : ''}.`
-      }`,
+      conteudo: resumo,
       tipo: 'texto'
     },
     {
@@ -501,11 +455,7 @@ export function gerarRelatorioInteligente(dados: ReportData): IntelligentReportR
     },
     {
       titulo: "Análise de Despesas",
-      conteudo: `As despesas estão distribuídas entre diferentes categorias, com maior concentração em ${
-        Object.entries(categoriasDespesas).length > 0 
-          ? Object.entries(categoriasDespesas).sort((a, b) => b[1] - a[1])[0][0]
-          : 'categorias diversas'
-      }.`,
+      conteudo: `As despesas estão distribuídas entre diferentes categorias.`,
       tipo: 'grafico',
       dados_grafico: Object.entries(categoriasDespesas).map(([categoria, valor]) => ({
         categoria,
@@ -513,15 +463,6 @@ export function gerarRelatorioInteligente(dados: ReportData): IntelligentReportR
       }))
     }
   ];
-  
-  // Add tax section for PJ
-  if (dados.tipo === 'PJ') {
-    secoes.push({
-      titulo: "Análise Tributária",
-      conteudo: `Com base no regime tributário ${dados.regime_tributario || 'atual'}, a estimativa de impostos a recolher é de aproximadamente R$ ${estimativaImpostos.toFixed(2)}, o que representa cerca de ${((estimativaImpostos / totalReceitas) * 100).toFixed(2)}% da receita total.`,
-      tipo: 'texto'
-    });
-  }
   
   // Create key metrics
   const metricasChave = [
@@ -542,50 +483,19 @@ export function gerarRelatorioInteligente(dados: ReportData): IntelligentReportR
       valor: resultado,
       unidade: 'BRL',
       tendencia: resultado > 0 ? 'up' as const : 'down' as const
-    },
-    {
-      nome: 'Margem de Resultado',
-      valor: `${margemResultado}%`,
-      tendencia: parseFloat(margemResultado) > 15 ? 'up' as const : 'down' as const
     }
   ];
   
-  // For PJ, add tax and profitability metrics
-  if (dados.tipo === 'PJ') {
-    metricasChave.push({
-      nome: 'Carga Tributária Estimada',
-      valor: estimativaImpostos,
-      unidade: 'BRL',
-      tendencia: 'stable' as const
-    });
-    
-    metricasChave.push({
-      nome: 'Lucratividade',
-      valor: `${((resultado / totalReceitas) * 100).toFixed(2)}%`,
-      tendencia: (resultado / totalReceitas) > 0.2 ? 'up' as const : 'down' as const
-    });
-  }
-  
-  // Final report object
+  // Final report object that matches our interface
   return {
     titulo: titulo,
     data_geracao: dataFormatada,
-    resumo_executivo: `No período analisado, ${dados.tipo === 'PJ' ? 'a empresa' : 'o contribuinte'} registrou receitas de R$ ${totalReceitas.toFixed(2)} e despesas de R$ ${totalDespesas.toFixed(2)}, resultando em ${resultado >= 0 ? 'lucro' : 'prejuízo'} de R$ ${Math.abs(resultado).toFixed(2)}. ${
-      resultado >= 0 
-        ? `Isso representa uma margem de ${margemResultado}% sobre a receita.` 
-        : 'É recomendável reavaliar a estrutura de custos para reverter esse resultado negativo.'
-    }`,
+    resumo_executivo: resumo,
     secoes: secoes,
-    conclusao: `A análise dos dados financeiros ${
-      resultado > 0 
-        ? `indica uma situação ${resultado > totalReceitas * 0.2 ? 'bastante ' : ''}positiva` 
-        : `revela desafios que precisam de atenção`
-    }. ${
-      resultado > 0 
-        ? `A margem de resultado de ${margemResultado}% ${parseFloat(margemResultado) > 15 ? 'está acima da média de mercado' : 'está dentro dos padrões aceitáveis'}.` 
-        : `É necessário implementar medidas corretivas para equilibrar as finanças.`
-    } ${dados.tipo === 'PJ' ? `A carga tributária estimada representa ${((estimativaImpostos / totalReceitas) * 100).toFixed(2)}% da receita total.` : ''}`,
-    recomendacoes: recomendacoes,
+    conclusao: `A análise dos dados financeiros ${resultado > 0 ? 'indica uma situação positiva' : 'revela desafios que precisam de atenção'}.`,
+    recomendacoes: [
+      resultado > 0 ? "Considere investir o lucro em expansão ou reserva" : "Reduza despesas para equilibrar o fluxo de caixa"
+    ],
     metricas_chave: metricasChave
   };
 }
