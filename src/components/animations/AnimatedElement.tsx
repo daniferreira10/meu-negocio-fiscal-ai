@@ -1,9 +1,8 @@
 
-import { motion } from 'framer-motion';
-import { ReactNode, useEffect } from 'react';
+import { motion, Variants } from 'framer-motion';
+import { ReactNode } from 'react';
 import { useInView } from 'react-intersection-observer';
 import { cn } from '@/lib/utils';
-import { Variants } from 'framer-motion';
 
 type AnimatedElementProps = {
   children: ReactNode;

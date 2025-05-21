@@ -10,6 +10,23 @@ import CpfRegistrationForm from '@/components/registration/CpfRegistrationForm';
 import CnpjRegistrationForm from '@/components/registration/CnpjRegistrationForm';
 import { useNavigate } from 'react-router-dom';
 
+// Definindo interfaces para garantir compatibilidade de tipos
+interface RegisterFormContentProps {
+  accountType: 'cpf' | 'cnpj';
+  onSubmit: () => void;
+}
+
+interface FormFooterProps {
+  linkText: string;
+  href: string;
+  question: string;
+}
+
+interface RegistrationFormProps {
+  onRegistrationComplete: () => void;
+  onBack: () => void;
+}
+
 const Register = () => {
   const [step, setStep] = useState<'credentials' | 'registration'>('credentials');
   const [accountType, setAccountType] = useState<'cpf' | 'cnpj'>('cpf');
@@ -49,7 +66,7 @@ const Register = () => {
                   </Tabs>
                   
                   <RegisterFormContent 
-                    accountType={accountType as any}
+                    accountType={accountType}
                     onSubmit={() => setStep('registration')}
                   />
                   
