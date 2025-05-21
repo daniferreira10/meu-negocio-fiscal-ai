@@ -36,10 +36,11 @@ const Register = () => {
             <CardContent className="p-6">
               {step === 'credentials' ? (
                 <>
-                  <FormHeader
+                  <FormHeader 
                     title="Criar sua conta"
-                    description="Preencha os dados para acessar a plataforma"
                   />
+                  
+                  <p className="text-gray-400 mb-6">Preencha os dados para acessar a plataforma</p>
                   
                   <Tabs defaultValue={accountType} onValueChange={(v) => setAccountType(v as 'cpf' | 'cnpj')} className="mb-6">
                     <TabsList className="grid w-full grid-cols-2">
@@ -54,9 +55,9 @@ const Register = () => {
                   />
                   
                   <FormFooter
-                    question="Já tem uma conta?"
                     actionText="Entrar agora"
                     actionHref="/login"
+                    question="Já tem uma conta?"
                   />
                 </>
               ) : (
