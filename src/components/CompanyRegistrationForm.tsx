@@ -23,6 +23,8 @@ import {
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { consultarCNPJ } from '@/utils/cnpjUtils';
+import { Loader } from 'lucide-react';
 
 // Validação do formulário usando Zod
 const companyFormSchema = z.object({
@@ -42,6 +44,7 @@ const companyFormSchema = z.object({
 
 const CompanyRegistrationForm = () => {
   const [loading, setLoading] = useState(false);
+  const [consultingCNPJ, setConsultingCNPJ] = useState(false);
 
   const form = useForm<z.infer<typeof companyFormSchema>>({
     resolver: zodResolver(companyFormSchema),
@@ -77,6 +80,76 @@ const CompanyRegistrationForm = () => {
     }
   };
 
+  const handleConsultarCNPJ = async () => {
+    const cnpj = form.getValues('cnpj');
+
+    if (!cnpj) {
+      toast.error("Por favor, digite um CNPJ válido.");
+      return;
+    }
+
+    try {
+      setConsultingCNPJ(true);
+      const data = await consultarCNPJ(cnpj);
+      
+      if (data) {
+        form.setValue('companyName', data.nome);
+        
+        // Defina o tipo de atividade com base na atividade principal
+        if (data.atividade_principal && data.atividade_principal.length > 0) {
+          const atividadeText = data.atividade_principal[0].text.toLowerCase();
+          
+          if (atividadeText.includes('comércio')) {
+            form.setValue('activityType', 'Comércio');
+          } else if (atividadeText.includes('serviço') || atividadeText.includes('servico')) {
+            form.setValue('activityType', 'Serviço');
+          } else if (atividadeText.includes('indústria') || atividadeText.includes('industria')) {
+            form.setValue('activityType', 'Indústria');
+          } else if (atividadeText.includes('agro') || atividadeText.includes('agricultura')) {
+            form.setValue('activityType', 'Agronegócio');
+          } else {
+            form.setValue('activityType', 'Outro');
+          }
+        }
+
+        if (data.telefone) {
+          form.setValue('phone', data.telefone);
+        }
+        
+        if (data.email) {
+          form.setValue('email', data.email);
+        }
+
+        // Endereço
+        const endereco = [data.endereco, data.bairro].filter(Boolean).join(', ');
+        if (endereco) {
+          form.setValue('address', endereco);
+        }
+        
+        if (data.municipio) {
+          form.setValue('city', data.municipio);
+        }
+        
+        if (data.uf) {
+          form.setValue('state', data.uf);
+        }
+        
+        if (data.cep) {
+          const formattedCep = data.cep.replace(/[^\d]+/g, '');
+          if (formattedCep.length === 8) {
+            form.setValue('zipCode', `${formattedCep.substring(0, 5)}-${formattedCep.substring(5)}`);
+          }
+        }
+
+        toast.success("Dados da empresa carregados com sucesso!");
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Erro ao consultar CNPJ");
+    } finally {
+      setConsultingCNPJ(false);
+    }
+  };
+
   return (
     <Card className="p-6">
       <h2 className="text-xl font-bold text-brand-dark mb-6">Cadastrar Empresa</h2>
@@ -84,6 +157,31 @@ const CompanyRegistrationForm = () => {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* CNPJ com botão de consulta */}
+            <FormField
+              control={form.control}
+              name="cnpj"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>CNPJ</FormLabel>
+                  <div className="flex space-x-2">
+                    <FormControl>
+                      <Input placeholder="00.000.000/0001-00" {...field} />
+                    </FormControl>
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={handleConsultarCNPJ}
+                      disabled={consultingCNPJ}
+                    >
+                      {consultingCNPJ ? <Loader className="h-4 w-4 animate-spin" /> : "Consultar"}
+                    </Button>
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             {/* Nome da Empresa */}
             <FormField
               control={form.control}
@@ -93,21 +191,6 @@ const CompanyRegistrationForm = () => {
                   <FormLabel>Nome da Empresa</FormLabel>
                   <FormControl>
                     <Input placeholder="Razão Social / Nome Fantasia" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* CNPJ */}
-            <FormField
-              control={form.control}
-              name="cnpj"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>CNPJ</FormLabel>
-                  <FormControl>
-                    <Input placeholder="00.000.000/0001-00" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -146,7 +229,7 @@ const CompanyRegistrationForm = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Tipo de Atividade</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Selecione o tipo de atividade" />
@@ -232,7 +315,7 @@ const CompanyRegistrationForm = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Estado</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Selecione o estado" />

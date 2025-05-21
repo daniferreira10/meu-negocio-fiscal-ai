@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
@@ -78,6 +77,7 @@ const CnpjRegistrationForm = ({ onRegistrationComplete, onBack }: CnpjRegistrati
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('account');
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [consultingCNPJ, setConsultingCNPJ] = useState(false);
 
   const form = useForm<CnpjFormValues>({
     resolver: zodResolver(cnpjSchema),
@@ -138,6 +138,85 @@ const CnpjRegistrationForm = ({ onRegistrationComplete, onBack }: CnpjRegistrati
       if (companyValid) {
         setActiveTab('address');
       }
+    }
+  };
+
+  const handleConsultarCNPJ = async () => {
+    const cnpj = form.getValues('cnpj');
+
+    if (!cnpj) {
+      toast.error("Por favor, digite um CNPJ válido.");
+      return;
+    }
+
+    try {
+      setConsultingCNPJ(true);
+      
+      // Import dynamically to avoid circular dependencies
+      const { consultarCNPJ } = await import('@/utils/cnpjUtils');
+      const data = await consultarCNPJ(cnpj);
+      
+      if (data) {
+        form.setValue('companyName', data.nome);
+        if (data.fantasia) {
+          form.setValue('tradingName', data.fantasia);
+        }
+        
+        // Define activity area based on primary activity
+        if (data.atividade_principal && data.atividade_principal.length > 0) {
+          const atividadeText = data.atividade_principal[0].text.toLowerCase();
+          
+          if (atividadeText.includes('comércio')) {
+            form.setValue('activityArea', 'comercio');
+          } else if (atividadeText.includes('serviço') || atividadeText.includes('servico')) {
+            form.setValue('activityArea', 'servicos');
+          } else if (atividadeText.includes('indústria') || atividadeText.includes('industria')) {
+            form.setValue('activityArea', 'industria');
+          } else if (atividadeText.includes('agro') || atividadeText.includes('agricultura')) {
+            form.setValue('activityArea', 'agronegocio');
+          } else if (atividadeText.includes('tecnologia') || atividadeText.includes('software')) {
+            form.setValue('activityArea', 'tecnologia');
+          } else {
+            form.setValue('activityArea', 'outro');
+          }
+        }
+
+        // Address data
+        const endereco = [data.endereco, data.bairro].filter(Boolean).join(', ');
+        if (endereco) {
+          form.setValue('address', endereco);
+        }
+        
+        if (data.municipio) {
+          form.setValue('city', data.municipio);
+        }
+        
+        if (data.uf) {
+          form.setValue('state', data.uf);
+        }
+        
+        if (data.cep) {
+          const formattedCep = data.cep.replace(/[^\d]+/g, '');
+          if (formattedCep.length === 8) {
+            form.setValue('zipCode', `${formattedCep.substring(0, 5)}-${formattedCep.substring(5)}`);
+          }
+        }
+
+        if (data.telefone) {
+          form.setValue('phoneNumber', data.telefone);
+        }
+
+        // If we have company data, move to the company tab
+        if (activeTab === 'account') {
+          setActiveTab('company');
+        }
+        
+        toast.success("Dados da empresa carregados com sucesso!");
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Erro ao consultar CNPJ");
+    } finally {
+      setConsultingCNPJ(false);
     }
   };
 
@@ -271,9 +350,20 @@ const CnpjRegistrationForm = ({ onRegistrationComplete, onBack }: CnpjRegistrati
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>CNPJ</FormLabel>
-                      <FormControl>
-                        <Input placeholder="00.000.000/0001-00" {...field} />
-                      </FormControl>
+                      <div className="flex space-x-2">
+                        <FormControl>
+                          <Input placeholder="00.000.000/0001-00" {...field} />
+                        </FormControl>
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          onClick={handleConsultarCNPJ}
+                          disabled={consultingCNPJ}
+                          className="whitespace-nowrap"
+                        >
+                          {consultingCNPJ ? <Loader className="h-4 w-4 animate-spin" /> : "Consultar CNPJ"}
+                        </Button>
+                      </div>
                       <FormMessage />
                     </FormItem>
                   )}

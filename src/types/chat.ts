@@ -1,3 +1,4 @@
+
 export interface ChatMessage {
   id: string;
   text: string;
@@ -59,6 +60,7 @@ export interface KnowledgeBase {
   content: string;
   "consultoria_contabil"?: any;
   "planejamento_tributario"?: any;
+  "contabilidade"?: any;
 }
 
 export interface DevelopmentPhase {
@@ -209,6 +211,10 @@ export interface ReportData {
   despesas: FinancialTransaction[];
   regime_tributario?: 'simples_nacional' | 'lucro_presumido' | 'lucro_real';
   atividade?: string;
+  receita?: number;
+  despesa?: number;
+  mensal?: any[];
+  por_categoria?: Record<string, any>;
 }
 
 export interface ReportSection {
@@ -231,4 +237,9 @@ export interface IntelligentReportResult {
     unidade?: string;
     tendencia?: 'up' | 'down' | 'stable';
   }[];
+  resumo?: string;
+  graficos?: {
+    mensal: any[];
+    categorias: Record<string, any>;
+  };
 }
