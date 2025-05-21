@@ -1,4 +1,3 @@
-
 export interface ChatMessage {
   id: string;
   text: string;
@@ -83,7 +82,7 @@ export interface DevelopmentPhase {
   tasks: Task[];
 }
 
-// Export the LivroCaixaResult interface to fix the import error
+// Financial transaction interfaces
 export interface FinancialTransaction {
   data: string;
   valor: number;
@@ -104,7 +103,7 @@ export interface LivroCaixaResult {
   saldo_final: number;
 }
 
-// New interface for DAS Simples Nacional
+// DAS Simples Nacional interface
 export interface DASSimples {
   cnpj: string;
   periodo: string;
@@ -112,4 +111,20 @@ export interface DASSimples {
   data_vencimento: string;
   codigo_barras?: string;
   url_boleto?: string;
+}
+
+// IR (Income Tax) calculation interface
+export interface IRResult {
+  rendimentos_tributaveis: number;
+  rendimentos_isentos: number;
+  deducoes: number;
+  base_calculo: number;
+  imposto_devido: number;
+  aliquota_efetiva: number;
+  faixas_utilizadas: {
+    faixa: number;
+    valor_na_faixa: number;
+    aliquota: number;
+    imposto_na_faixa: number;
+  }[];
 }

@@ -1,9 +1,8 @@
-
 /**
  * Utility functions for financial calculations and transformations
  */
 
-import { FinancialTransaction, LivroCaixaItem, LivroCaixaResult, DASSimples } from '@/types/chat';
+import { FinancialTransaction, LivroCaixaItem, LivroCaixaResult, DASSimples, IRResult } from '@/types/chat';
 
 /**
  * Generates a cash book (Livro Caixa) from financial data
@@ -100,6 +99,79 @@ export function emitirDASSimples(dadosCnpj: {
   };
 }
 
+/**
+ * Calculates Income Tax (IR) based on financial data
+ * @param dados Object containing income and deductions data
+ * @returns Calculated IR with detailed breakdown
+ */
+export function calcularIR(dados: {
+  rendimentos_tributaveis: number;
+  rendimentos_isentos?: number;
+  deducoes?: number;
+  periodo?: string;
+}): IRResult {
+  // Default values
+  const rendimentosTributaveis = dados.rendimentos_tributaveis || 0;
+  const rendimentosIsentos = dados.rendimentos_isentos || 0;
+  const deducoes = dados.deducoes || 0;
+  
+  // Calculate taxable base
+  const baseCalculo = Math.max(0, rendimentosTributaveis - deducoes);
+  
+  // IR tax brackets (2024 values)
+  const faixasIR = [
+    { limite: 2259.20, aliquota: 0, deducao: 0 },
+    { limite: 2826.65, aliquota: 0.075, deducao: 169.44 },
+    { limite: 3751.05, aliquota: 0.15, deducao: 381.44 },
+    { limite: 4664.68, aliquota: 0.225, deducao: 662.77 },
+    { limite: Infinity, aliquota: 0.275, deducao: 896.00 }
+  ];
+  
+  // Find the tax bracket
+  const faixaAplicavel = faixasIR.find(faixa => baseCalculo <= faixa.limite) || faixasIR[faixasIR.length - 1];
+  
+  // Calculate tax due using the formula: (base * rate) - deduction
+  const impostoBruto = (baseCalculo * faixaAplicavel.aliquota) - faixaAplicavel.deducao;
+  const impostoDevido = Math.max(0, impostoBruto);
+  
+  // Calculate effective tax rate
+  const aliquotaEfetiva = rendimentosTributaveis > 0 ? (impostoDevido / rendimentosTributaveis) : 0;
+  
+  // Detailed breakdown by tax bracket
+  const faixasUtilizadas = [];
+  let valorRestante = baseCalculo;
+  let faixaAnterior = 0;
+  
+  for (const faixa of faixasIR) {
+    const valorNaFaixa = Math.min(Math.max(0, valorRestante), Math.max(0, faixa.limite - faixaAnterior));
+    
+    if (valorNaFaixa > 0) {
+      faixasUtilizadas.push({
+        faixa: faixasIR.indexOf(faixa) + 1,
+        valor_na_faixa: valorNaFaixa,
+        aliquota: faixa.aliquota,
+        imposto_na_faixa: valorNaFaixa * faixa.aliquota
+      });
+      
+      valorRestante -= valorNaFaixa;
+    }
+    
+    faixaAnterior = faixa.limite;
+    
+    if (valorRestante <= 0) break;
+  }
+  
+  return {
+    rendimentos_tributaveis: rendimentosTributaveis,
+    rendimentos_isentos: rendimentosIsentos,
+    deducoes: deducoes,
+    base_calculo: baseCalculo,
+    imposto_devido: impostoDevido,
+    aliquota_efetiva: aliquotaEfetiva,
+    faixas_utilizadas: faixasUtilizadas
+  };
+}
+
 // Sample data generator for testing
 export function getSampleFinancialData() {
   const currentYear = new Date().getFullYear();
@@ -118,5 +190,16 @@ export function getSampleFinancialData() {
       { data: `${currentYear}-${currentMonth+1}-18`, valor: 120, descricao: "Internet", categoria: "Serviços" },
       { data: `${currentYear}-${currentMonth+1}-22`, valor: 250, descricao: "Combustível", categoria: "Transporte" },
     ]
+  };
+}
+
+/**
+ * Sample data for IR calculation
+ */
+export function getSampleIRData() {
+  return {
+    rendimentos_tributaveis: 5000,
+    rendimentos_isentos: 1200,
+    deducoes: 1100,
   };
 }
