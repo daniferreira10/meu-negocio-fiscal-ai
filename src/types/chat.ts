@@ -1,3 +1,4 @@
+
 export interface ChatMessage {
   id: string;
   text: string;
@@ -194,5 +195,41 @@ export interface TaxPredictionResult {
     tipo: string;
     total: number;
     percentual: number;
+  }[];
+}
+
+// Intelligent Report interfaces
+export interface ReportData {
+  periodo: string;
+  empresa_nome?: string;
+  empresa_cnpj?: string;
+  pessoa_nome?: string;
+  pessoa_cpf?: string;
+  tipo: 'PF' | 'PJ';
+  receitas: FinancialTransaction[];
+  despesas: FinancialTransaction[];
+  regime_tributario?: 'simples_nacional' | 'lucro_presumido' | 'lucro_real';
+  atividade?: string;
+}
+
+export interface ReportSection {
+  titulo: string;
+  conteudo: string;
+  tipo: 'texto' | 'tabela' | 'grafico';
+  dados_grafico?: any;
+}
+
+export interface IntelligentReportResult {
+  titulo: string;
+  data_geracao: string; 
+  resumo_executivo: string;
+  secoes: ReportSection[];
+  conclusao: string;
+  recomendacoes: string[];
+  metricas_chave: {
+    nome: string;
+    valor: number | string;
+    unidade?: string;
+    tendencia?: 'up' | 'down' | 'stable';
   }[];
 }

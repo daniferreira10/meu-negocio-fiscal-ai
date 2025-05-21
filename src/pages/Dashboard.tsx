@@ -11,6 +11,7 @@ import EmitirDAS from '@/components/EmitirDAS';
 import CalcularIR from '@/components/CalcularIR';
 import AnaliseFiscal from '@/components/AnaliseFiscal';
 import PrevisaoImpostos from '@/components/PrevisaoImpostos';
+import RelatorioInteligente from '@/components/RelatorioInteligente';
 
 const Dashboard = () => {
   const [accountType, setAccountType] = useState('cpf');
@@ -56,6 +57,8 @@ const Dashboard = () => {
           <AnaliseFiscal onClose={handleCloseModule} />
         ) : activeModule === 'previsao-impostos' ? (
           <PrevisaoImpostos onClose={handleCloseModule} />
+        ) : activeModule === 'relatorio-inteligente' ? (
+          <RelatorioInteligente onClose={handleCloseModule} />
         ) : (
           <Card className="rounded-2xl shadow-xl bg-white dark:bg-gray-800">
             <CardContent className="p-6">
@@ -135,7 +138,12 @@ const Dashboard = () => {
                     >
                       Previsão de Impostos
                     </Button>
-                    <Button className="w-full">Relatório Contábil Inteligente</Button>
+                    <Button 
+                      className="w-full"
+                      onClick={() => handleModuleSelect('relatorio-inteligente')}
+                    >
+                      Relatório Contábil Inteligente
+                    </Button>
                   </div>
                 </div>
               )}
