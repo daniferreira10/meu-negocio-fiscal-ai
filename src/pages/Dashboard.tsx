@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -8,6 +9,7 @@ import DashboardLayout from '@/components/DashboardLayout';
 import LivroCaixa from '@/components/LivroCaixa';
 import EmitirDAS from '@/components/EmitirDAS';
 import CalcularIR from '@/components/CalcularIR';
+import AnaliseFiscal from '@/components/AnaliseFiscal';
 
 const Dashboard = () => {
   const [accountType, setAccountType] = useState('cpf');
@@ -49,6 +51,8 @@ const Dashboard = () => {
           <EmitirDAS onClose={handleCloseModule} />
         ) : activeModule === 'calcular-ir' ? (
           <CalcularIR onClose={handleCloseModule} />
+        ) : activeModule === 'analise-fiscal' ? (
+          <AnaliseFiscal onClose={handleCloseModule} />
         ) : (
           <Card className="rounded-2xl shadow-xl bg-white dark:bg-gray-800">
             <CardContent className="p-6">
@@ -116,7 +120,12 @@ const Dashboard = () => {
                     >
                       Calcular IRPF / IRPJ
                     </Button>
-                    <Button className="w-full">Análise Fiscal Completa</Button>
+                    <Button 
+                      className="w-full"
+                      onClick={() => handleModuleSelect('analise-fiscal')}
+                    >
+                      Análise Fiscal Completa
+                    </Button>
                     <Button className="w-full">Previsão de Impostos</Button>
                     <Button className="w-full">Relatório Contábil Inteligente</Button>
                   </div>

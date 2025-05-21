@@ -142,3 +142,29 @@ export interface SimpleIRResult {
   tipo: 'PF' | 'PJ';
   imposto_devido: number;
 }
+
+// Fiscal Analysis interfaces
+export interface FiscalAnalysisData {
+  faturamento_mensal: number;
+  custos_fixos: number;
+  custos_variaveis: number;
+  regime_tributario: 'simples_nacional' | 'lucro_presumido' | 'lucro_real';
+  setor: string;
+  numero_funcionarios?: number;
+}
+
+export interface FiscalAnalysisResult {
+  carga_tributaria: number;
+  economia_potencial: number;
+  recomendacoes: {
+    titulo: string;
+    descricao: string;
+    impacto: 'alto' | 'medio' | 'baixo';
+  }[];
+  oportunidades: {
+    titulo: string;
+    descricao: string;
+    economia_estimada: number;
+  }[];
+  risco_fiscal: 'alto' | 'medio' | 'baixo';
+}

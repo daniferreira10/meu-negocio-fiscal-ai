@@ -2,7 +2,7 @@
  * Utility functions for financial calculations and transformations
  */
 
-import { FinancialTransaction, LivroCaixaItem, LivroCaixaResult, DASSimples, IRResult, SimpleIRData, SimpleIRResult } from '@/types/chat';
+import { FinancialTransaction, LivroCaixaItem, LivroCaixaResult, DASSimples, IRResult, SimpleIRData, SimpleIRResult, FiscalAnalysisData, FiscalAnalysisResult } from '@/types/chat';
 
 /**
  * Generates a cash book (Livro Caixa) from financial data
@@ -196,7 +196,97 @@ export function calcularIRSimples(dados: SimpleIRData): SimpleIRResult {
   };
 }
 
-// Sample data generator for testing
+/**
+ * Performs a fiscal analysis based on the provided financial data
+ * @param dados Financial data for analysis
+ * @returns Fiscal analysis results with recommendations
+ */
+export function analiseFiscal(dados: FiscalAnalysisData): FiscalAnalysisResult {
+  // Calculate tax burden based on tax regime
+  const cargaTributariaPorRegime = {
+    simples_nacional: 0.06,
+    lucro_presumido: 0.115,
+    lucro_real: 0.15
+  };
+  
+  const cargaTributaria = dados.faturamento_mensal * cargaTributariaPorRegime[dados.regime_tributario];
+  
+  // Calculate potential savings
+  let economiaPotencial = 0;
+  const recomendacoes = [];
+  const oportunidades = [];
+  let riscoFiscal: 'alto' | 'medio' | 'baixo' = 'baixo';
+  
+  // Analyze based on sector and tax regime to generate recommendations
+  if (dados.regime_tributario === 'simples_nacional' && dados.faturamento_mensal > 300000) {
+    recomendacoes.push({
+      titulo: 'Revisão do regime tributário',
+      descricao: 'Considerar mudança para Lucro Presumido devido ao faturamento elevado',
+      impacto: 'alto' as const
+    });
+    
+    oportunidades.push({
+      titulo: 'Economia com créditos de PIS/COFINS',
+      descricao: 'Possível aproveitamento de créditos não disponíveis no Simples Nacional',
+      economia_estimada: dados.faturamento_mensal * 0.03
+    });
+    
+    economiaPotencial += dados.faturamento_mensal * 0.03;
+    riscoFiscal = 'medio';
+  }
+  
+  if (dados.custos_fixos > dados.faturamento_mensal * 0.7) {
+    recomendacoes.push({
+      titulo: 'Otimização de custos fixos',
+      descricao: 'Custos fixos muito elevados em relação ao faturamento',
+      impacto: 'alto' as const
+    });
+    
+    oportunidades.push({
+      titulo: 'Renegociação de contratos fixos',
+      descricao: 'Revisão e renegociação de contratos de aluguel e serviços continuados',
+      economia_estimada: dados.custos_fixos * 0.15
+    });
+    
+    economiaPotencial += dados.custos_fixos * 0.15;
+    riscoFiscal = 'alto';
+  }
+  
+  if (dados.numero_funcionarios && dados.numero_funcionarios > 0) {
+    if (dados.faturamento_mensal / dados.numero_funcionarios < 10000) {
+      recomendacoes.push({
+        titulo: 'Análise de produtividade',
+        descricao: 'Faturamento por funcionário abaixo da média do mercado',
+        impacto: 'medio' as const
+      });
+      
+      oportunidades.push({
+        titulo: 'Revisão de estrutura organizacional',
+        descricao: 'Otimização da equipe ou aumento de produtividade por colaborador',
+        economia_estimada: dados.numero_funcionarios * 1000
+      });
+      
+      economiaPotencial += dados.numero_funcionarios * 1000;
+    }
+  }
+  
+  // Add general recommendation
+  recomendacoes.push({
+    titulo: 'Planejamento tributário anual',
+    descricao: 'Implementar planejamento tributário anual para otimizar impostos',
+    impacto: 'medio' as const
+  });
+  
+  return {
+    carga_tributaria: cargaTributaria,
+    economia_potencial: economiaPotencial,
+    recomendacoes: recomendacoes,
+    oportunidades: oportunidades,
+    risco_fiscal: riscoFiscal
+  };
+}
+
+// Sample data generators for testing
 export function getSampleFinancialData() {
   const currentYear = new Date().getFullYear();
   const currentMonth = new Date().getMonth();
@@ -235,5 +325,19 @@ export function getSampleSimpleIRData(): SimpleIRData {
   return {
     tipo: 'PF',
     rendimento: 60000
+  };
+}
+
+/**
+ * Sample data for fiscal analysis
+ */
+export function getSampleFiscalAnalysisData(): FiscalAnalysisData {
+  return {
+    faturamento_mensal: 120000,
+    custos_fixos: 40000,
+    custos_variaveis: 30000,
+    regime_tributario: 'simples_nacional',
+    setor: 'tecnologia',
+    numero_funcionarios: 8
   };
 }
