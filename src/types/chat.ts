@@ -1,3 +1,4 @@
+
 export interface ChatMessage {
   id: string;
   text: string;
@@ -170,4 +171,28 @@ export interface FiscalAnalysisResult {
   }[];
   risco_fiscal: 'alto' | 'medio' | 'baixo';
   alertas?: string[];
+}
+
+// Tax Prediction interfaces
+export interface TaxPredictionData {
+  faturamento_previsto: number;
+  despesas_previstas: number;
+  regime_tributario: 'simples_nacional' | 'lucro_presumido' | 'lucro_real';
+  periodo_meses: number;
+  setor?: string;
+}
+
+export interface TaxPredictionResult {
+  impostos_mensais: {
+    mes: string;
+    valor: number;
+    tipo: string;
+  }[];
+  total_periodo: number;
+  media_mensal: number;
+  impostos_detalhados: {
+    tipo: string;
+    total: number;
+    percentual: number;
+  }[];
 }

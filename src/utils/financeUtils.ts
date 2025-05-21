@@ -2,7 +2,7 @@
  * Utility functions for financial calculations and transformations
  */
 
-import { FinancialTransaction, LivroCaixaItem, LivroCaixaResult, DASSimples, IRResult, SimpleIRData, SimpleIRResult, FiscalAnalysisData, FiscalAnalysisResult } from '@/types/chat';
+import { FinancialTransaction, LivroCaixaItem, LivroCaixaResult, DASSimples, IRResult, SimpleIRData, SimpleIRResult, FiscalAnalysisData, FiscalAnalysisResult, TaxPredictionData, TaxPredictionResult } from '@/types/chat';
 
 /**
  * Generates a cash book (Livro Caixa) from financial data
@@ -313,6 +313,109 @@ export function analiseFiscal(dados: FiscalAnalysisData): FiscalAnalysisResult {
   };
 }
 
+/**
+ * Predicts future taxes based on estimated financial data
+ * @param dados Object containing financial projections and business parameters
+ * @returns Predicted taxes by month and type
+ */
+export function preverImpostos(dados: TaxPredictionData): TaxPredictionResult {
+  const { faturamento_previsto, despesas_previstas, regime_tributario, periodo_meses, setor } = dados;
+  
+  // Calculate monthly values
+  const faturamentoMensal = faturamento_previsto / periodo_meses;
+  const despesasMensais = despesas_previstas / periodo_meses;
+  
+  // Define tax rates based on regime
+  const taxRates = {
+    simples_nacional: { 
+      darf: 0.06, 
+      iss: 0.02, 
+      inss: 0.0 
+    },
+    lucro_presumido: { 
+      irpj: 0.048, 
+      csll: 0.0288, 
+      pis: 0.0065, 
+      cofins: 0.03, 
+      iss: 0.02, 
+      inss: 0.0 
+    },
+    lucro_real: { 
+      irpj: 0.15, 
+      csll: 0.09, 
+      pis: 0.0165, 
+      cofins: 0.076, 
+      iss: 0.02, 
+      inss: 0.0 
+    }
+  };
+  
+  const rates = taxRates[regime_tributario];
+  const currentDate = new Date();
+  
+  // Generate monthly predictions
+  const impostosMensais = [];
+  let totalImpostos = 0;
+  
+  for (let i = 0; i < periodo_meses; i++) {
+    const date = new Date(currentDate);
+    date.setMonth(currentDate.getMonth() + i);
+    const monthYear = `${date.toLocaleString('default', { month: 'long' })} ${date.getFullYear()}`;
+    
+    // Calculate taxes based on regime
+    if (regime_tributario === 'simples_nacional') {
+      const valorImposto = faturamentoMensal * rates.darf;
+      impostosMensais.push({
+        mes: monthYear,
+        valor: valorImposto,
+        tipo: 'DAS'
+      });
+      totalImpostos += valorImposto;
+    } else {
+      // For lucro_presumido and lucro_real
+      Object.entries(rates).forEach(([tipo, aliquota]) => {
+        if (aliquota > 0) {
+          const base = tipo === 'inss' ? despesasMensais * 0.4 : faturamentoMensal;
+          const valorImposto = base * aliquota;
+          
+          impostosMensais.push({
+            mes: monthYear,
+            valor: valorImposto,
+            tipo: tipo.toUpperCase()
+          });
+          totalImpostos += valorImposto;
+        }
+      });
+    }
+  }
+  
+  // Calculate monthly average
+  const mediaMensal = totalImpostos / periodo_meses;
+  
+  // Generate detailed breakdown by tax type
+  const impostosDetalhados = [];
+  const impostosPorTipo = impostosMensais.reduce((acc, item) => {
+    if (!acc[item.tipo]) acc[item.tipo] = 0;
+    acc[item.tipo] += item.valor;
+    return acc;
+  }, {});
+  
+  Object.entries(impostosPorTipo).forEach(([tipo, total]) => {
+    impostosDetalhados.push({
+      tipo,
+      total: total as number,
+      percentual: (total as number) / totalImpostos
+    });
+  });
+  
+  return {
+    impostos_mensais: impostosMensais,
+    total_periodo: totalImpostos,
+    media_mensal: mediaMensal,
+    impostos_detalhados: impostosDetalhados
+  };
+}
+
 // Sample data generators for testing
 export function getSampleFinancialData() {
   const currentYear = new Date().getFullYear();
@@ -369,5 +472,18 @@ export function getSampleFiscalAnalysisData(): FiscalAnalysisData {
     receita: 120000,
     despesa: 70000,
     folha_pagamento: 35000
+  };
+}
+
+/**
+ * Sample data for tax prediction
+ */
+export function getSampleTaxPredictionData(): TaxPredictionData {
+  return {
+    faturamento_previsto: 720000, // 60k per month for 12 months
+    despesas_previstas: 480000,   // 40k per month for 12 months
+    regime_tributario: 'simples_nacional',
+    periodo_meses: 12,
+    setor: 'tecnologia'
   };
 }
