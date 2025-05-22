@@ -10,11 +10,19 @@ import CpfRegistrationForm from '@/components/registration/CpfRegistrationForm';
 import CnpjRegistrationForm from '@/components/registration/CnpjRegistrationForm';
 import { useNavigate } from 'react-router-dom';
 
-// Interfaces corretas para os componentes - não modificamos os componentes originais
-interface FormFooterProps {
-  text?: string;
-  linkText?: string;
-  href?: string;
+interface RegisterFormContentProps {
+  accountType: 'cpf' | 'cnpj';
+  onSubmit: () => void;
+}
+
+interface CpfRegistrationFormProps {
+  onRegistrationComplete: () => void;
+  onBack: () => void;
+}
+
+interface CnpjRegistrationFormProps {
+  onRegistrationComplete: () => void;
+  onBack: () => void;
 }
 
 const Register = () => {
@@ -55,7 +63,6 @@ const Register = () => {
                     </TabsList>
                   </Tabs>
                   
-                  {/* Assume RegisterFormContent has an onSubmit prop in its component definition */}
                   <RegisterFormContent 
                     accountType={accountType}
                     onSubmit={() => setStep('registration')}
