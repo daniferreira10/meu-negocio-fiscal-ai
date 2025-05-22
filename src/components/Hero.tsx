@@ -90,7 +90,7 @@ const Hero = () => {
       </svg>
       
       <div className="container mx-auto px-4 relative z-10">
-        <motion.div variants={containerVariants} initial="hidden" animate="visible" className="flex flex-col md:flex-row items-center justify-between object-cover">
+        <motion.div variants={containerVariants} initial="hidden" animate="visible" className="flex flex-col md:flex-row items-center justify-between object-cover mx-[10px]">
           <div className="md:w-1/2 mb-12 md:mb-0">
             <motion.div variants={itemVariants} className="flex items-center mb-4">
               <CircuitBoard className="h-8 w-8 mr-2 text-brand-cyan" />
