@@ -10,17 +10,16 @@ import CpfRegistrationForm from '@/components/registration/CpfRegistrationForm';
 import CnpjRegistrationForm from '@/components/registration/CnpjRegistrationForm';
 import { useNavigate } from 'react-router-dom';
 
-// These interfaces should match the actual component props
-// They are defined here for type checking but the actual components should implement them
 interface RegisterFormContentProps {
   accountType: 'cpf' | 'cnpj';
   onSubmit: () => void;
 }
 
 interface FormFooterProps {
-  linkText: string;
-  href: string;
-  question: string;
+  text?: string;
+  linkText?: string;
+  href?: string;
+  question?: string;
 }
 
 interface RegistrationFormProps {
@@ -72,9 +71,9 @@ const Register = () => {
                   />
                   
                   <FormFooter
+                    question="Já tem uma conta?"
                     linkText="Entrar agora"
                     href="/login"
-                    question="Já tem uma conta?"
                   />
                 </>
               ) : (
