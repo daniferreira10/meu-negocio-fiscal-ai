@@ -15,14 +15,11 @@ interface RegisterFormContentProps {
   onSubmit: () => void;
 }
 
-interface CpfRegistrationFormProps {
-  onRegistrationComplete: () => void;
-  onBack: () => void;
-}
-
-interface CnpjRegistrationFormProps {
-  onRegistrationComplete: () => void;
-  onBack: () => void;
+// Definindo interfaces para os componentes que recebem props
+interface FormFooterProps {
+  text: string;
+  linkText: string;
+  href: string;
 }
 
 const Register = () => {
