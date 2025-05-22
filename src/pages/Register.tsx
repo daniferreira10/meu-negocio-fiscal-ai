@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
@@ -13,6 +12,7 @@ import { useNavigate } from 'react-router-dom';
 import { CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-react';
 import AccountTypeSelection from '@/components/AccountTypeSelection';
 import { Button } from '@/components/ui/button';
+import PrimeDeskDescription from '@/components/PrimeDeskDescription';
 
 // Define the wizard steps for better organization
 const STEPS = {
@@ -87,35 +87,7 @@ const Register = () => {
               subtitle="Sua contabilidade automatizada com Inteligência Artificial"
             />
             
-            <div className="text-center mb-8">
-              <p className="text-gray-600 mb-6">
-                Estamos felizes por você escolher nossa plataforma! Vamos configurar sua conta em algumas 
-                etapas simples para personalizar sua experiência.
-              </p>
-              
-              <div className="flex flex-col space-y-4">
-                <div className="flex items-center">
-                  <div className="bg-brand-light-blue rounded-full p-1 mr-3">
-                    <CheckCircle2 className="h-4 w-4 text-brand-blue" />
-                  </div>
-                  <p className="text-sm text-left text-gray-600">Processo rápido em poucos passos</p>
-                </div>
-                
-                <div className="flex items-center">
-                  <div className="bg-brand-light-blue rounded-full p-1 mr-3">
-                    <CheckCircle2 className="h-4 w-4 text-brand-blue" />
-                  </div>
-                  <p className="text-sm text-left text-gray-600">Seus dados são protegidos e criptografados</p>
-                </div>
-                
-                <div className="flex items-center">
-                  <div className="bg-brand-light-blue rounded-full p-1 mr-3">
-                    <CheckCircle2 className="h-4 w-4 text-brand-blue" />
-                  </div>
-                  <p className="text-sm text-left text-gray-600">Configuração personalizada para suas necessidades</p>
-                </div>
-              </div>
-            </div>
+            <PrimeDeskDescription />
             
             <Button 
               onClick={() => setCurrentStep(STEPS.ACCOUNT_TYPE)} 
