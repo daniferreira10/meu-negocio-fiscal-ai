@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { savePhysicalPersonProfile } from '@/services/userProfileService';
 import { registerUser } from '@/services/authService';
-import { CpfFormValues, cpfRegistrationSchema, RegistrationFormProps, ProfileType } from '@/types/userProfileTypes';
+import { CpfFormValues, cpfRegistrationSchema, RegistrationFormProps, ProfileType, MaritalStatus } from '@/types/userProfileTypes';
 import { useRegistrationTabs } from './hooks/useRegistrationTabs';
 import AccountTab from './tabs/AccountTab';
 import PersonalTab from './tabs/PersonalTab';
@@ -38,7 +38,7 @@ const CpfRegistrationForm = ({ onRegistrationComplete, onBack }: RegistrationFor
       phone: "",
       birth_date: "",
       cpf: "",
-      marital_status: "solteiro",
+      marital_status: MaritalStatus.SINGLE,
       dependents_count: 0,
       
       // Endereço

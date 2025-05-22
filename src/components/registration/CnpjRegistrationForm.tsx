@@ -31,6 +31,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { saveLegalPersonProfile } from '@/services/userProfileService';
+import { ProfileType, TaxRegime } from '@/types/userProfileTypes';
 
 interface CnpjRegistrationFormProps {
   onRegistrationComplete: () => void;
@@ -55,7 +56,9 @@ const cnpjSchema = z.object({
   
   // Informações Fiscais
   legal_nature: z.string().min(1, { message: "Natureza jurídica é obrigatória" }),
-  tax_regime: z.string().min(1, { message: "Regime tributário é obrigatório" }),
+  tax_regime: z.enum(["simples_nacional", "lucro_presumido", "lucro_real", "mei"], {
+    errorMap: () => ({ message: "Regime tributário é obrigatório" })
+  }),
   cnae_code: z.string().min(1, { message: "CNAE principal é obrigatório" }),
   
   // Informações Financeiras
@@ -107,7 +110,7 @@ const CnpjRegistrationForm = ({ onRegistrationComplete, onBack }: CnpjRegistrati
       
       // Informações Fiscais
       legal_nature: '',
-      tax_regime: 'simples_nacional',
+      tax_regime: "simples_nacional" as TaxRegime,
       cnae_code: '',
       
       // Informações Financeiras
@@ -216,7 +219,7 @@ const CnpjRegistrationForm = ({ onRegistrationComplete, onBack }: CnpjRegistrati
         address_state: data.address_state,
         address_zipcode: data.address_zipcode,
         legal_nature: data.legal_nature,
-        tax_regime: data.tax_regime,
+        tax_regime: data.tax_regime as TaxRegime,
         cnae_code: data.cnae_code,
         monthly_revenue: data.monthly_revenue,
         employees_count: data.employees_count,
@@ -228,7 +231,8 @@ const CnpjRegistrationForm = ({ onRegistrationComplete, onBack }: CnpjRegistrati
         invoice_type: data.invoice_type || '',
         tax_status: data.tax_status,
         public_debts: data.public_debts || '',
-        current_accounting_info: data.current_accounting_info || ''
+        current_accounting_info: data.current_accounting_info || '',
+        profile_type: ProfileType.LEGAL
       };
       
       const savedProfile = await saveLegalPersonProfile(profileData);
