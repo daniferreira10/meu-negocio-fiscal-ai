@@ -16,7 +16,7 @@ const Index = () => {
       <Navbar />
       
       {/* About Us Section - Moved to the top */}
-      <section className="py-16 bg-white relative overflow-hidden">
+      <section className="py-16 relative overflow-hidden bg-slate-50">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center gap-10">
             <AnimatedElement variants={fadeInUp} className="md:w-1/2">

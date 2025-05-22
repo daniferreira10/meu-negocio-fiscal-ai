@@ -90,7 +90,7 @@ const Hero = () => {
       </svg>
       
       <div className="container mx-auto px-4 relative z-10">
-        <motion.div variants={containerVariants} initial="hidden" animate="visible" className="flex flex-col md:flex-row items-center justify-between object-cover mx-[10px]">
+        <motion.div variants={containerVariants} initial="hidden" animate="visible" className="flex flex-col md:flex-row items-center justify-between object-cover mx-[10px] rounded">
           <div className="md:w-1/2 mb-12 md:mb-0">
             <motion.div variants={itemVariants} className="flex items-center mb-4">
               <CircuitBoard className="h-8 w-8 mr-2 text-brand-cyan" />
@@ -113,7 +113,7 @@ const Hero = () => {
             <motion.div variants={itemVariants} className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
               <Link to="/register">
                 <motion.div variants={buttonVariants} whileHover="hover" whileTap="tap">
-                  <Button className="w-full sm:w-auto bg-gradient-brand hover:opacity-90 text-white px-8 py-6 text-lg border-0 group">
+                  <Button className="w-full sm:w-auto bg-gradient-brand hover:opacity-90 text-white px-8 py-6 border-0 group text-base">
                     Comece Gratuitamente
                     <ChevronRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </Button>
@@ -183,7 +183,7 @@ const Hero = () => {
               repeat: Infinity,
               repeatType: "reverse"
             }} />
-              <motion.img src="https://images.unsplash.com/photo-1488590528505-98d2b5aba04b" alt="Dashboard de contabilidade automatizada" className="rounded-lg shadow-xl w-full max-w-md object-cover relative z-10" initial={{
+              <motion.img src="https://images.unsplash.com/photo-1488590528505-98d2b5aba04b" alt="Dashboard de contabilidade automatizada" initial={{
               y: 30,
               opacity: 0
             }} animate={{
@@ -194,7 +194,7 @@ const Hero = () => {
               delay: 0.5,
               type: "spring",
               stiffness: 100
-            }} />
+            }} className="rounded-lg shadow-xl w-full max-w-md relative z-10 object-cover" />
               
               {/* Elemento decorativo flutuante */}
               
