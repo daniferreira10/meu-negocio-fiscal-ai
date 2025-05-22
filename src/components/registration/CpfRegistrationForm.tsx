@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { savePhysicalPersonProfile } from '@/services/userProfileService';
 import { registerUser } from '@/services/authService';
-import { CpfFormValues, cpfSchema, CpfRegistrationFormProps } from './types/cpfRegistrationTypes';
+import { CpfFormValues, cpfRegistrationSchema, RegistrationFormProps, ProfileType } from '@/types/userProfileTypes';
 import { useRegistrationTabs } from './hooks/useRegistrationTabs';
 import AccountTab from './tabs/AccountTab';
 import PersonalTab from './tabs/PersonalTab';
@@ -19,12 +19,15 @@ import FinancialTab from './tabs/FinancialTab';
 import AssetsTab from './tabs/AssetsTab';
 import OtherTab from './tabs/OtherTab';
 
-const CpfRegistrationForm = ({ onRegistrationComplete, onBack }: CpfRegistrationFormProps) => {
+const CpfRegistrationForm = ({ onRegistrationComplete, onBack }: RegistrationFormProps) => {
   const [loading, setLoading] = useState(false);
 
   const form = useForm<CpfFormValues>({
-    resolver: zodResolver(cpfSchema),
+    resolver: zodResolver(cpfRegistrationSchema),
     defaultValues: {
+      // Dados de perfil
+      profile_type: ProfileType.PHYSICAL,
+      
       // Dados de conta
       email: "",
       password: "",
@@ -50,6 +53,9 @@ const CpfRegistrationForm = ({ onRegistrationComplete, onBack }: CpfRegistration
       profession: "",
       monthly_income: 0,
       monthly_expenses: 0,
+      monthly_income_range: undefined,
+      income_tax_declarant: false,
+      autonomous_activity: false,
       
       // Patrimônio e dívidas
       assets: [],
@@ -73,30 +79,10 @@ const CpfRegistrationForm = ({ onRegistrationComplete, onBack }: CpfRegistration
       const success = await registerUser(data.email, data.password);
       
       if (success) {
-        // 2. Salvar perfil completo
+        // 2. Salvar perfil completo - todos os campos do schema são enviados
         const profileData = {
+          ...data,
           user_id: "", // preenchido no backend pelo currentUser
-          full_name: data.full_name,
-          email: data.email,
-          phone: data.phone,
-          birth_date: data.birth_date,
-          cpf: data.cpf,
-          address_street: data.address_street,
-          address_number: data.address_number,
-          address_neighborhood: data.address_neighborhood,
-          address_city: data.address_city,
-          address_state: data.address_state,
-          address_zipcode: data.address_zipcode,
-          marital_status: data.marital_status,
-          dependents_count: data.dependents_count,
-          profession: data.profession,
-          monthly_income: data.monthly_income,
-          monthly_expenses: data.monthly_expenses,
-          assets: data.assets,
-          debts: data.debts,
-          other_income_sources: data.other_income_sources || "",
-          main_bank_account: data.main_bank_account,
-          tax_return_info: data.tax_return_info || ""
         };
         
         const savedProfile = await savePhysicalPersonProfile(profileData);

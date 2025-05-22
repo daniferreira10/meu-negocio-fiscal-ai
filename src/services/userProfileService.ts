@@ -1,71 +1,24 @@
 
 import { supabase } from './supabaseClient';
 import { getCurrentUser } from './authService';
+import { 
+  UserProfile, 
+  PhysicalPersonProfile, 
+  LegalPersonProfile,
+  ProfileType
+} from '@/types/userProfileTypes';
 
-export interface PhysicalPersonProfile {
-  id?: string;
-  user_id: string;
-  full_name: string;
-  email: string;
-  phone: string;
-  birth_date: string;
-  cpf: string;
-  address_street: string;
-  address_number: string;
-  address_neighborhood: string;
-  address_city: string;
-  address_state: string;
-  address_zipcode: string;
-  marital_status: string;
-  dependents_count: number;
-  profession: string;
-  monthly_income: number;
-  monthly_expenses: number;
-  assets: any;
-  debts: any;
-  other_income_sources: any;
-  main_bank_account: string;
-  tax_return_info: string;
-  created_at?: string;
-  updated_at?: string;
-}
-
-export interface LegalPersonProfile {
-  id?: string;
-  user_id: string;
-  company_name: string;
-  cnpj: string;
-  legal_representative: string;
-  email: string;
-  phone: string;
-  address_street: string;
-  address_number: string;
-  address_neighborhood: string;
-  address_city: string;
-  address_state: string;
-  address_zipcode: string;
-  legal_nature: string;
-  tax_regime: string;
-  cnae_code: string;
-  monthly_revenue: number;
-  employees_count: number;
-  average_payroll: number;
-  fixed_expenses: number;
-  variable_expenses: number;
-  bank_accounts: any;
-  issues_invoices: boolean;
-  invoice_type: string;
-  tax_status: string;
-  public_debts: any;
-  current_accounting_info: string;
-  created_at?: string;
-  updated_at?: string;
-}
-
-export type UserProfile = PhysicalPersonProfile | LegalPersonProfile;
+// Re-exporte dos tipos para compatibilidade com código existente
+export { ProfileType, MaritalStatus, IncomeRange, RevenueRange } from '@/types/userProfileTypes';
+export type { 
+  User, 
+  PhysicalPersonProfile, 
+  LegalPersonProfile, 
+  UserProfile 
+} from '@/types/userProfileTypes';
 
 // Determinar o tipo de perfil pelo ID do usuário
-export const getProfileType = async (userId: string): Promise<'physical' | 'legal' | null> => {
+export const getProfileType = async (userId: string): Promise<ProfileType | null> => {
   try {
     // Verifica na tabela de perfis físicos
     const { data: physicalProfile } = await supabase
@@ -74,7 +27,7 @@ export const getProfileType = async (userId: string): Promise<'physical' | 'lega
       .eq('user_id', userId)
       .single();
     
-    if (physicalProfile) return 'physical';
+    if (physicalProfile) return ProfileType.PHYSICAL;
     
     // Verifica na tabela de perfis jurídicos
     const { data: legalProfile } = await supabase
@@ -83,7 +36,7 @@ export const getProfileType = async (userId: string): Promise<'physical' | 'lega
       .eq('user_id', userId)
       .single();
     
-    if (legalProfile) return 'legal';
+    if (legalProfile) return ProfileType.LEGAL;
     
     return null;
   } catch (error) {
@@ -105,7 +58,7 @@ export const getUserProfile = async (): Promise<UserProfile | null> => {
     // Determina o tipo de perfil
     const profileType = await getProfileType(currentUser.id);
     
-    if (profileType === 'physical') {
+    if (profileType === ProfileType.PHYSICAL) {
       // Busca perfil de pessoa física
       const { data, error } = await supabase
         .from('physical_person_profiles')
@@ -118,8 +71,11 @@ export const getUserProfile = async (): Promise<UserProfile | null> => {
         return null;
       }
 
-      return data as PhysicalPersonProfile;
-    } else if (profileType === 'legal') {
+      return {
+        ...data,
+        profile_type: ProfileType.PHYSICAL
+      } as PhysicalPersonProfile;
+    } else if (profileType === ProfileType.LEGAL) {
       // Busca perfil de pessoa jurídica
       const { data, error } = await supabase
         .from('legal_person_profiles')
@@ -132,7 +88,10 @@ export const getUserProfile = async (): Promise<UserProfile | null> => {
         return null;
       }
 
-      return data as LegalPersonProfile;
+      return {
+        ...data,
+        profile_type: ProfileType.LEGAL
+      } as LegalPersonProfile;
     }
     
     return null;
@@ -154,17 +113,23 @@ export const savePhysicalPersonProfile = async (
       return null;
     }
 
+    // Verificar se os campos obrigatórios estão preenchidos
+    if (!profile.full_name || !profile.cpf) {
+      console.error("Campos obrigatórios não preenchidos");
+      throw new Error("Campos obrigatórios não preenchidos");
+    }
+
     // Modo de desenvolvimento sem Supabase configurado
     if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
       console.log("Modo de desenvolvimento: simulando salvamento de perfil");
       // Simular sucesso no salvamento
       return {
         id: "mock-id",
-        user_id: currentUser.id,
         ...profile,
+        user_id: currentUser.id,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
-      };
+      } as PhysicalPersonProfile;
     }
 
     // Verificar se o perfil já existe
@@ -174,12 +139,19 @@ export const savePhysicalPersonProfile = async (
       .eq('user_id', currentUser.id)
       .single();
     
+    // Prepara os dados para salvar, garantindo que o user_id está correto
+    const dataToSave = {
+      ...profile,
+      user_id: currentUser.id,
+      profile_type: ProfileType.PHYSICAL // Garante o tipo correto
+    };
+    
     if (existingProfile) {
       // Atualizar perfil existente
       const { data, error } = await supabase
         .from('physical_person_profiles')
         .update({
-          ...profile,
+          ...dataToSave,
           updated_at: new Date().toISOString()
         })
         .eq('user_id', currentUser.id)
@@ -191,12 +163,15 @@ export const savePhysicalPersonProfile = async (
         return null;
       }
 
-      return data as PhysicalPersonProfile;
+      return {
+        ...data,
+        profile_type: ProfileType.PHYSICAL
+      } as PhysicalPersonProfile;
     } else {
       // Criar novo perfil
       const { data, error } = await supabase
         .from('physical_person_profiles')
-        .insert([{ ...profile, user_id: currentUser.id }])
+        .insert([dataToSave])
         .select()
         .single();
 
@@ -205,7 +180,10 @@ export const savePhysicalPersonProfile = async (
         return null;
       }
 
-      return data as PhysicalPersonProfile;
+      return {
+        ...data,
+        profile_type: ProfileType.PHYSICAL
+      } as PhysicalPersonProfile;
     }
   } catch (error) {
     console.error("Erro ao salvar perfil físico:", error);
@@ -225,17 +203,23 @@ export const saveLegalPersonProfile = async (
       return null;
     }
 
+    // Verificar se os campos obrigatórios estão preenchidos
+    if (!profile.company_name || !profile.cnpj) {
+      console.error("Campos obrigatórios não preenchidos");
+      throw new Error("Campos obrigatórios não preenchidos");
+    }
+
     // Modo de desenvolvimento sem Supabase configurado
     if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
       console.log("Modo de desenvolvimento: simulando salvamento de perfil jurídico");
       // Simular sucesso no salvamento
       return {
         id: "mock-id",
-        user_id: currentUser.id,
         ...profile,
+        user_id: currentUser.id,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
-      };
+      } as LegalPersonProfile;
     }
 
     // Verificar se o perfil já existe
@@ -245,12 +229,19 @@ export const saveLegalPersonProfile = async (
       .eq('user_id', currentUser.id)
       .single();
     
+    // Prepara os dados para salvar, garantindo que o user_id está correto
+    const dataToSave = {
+      ...profile,
+      user_id: currentUser.id,
+      profile_type: ProfileType.LEGAL // Garante o tipo correto
+    };
+    
     if (existingProfile) {
       // Atualizar perfil existente
       const { data, error } = await supabase
         .from('legal_person_profiles')
         .update({
-          ...profile,
+          ...dataToSave,
           updated_at: new Date().toISOString()
         })
         .eq('user_id', currentUser.id)
@@ -262,12 +253,15 @@ export const saveLegalPersonProfile = async (
         return null;
       }
 
-      return data as LegalPersonProfile;
+      return {
+        ...data,
+        profile_type: ProfileType.LEGAL
+      } as LegalPersonProfile;
     } else {
       // Criar novo perfil
       const { data, error } = await supabase
         .from('legal_person_profiles')
-        .insert([{ ...profile, user_id: currentUser.id }])
+        .insert([dataToSave])
         .select()
         .single();
 
@@ -276,7 +270,10 @@ export const saveLegalPersonProfile = async (
         return null;
       }
 
-      return data as LegalPersonProfile;
+      return {
+        ...data,
+        profile_type: ProfileType.LEGAL
+      } as LegalPersonProfile;
     }
   } catch (error) {
     console.error("Erro ao salvar perfil jurídico:", error);
