@@ -10,22 +10,11 @@ import CpfRegistrationForm from '@/components/registration/CpfRegistrationForm';
 import CnpjRegistrationForm from '@/components/registration/CnpjRegistrationForm';
 import { useNavigate } from 'react-router-dom';
 
-// Adicionamos as interfaces corretas para os componentes
-interface RegisterFormContentProps {
-  accountType: 'cpf' | 'cnpj';
-  onSubmit: () => void;
-}
-
+// Interfaces corretas para os componentes - não modificamos os componentes originais
 interface FormFooterProps {
   text?: string;
   linkText?: string;
   href?: string;
-  question?: string;
-}
-
-interface RegistrationFormProps {
-  onRegistrationComplete: () => void;
-  onBack: () => void;
 }
 
 const Register = () => {
@@ -66,25 +55,29 @@ const Register = () => {
                     </TabsList>
                   </Tabs>
                   
-                  {/* Corrigimos o componente removendo props que causam erros */}
+                  {/* Assume RegisterFormContent has an onSubmit prop in its component definition */}
                   <RegisterFormContent 
+                    accountType={accountType}
                     onSubmit={() => setStep('registration')}
                   />
                   
-                  {/* Corrigimos o componente removendo props que causam erros */}
                   <FormFooter
+                    text="Já tem uma conta?"
                     linkText="Entrar agora"
                     href="/login"
-                    text="Já tem uma conta?"
                   />
                 </>
               ) : (
                 accountType === 'cpf' ? (
-                  /* Corrigimos o componente removendo props que causam erros */
-                  <CpfRegistrationForm />
+                  <CpfRegistrationForm 
+                    onRegistrationComplete={handleRegistrationComplete}
+                    onBack={handleBack}
+                  />
                 ) : (
-                  /* Corrigimos o componente removendo props que causam erros */
-                  <CnpjRegistrationForm />
+                  <CnpjRegistrationForm 
+                    onRegistrationComplete={handleRegistrationComplete}
+                    onBack={handleBack}
+                  />
                 )
               )}
             </CardContent>
