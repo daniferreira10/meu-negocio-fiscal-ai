@@ -173,8 +173,8 @@ const CnpjRegistrationForm = ({ onRegistrationComplete, onBack }: CnpjRegistrati
         form.setValue('company_name', data.nome);
         form.setValue('email', data.email || '');
         form.setValue('phone', data.telefone || '');
-        form.setValue('address_street', data.endereco);
-        form.setValue('address_number', '');
+        form.setValue('address_street', data.endereco); // Usando endereco diretamente
+        form.setValue('address_number', ''); // API não retorna número separado
         form.setValue('address_neighborhood', data.bairro || '');
         form.setValue('address_city', data.municipio || '');
         form.setValue('address_state', data.uf || '');

@@ -10,18 +10,6 @@ import CpfRegistrationForm from '@/components/registration/CpfRegistrationForm';
 import CnpjRegistrationForm from '@/components/registration/CnpjRegistrationForm';
 import { useNavigate } from 'react-router-dom';
 
-interface RegisterFormContentProps {
-  accountType: 'cpf' | 'cnpj';
-  onSubmit: () => void;
-}
-
-// Definindo interfaces para os componentes que recebem props
-interface FormFooterProps {
-  text: string;
-  linkText: string;
-  href: string;
-}
-
 const Register = () => {
   const [step, setStep] = useState<'credentials' | 'registration'>('credentials');
   const [accountType, setAccountType] = useState<'cpf' | 'cnpj'>('cpf');

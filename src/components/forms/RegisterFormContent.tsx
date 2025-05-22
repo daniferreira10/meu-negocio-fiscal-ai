@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -25,6 +25,8 @@ const registerSchema = z.object({
 type RegisterFormValues = z.infer<typeof registerSchema>;
 
 const RegisterFormContent: React.FC<RegisterFormContentProps> = ({ onSubmit }) => {
+  const [loading, setLoading] = useState(false);
+
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -35,8 +37,14 @@ const RegisterFormContent: React.FC<RegisterFormContentProps> = ({ onSubmit }) =
   });
 
   const handleSubmit = (values: RegisterFormValues) => {
+    setLoading(true);
     console.log('Form values:', values);
-    onSubmit();
+    
+    // Simulate API call with a small delay
+    setTimeout(() => {
+      setLoading(false);
+      onSubmit();
+    }, 1000);
   };
 
   return (
@@ -60,7 +68,7 @@ const RegisterFormContent: React.FC<RegisterFormContentProps> = ({ onSubmit }) =
           label="Confirme sua senha"
           placeholder="Digite sua senha novamente"
         />
-        <SubmitButton text="Continuar" className="w-full" />
+        <SubmitButton text="Continuar" className="w-full" loading={loading} />
       </form>
     </Form>
   );

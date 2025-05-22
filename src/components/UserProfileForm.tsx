@@ -15,7 +15,12 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { getUserProfile, savePhysicalPersonProfile, UserProfile, PhysicalPersonProfile } from '@/services/userProfileService';
+import { 
+  getUserProfile, 
+  savePhysicalPersonProfile, 
+  UserProfile, 
+  PhysicalPersonProfile 
+} from '@/services/userProfileService';
 import { getCurrentUser } from '@/services/authService';
 
 const profileSchema = z.object({
@@ -52,13 +57,14 @@ const UserProfileForm = () => {
         const currentUser = getCurrentUser();
         
         if (profile && 'full_name' in profile) {
+          const physicalProfile = profile as PhysicalPersonProfile;
           // Preencher o formulário com os dados existentes
           form.reset({
-            full_name: profile.full_name,
-            email: profile.email || currentUser?.email || '',
-            cpf: profile.cpf,
-            profession: profile.profession,
-            monthly_expenses: profile.monthly_expenses
+            full_name: physicalProfile.full_name,
+            email: physicalProfile.email || currentUser?.email || '',
+            cpf: physicalProfile.cpf,
+            profession: physicalProfile.profession,
+            monthly_expenses: physicalProfile.monthly_expenses
           });
           setIsSaved(true);
         } else if (currentUser) {
