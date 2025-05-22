@@ -255,7 +255,7 @@ export interface CNPJResponse {
   }>;
   situacao: string;
   data_abertura: string;
-  endereco: string;
+  endereco: string;  // It's 'endereco' not 'logradouro'
   bairro: string;
   municipio: string;
   uf: string;
@@ -263,4 +263,5 @@ export interface CNPJResponse {
   telefone: string;
   email: string;
   message?: string;
+  // The API doesn't return 'numero' separately
 }

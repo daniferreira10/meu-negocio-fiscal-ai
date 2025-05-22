@@ -15,7 +15,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { getUserProfile, saveUserProfile, UserProfile } from '@/services/userProfileService';
+import { getUserProfile, savePhysicalPersonProfile, UserProfile, PhysicalPersonProfile } from '@/services/userProfileService';
 import { getCurrentUser } from '@/services/authService';
 
 const profileSchema = z.object({
@@ -51,7 +51,7 @@ const UserProfileForm = () => {
         const profile = await getUserProfile();
         const currentUser = getCurrentUser();
         
-        if (profile) {
+        if (profile && 'full_name' in profile) {
           // Preencher o formulário com os dados existentes
           form.reset({
             full_name: profile.full_name,
@@ -87,7 +87,7 @@ const UserProfileForm = () => {
         return;
       }
       
-      const profileData: Omit<UserProfile, 'id' | 'created_at' | 'updated_at'> = {
+      const profileData: Partial<PhysicalPersonProfile> = {
         user_id: currentUser.id,
         full_name: data.full_name,
         email: data.email,
@@ -96,7 +96,7 @@ const UserProfileForm = () => {
         monthly_expenses: data.monthly_expenses
       };
       
-      const result = await saveUserProfile(profileData);
+      const result = await savePhysicalPersonProfile(profileData as PhysicalPersonProfile);
       
       if (result) {
         toast.success("Perfil salvo com sucesso!");

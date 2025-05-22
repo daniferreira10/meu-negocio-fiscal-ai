@@ -9,7 +9,7 @@ interface CNPJResponse {
   }>;
   situacao: string;
   data_abertura: string;
-  endereco: string;
+  endereco: string;       // Already has endereco instead of logradouro
   bairro: string;
   municipio: string;
   uf: string;
@@ -17,6 +17,7 @@ interface CNPJResponse {
   telefone: string;
   email: string;
   message?: string;
+  // The API doesn't return numero separately, it's part of endereco
 }
 
 /**

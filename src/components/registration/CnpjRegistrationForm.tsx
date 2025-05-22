@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
@@ -174,8 +173,8 @@ const CnpjRegistrationForm = ({ onRegistrationComplete, onBack }: CnpjRegistrati
         form.setValue('company_name', data.nome);
         form.setValue('email', data.email || '');
         form.setValue('phone', data.telefone || '');
-        form.setValue('address_street', data.logradouro || '');
-        form.setValue('address_number', data.numero || '');
+        form.setValue('address_street', data.endereco);
+        form.setValue('address_number', '');
         form.setValue('address_neighborhood', data.bairro || '');
         form.setValue('address_city', data.municipio || '');
         form.setValue('address_state', data.uf || '');
