@@ -14,14 +14,30 @@ if (!supabaseUrl || !supabaseAnonKey) {
   // Criamos um objeto mock que não tentará fazer requisições reais ao Supabase
   supabase = {
     from: () => ({
-      select: () => Promise.resolve({ data: null, error: { message: 'Supabase não configurado' } }),
-      insert: () => Promise.resolve({ data: null, error: { message: 'Supabase não configurado' } }),
-      update: () => Promise.resolve({ data: null, error: { message: 'Supabase não configurado' } }),
-      eq: () => ({
-        select: () => Promise.resolve({ data: null, error: { message: 'Supabase não configurado' } }),
-        single: () => Promise.resolve({ data: null, error: { message: 'Supabase não configurado' } }),
+      select: () => ({
+        eq: () => ({
+          single: () => Promise.resolve({ data: null, error: null }),
+          select: () => Promise.resolve({ data: null, error: null })
+        }),
+        single: () => Promise.resolve({ data: null, error: null }),
       }),
-      single: () => Promise.resolve({ data: null, error: { message: 'Supabase não configurado' } }),
+      insert: () => ({
+        select: () => ({
+          single: () => Promise.resolve({ data: null, error: null })
+        })
+      }),
+      update: () => ({
+        eq: () => ({
+          select: () => ({
+            single: () => Promise.resolve({ data: null, error: null })
+          })
+        })
+      }),
+      eq: () => ({
+        select: () => Promise.resolve({ data: null, error: null }),
+        single: () => Promise.resolve({ data: null, error: null }),
+      }),
+      single: () => Promise.resolve({ data: null, error: null }),
     }),
     auth: {
       getUser: () => Promise.resolve({ data: { user: null }, error: null }),

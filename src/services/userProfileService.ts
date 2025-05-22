@@ -154,6 +154,19 @@ export const savePhysicalPersonProfile = async (
       return null;
     }
 
+    // Modo de desenvolvimento sem Supabase configurado
+    if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
+      console.log("Modo de desenvolvimento: simulando salvamento de perfil");
+      // Simular sucesso no salvamento
+      return {
+        id: "mock-id",
+        user_id: currentUser.id,
+        ...profile,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+    }
+
     // Verificar se o perfil já existe
     const { data: existingProfile } = await supabase
       .from('physical_person_profiles')
@@ -210,6 +223,19 @@ export const saveLegalPersonProfile = async (
     if (!currentUser) {
       console.error("Nenhum usuário autenticado encontrado");
       return null;
+    }
+
+    // Modo de desenvolvimento sem Supabase configurado
+    if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
+      console.log("Modo de desenvolvimento: simulando salvamento de perfil jurídico");
+      // Simular sucesso no salvamento
+      return {
+        id: "mock-id",
+        user_id: currentUser.id,
+        ...profile,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
     }
 
     // Verificar se o perfil já existe
