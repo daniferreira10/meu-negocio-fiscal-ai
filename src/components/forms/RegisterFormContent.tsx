@@ -189,7 +189,7 @@ const RegisterFormContent = () => {
               <FormField control={pfForm.control} name="fullName" render={({
             field
           }) => <FormItem>
-                    <FormLabel className="bg-slate-50">Nome Completo</FormLabel>
+                    <FormLabel className="bg-neutral-50">Nome Completo</FormLabel>
                     <FormControl>
                       <Input placeholder="Seu nome completo" {...field} />
                     </FormControl>
