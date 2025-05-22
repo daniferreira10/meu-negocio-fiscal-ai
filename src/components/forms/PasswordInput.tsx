@@ -3,10 +3,11 @@ import { useState } from 'react';
 import { LockIcon, EyeIcon, EyeOffIcon } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Control } from 'react-hook-form';
+import { Control, UseFormReturn } from 'react-hook-form';
 
 interface PasswordInputProps {
-  control: Control<any>;
+  control?: Control<any>;
+  form?: UseFormReturn<any>;
   name: string;
   label: string;
   placeholder: string;
@@ -14,11 +15,20 @@ interface PasswordInputProps {
 
 const PasswordInput = ({
   control,
+  form,
   name,
   label,
   placeholder
 }: PasswordInputProps) => {
   const [showPassword, setShowPassword] = useState(false);
+  
+  // Use the control directly if provided, otherwise get it from the form
+  const actualControl = control || (form ? form.control : undefined);
+  
+  if (!actualControl) {
+    console.error("PasswordInput requires either a control or form prop");
+    return null;
+  }
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -26,7 +36,7 @@ const PasswordInput = ({
 
   return (
     <FormField
-      control={control}
+      control={actualControl}
       name={name}
       render={({ field }) => (
         <FormItem>

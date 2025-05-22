@@ -2,10 +2,11 @@
 import { MailIcon } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Control } from 'react-hook-form';
+import { Control, UseFormReturn } from 'react-hook-form';
 
 interface EmailInputProps {
-  control: Control<any>;
+  control?: Control<any>;
+  form?: UseFormReturn<any>;
   name: string;
   label: string;
   placeholder: string;
@@ -13,13 +14,22 @@ interface EmailInputProps {
 
 const EmailInput = ({
   control,
+  form,
   name,
   label,
   placeholder
 }: EmailInputProps) => {
+  // Use the control directly if provided, otherwise get it from the form
+  const actualControl = control || (form ? form.control : undefined);
+  
+  if (!actualControl) {
+    console.error("EmailInput requires either a control or form prop");
+    return null;
+  }
+
   return (
     <FormField
-      control={control}
+      control={actualControl}
       name={name}
       render={({ field }) => (
         <FormItem>
