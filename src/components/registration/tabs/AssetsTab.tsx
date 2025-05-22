@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { CpfFormValues } from '../types/cpfRegistrationTypes';
@@ -8,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { PlusCircle, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { CurrencyInput } from '@/components/ui/currency-input';
 
 interface AssetsTabProps {
   form: UseFormReturn<CpfFormValues>;
@@ -100,13 +100,10 @@ const AssetsTab: React.FC<AssetsTabProps> = ({ form, onNext, onPrevious }) => {
                     name={`assets.${index}.value`}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Valor (R$)</FormLabel>
+                        <FormLabel>Valor</FormLabel>
                         <FormControl>
-                          <Input 
-                            type="number" 
-                            placeholder="0,00" 
-                            min="0" 
-                            step="0.01" 
+                          <CurrencyInput 
+                            placeholder="0,00"
                             {...field} 
                           />
                         </FormControl>
@@ -171,13 +168,10 @@ const AssetsTab: React.FC<AssetsTabProps> = ({ form, onNext, onPrevious }) => {
                     name={`debts.${index}.value`}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Valor (R$)</FormLabel>
+                        <FormLabel>Valor</FormLabel>
                         <FormControl>
-                          <Input 
-                            type="number" 
-                            placeholder="0,00" 
-                            min="0" 
-                            step="0.01" 
+                          <CurrencyInput 
+                            placeholder="0,00"
                             {...field} 
                           />
                         </FormControl>

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
@@ -15,6 +14,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { CurrencyInput } from '@/components/ui/currency-input';
 import { 
   getUserProfile, 
   savePhysicalPersonProfile, 
@@ -192,10 +192,8 @@ const UserProfileForm = () => {
                 <FormItem>
                   <FormLabel>Despesas Mensais (estimadas)</FormLabel>
                   <FormControl>
-                    <Input 
-                      placeholder="0.00" 
-                      type="number" 
-                      step="0.01"
+                    <CurrencyInput 
+                      placeholder="0,00"
                       {...field} 
                     />
                   </FormControl>

@@ -5,6 +5,7 @@ import { CpfFormValues } from '../types/cpfRegistrationTypes';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { CurrencyInput } from '@/components/ui/currency-input';
 
 interface FinancialTabProps {
   form: UseFormReturn<CpfFormValues>;
@@ -35,14 +36,11 @@ const FinancialTab: React.FC<FinancialTabProps> = ({ form, onNext, onPrevious })
           name="monthly_income"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Renda Mensal Bruta (R$)</FormLabel>
+              <FormLabel>Renda Mensal Bruta</FormLabel>
               <FormControl>
-                <Input 
-                  type="number" 
-                  placeholder="0,00" 
-                  min="0" 
-                  step="0.01" 
-                  {...field} 
+                <CurrencyInput
+                  placeholder="0,00"
+                  {...field}
                 />
               </FormControl>
               <FormDescription>
@@ -58,14 +56,11 @@ const FinancialTab: React.FC<FinancialTabProps> = ({ form, onNext, onPrevious })
           name="monthly_expenses"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Despesas Mensais Médias (R$)</FormLabel>
+              <FormLabel>Despesas Mensais Médias</FormLabel>
               <FormControl>
-                <Input 
-                  type="number" 
-                  placeholder="0,00" 
-                  min="0" 
-                  step="0.01" 
-                  {...field} 
+                <CurrencyInput
+                  placeholder="0,00"
+                  {...field}
                 />
               </FormControl>
               <FormDescription>
