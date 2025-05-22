@@ -40,7 +40,8 @@ const FinancialTab: React.FC<FinancialTabProps> = ({ form, onNext, onPrevious })
               <FormControl>
                 <CurrencyInput
                   placeholder="0,00"
-                  {...field}
+                  value={field.value}
+                  onChange={field.onChange}
                 />
               </FormControl>
               <FormDescription>
@@ -60,7 +61,8 @@ const FinancialTab: React.FC<FinancialTabProps> = ({ form, onNext, onPrevious })
               <FormControl>
                 <CurrencyInput
                   placeholder="0,00"
-                  {...field}
+                  value={field.value}
+                  onChange={field.onChange}
                 />
               </FormControl>
               <FormDescription>
