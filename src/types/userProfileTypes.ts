@@ -1,3 +1,4 @@
+
 import { z } from 'zod';
 
 export enum ProfileType {
@@ -219,7 +220,8 @@ export const cpfRegistrationSchema = z.object({
   })).optional(),
   other_income_sources: z.string().optional(),
   main_bank_account: z.string().optional(),
-  tax_return_info: z.string().optional()
+  tax_return_info: z.string().optional(),
+  current_accounting_info: z.string().optional()
 }).refine((data) => data.password === data.confirmPassword, {
   message: "As senhas não correspondem",
   path: ["confirmPassword"],

@@ -2,8 +2,9 @@
 import React from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { CpfFormValues, CnpjFormValues } from '@/types/userProfileTypes';
-import { FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from '@/components/ui/form';
+import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 
 // Updated interface to use union type
@@ -25,8 +26,9 @@ const OtherTab: React.FC<OtherTabProps> = ({ form, onSubmit, onPrevious, loading
             <FormItem>
               <FormLabel>Informações Contábeis Atuais</FormLabel>
               <FormControl>
-                <Input 
+                <Textarea 
                   placeholder="Informações sobre contabilidade atual"
+                  className="min-h-[120px]"
                   {...field}
                 />
               </FormControl>

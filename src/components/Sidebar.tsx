@@ -1,120 +1,146 @@
 
-import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { 
-  Home, 
-  User, 
-  FileText, 
-  DollarSign, 
-  MessageSquare,
-  Settings, 
-  LogOut,
-  Layout,
-  FileText as FileTextIcon,
-  Calculator,
-  Users,
-  CreditCard
+import { useMobile } from '@/hooks/use-mobile';
+import {
+  HomeIcon,
+  FileTextIcon,
+  CalculatorIcon,
+  BrainCircuitIcon,
+  MessageSquareIcon,
+  LineChartIcon,
+  SettingsIcon,
+  HelpCircleIcon,
+  LogOutIcon,
+  MenuIcon,
+  UsersIcon,
+  ClipboardIcon,
+  UserIcon
 } from 'lucide-react';
-import { logoutUser } from '@/services/authService';
 
-const sidebarItems = [
-  {
-    name: 'Dashboard',
-    icon: <Layout className="w-5 h-5" />,
-    path: '/dashboard',
-    key: 'dashboard'
-  },
-  {
-    name: 'Documentos',
-    icon: <FileTextIcon className="w-5 h-5" />,
-    path: '/documents',
-    key: 'documents'
-  },
-  {
-    name: 'Chat Contábil',
-    icon: <MessageSquare className="w-5 h-5" />,
-    path: '/chat',
-    key: 'chat'
-  },
-  {
-    name: 'Impostos',
-    icon: <Calculator className="w-5 h-5" />,
-    path: '/tax-management',
-    key: 'taxes'
-  },
-  {
-    name: 'Clientes',
-    icon: <Users className="w-5 h-5" />,
-    path: '/client-registration',
-    key: 'clients'
-  },
-  {
-    name: 'Planos',
-    icon: <CreditCard className="w-5 h-5" />,
-    path: '/pricing',
-    key: 'pricing'
-  }
-];
+interface SidebarProps {
+  activeItem?: string;
+}
 
-const Sidebar = ({ activeItem = 'dashboard' }: { activeItem?: string }) => {
-  const handleLogout = () => {
-    logoutUser();
+const Sidebar = ({ activeItem = 'dashboard' }: SidebarProps) => {
+  const [collapsed, setCollapsed] = useState(true);
+  const location = useLocation();
+  const isMobile = useMobile();
+
+  const items = [
+    { id: 'dashboard', name: 'Dashboard', icon: HomeIcon, path: '/dashboard' },
+    { id: 'documents', name: 'Documentos', icon: FileTextIcon, path: '/documents' },
+    { id: 'tax-management', name: 'Impostos', icon: CalculatorIcon, path: '/tax-management' },
+    { id: 'ai-analysis', name: 'Análise IA', icon: BrainCircuitIcon, path: '/ai-analysis' },
+    { id: 'chat', name: 'Chat', icon: MessageSquareIcon, path: '/chat' },
+    { id: 'clients', name: 'Clientes', icon: UsersIcon, path: '/client-registration' },
+    { id: 'client-info', name: 'Informações', icon: ClipboardIcon, path: '/client-information' },
+  ];
+
+  const bottomItems = [
+    { id: 'settings', name: 'Configurações', icon: SettingsIcon, path: '/settings' },
+    { id: 'help', name: 'Ajuda', icon: HelpCircleIcon, path: '/help' },
+    { id: 'logout', name: 'Sair', icon: LogOutIcon, path: '/logout' },
+  ];
+
+  useEffect(() => {
+    if (isMobile) {
+      setCollapsed(true);
+    }
+  }, [location.pathname, isMobile]);
+
+  const toggleSidebar = () => {
+    setCollapsed(!collapsed);
   };
 
   return (
-    <aside className="w-20 md:w-64 min-h-screen bg-white shadow-md flex flex-col fixed">
-      <div className="p-4 border-b border-gray-100">
-        <Link to="/dashboard" className="text-xl font-bold text-brand-blue hidden md:flex items-center">
-          <span className="text-brand-blue">Prime</span>
-          <span className="text-brand-dark">Dask</span>
-        </Link>
-        <div className="md:hidden flex justify-center">
-          <span className="text-xl font-bold text-brand-blue">P</span>
+    <>
+      {/* Mobile menu toggle */}
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={toggleSidebar}
+        className="fixed z-50 top-3 left-3 md:hidden"
+      >
+        <MenuIcon className="h-6 w-6" />
+      </Button>
+
+      {/* Sidebar */}
+      <aside
+        className={cn(
+          "fixed top-0 left-0 h-full z-40 transition-all duration-300 ease-in-out bg-gradient-to-b from-gray-900 to-brand-dark-blue text-white",
+          collapsed && !isMobile ? "w-20" : "w-64",
+          isMobile && collapsed && "-translate-x-full", // Hide completely on mobile when collapsed
+          isMobile && !collapsed && "w-64" // Full width on mobile when expanded
+        )}
+      >
+        {/* User section */}
+        <div className="p-4">
+          <div className={cn(
+            "flex items-center",
+            collapsed && !isMobile ? "justify-center" : "justify-start"
+          )}>
+            <div className="bg-gradient-to-tr from-brand-blue to-brand-cyan rounded-full w-10 h-10 flex items-center justify-center">
+              <UserIcon className="h-6 w-6 text-white" />
+            </div>
+            {(!collapsed || isMobile) && (
+              <div className="ml-3 overflow-hidden">
+                <p className="text-sm font-medium truncate">Usuário PrimeDesk</p>
+                <p className="text-xs text-gray-400 truncate">user@example.com</p>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
-      
-      <nav className="flex-1 py-6">
-        <ul className="space-y-1">
-          {sidebarItems.map((item) => (
-            <li key={item.key}>
-              <Link to={item.path}>
-                <Button
-                  variant="ghost"
-                  className={`w-full justify-start ${activeItem === item.key ? 'bg-brand-light-blue text-brand-blue' : 'text-gray-600'}`}
-                >
-                  {item.icon}
-                  <span className="hidden md:inline ml-2">{item.name}</span>
-                </Button>
+
+        {/* Navigation links */}
+        <nav className="mt-2 px-2">
+          <div className="space-y-1">
+            {items.map((item) => (
+              <Link
+                key={item.id}
+                to={item.path}
+                className={cn(
+                  "flex items-center p-3 rounded-md transition-all hover:bg-gray-700/50",
+                  activeItem === item.id && "bg-gray-800/70 text-brand-cyan",
+                  collapsed && !isMobile && "justify-center px-0"
+                )}
+              >
+                <item.icon className={cn(
+                  "h-5 w-5",
+                  activeItem === item.id ? "text-brand-cyan" : "text-gray-400"
+                )} />
+                {(!collapsed || isMobile) && (
+                  <span className="ml-3 text-sm">{item.name}</span>
+                )}
               </Link>
-            </li>
-          ))}
-        </ul>
-      </nav>
-      
-      <div className="p-4 border-t border-gray-100">
-        <ul className="space-y-1">
-          <li>
-            <Button
-              variant="ghost"
-              className="w-full justify-start text-gray-600"
-            >
-              <Settings className="h-5 w-5 md:mr-2" />
-              <span className="hidden md:inline">Configurações</span>
-            </Button>
-          </li>
-          <li>
-            <Button
-              variant="ghost"
-              className="w-full justify-start text-gray-600"
-              onClick={handleLogout}
-            >
-              <LogOut className="h-5 w-5 md:mr-2" />
-              <span className="hidden md:inline">Sair</span>
-            </Button>
-          </li>
-        </ul>
-      </div>
-    </aside>
+            ))}
+          </div>
+        </nav>
+
+        {/* Bottom links */}
+        <div className="absolute bottom-0 left-0 right-0 px-2 pb-4">
+          <div className="space-y-1">
+            {bottomItems.map((item) => (
+              <Link
+                key={item.id}
+                to={item.path}
+                className={cn(
+                  "flex items-center p-3 rounded-md transition-all hover:bg-gray-700/50",
+                  collapsed && !isMobile && "justify-center px-0"
+                )}
+              >
+                <item.icon className="h-5 w-5 text-gray-400" />
+                {(!collapsed || isMobile) && (
+                  <span className="ml-3 text-sm">{item.name}</span>
+                )}
+              </Link>
+            ))}
+          </div>
+        </div>
+      </aside>
+    </>
   );
 };
 

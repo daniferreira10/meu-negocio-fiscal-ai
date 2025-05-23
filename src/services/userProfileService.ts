@@ -7,14 +7,14 @@ import {
   LegalPersonProfile,
   ProfileType
 } from '@/types/userProfileTypes';
+import { ClientInfo } from '@/types/clientInfoTypes';
 
 // Re-exporte dos tipos para compatibilidade com código existente
-export { ProfileType, MaritalStatus, IncomeRange, RevenueRange } from '@/types/userProfileTypes';
+export { ProfileType, MaritalStatus } from '@/types/userProfileTypes';
 export type { 
-  User, 
+  UserProfile, 
   PhysicalPersonProfile, 
-  LegalPersonProfile, 
-  UserProfile 
+  LegalPersonProfile 
 } from '@/types/userProfileTypes';
 
 // Determinar o tipo de perfil pelo ID do usuário
@@ -126,6 +126,7 @@ export const savePhysicalPersonProfile = async (
       return {
         id: "mock-id",
         ...profile,
+        profile_type: ProfileType.PHYSICAL,
         user_id: currentUser.id,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
@@ -277,6 +278,94 @@ export const saveLegalPersonProfile = async (
     }
   } catch (error) {
     console.error("Erro ao salvar perfil jurídico:", error);
+    return null;
+  }
+};
+
+// Nova função para salvar informações do cliente
+export const saveClientInfo = async (
+  clientInfo: Omit<ClientInfo, 'id' | 'created_at' | 'updated_at'>
+): Promise<ClientInfo | null> => {
+  try {
+    const currentUser = getCurrentUser();
+    
+    if (!currentUser) {
+      console.error("Nenhum usuário autenticado encontrado");
+      return null;
+    }
+
+    // Verificar se os campos obrigatórios estão preenchidos
+    if (!clientInfo.nome_completo) {
+      console.error("Nome completo é obrigatório");
+      throw new Error("Nome completo é obrigatório");
+    }
+
+    if (!clientInfo.cpf && !clientInfo.cnpj) {
+      console.error("É necessário fornecer CPF ou CNPJ");
+      throw new Error("É necessário fornecer CPF ou CNPJ");
+    }
+
+    // Modo de desenvolvimento sem Supabase configurado
+    if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
+      console.log("Modo de desenvolvimento: simulando salvamento de informações do cliente");
+      // Simular sucesso no salvamento
+      return {
+        id: "mock-id",
+        ...clientInfo,
+        user_id: currentUser.id,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      } as ClientInfo;
+    }
+
+    // Verificar se o perfil já existe
+    const { data: existingClientInfo } = await supabase
+      .from('client_info')
+      .select('id')
+      .eq('user_id', currentUser.id)
+      .single();
+    
+    // Prepara os dados para salvar, garantindo que o user_id está correto
+    const dataToSave = {
+      ...clientInfo,
+      user_id: currentUser.id
+    };
+    
+    if (existingClientInfo) {
+      // Atualizar informações existentes
+      const { data, error } = await supabase
+        .from('client_info')
+        .update({
+          ...dataToSave,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', existingClientInfo.id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Erro ao atualizar informações do cliente:", error);
+        return null;
+      }
+
+      return data as ClientInfo;
+    } else {
+      // Criar novas informações
+      const { data, error } = await supabase
+        .from('client_info')
+        .insert([dataToSave])
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Erro ao criar informações do cliente:", error);
+        return null;
+      }
+
+      return data as ClientInfo;
+    }
+  } catch (error) {
+    console.error("Erro ao salvar informações do cliente:", error);
     return null;
   }
 };
