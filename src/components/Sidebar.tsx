@@ -1,9 +1,8 @@
-
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { useMobile } from '@/hooks/use-mobile';
+import { useIsMobile } from '@/hooks/use-mobile';
 import {
   HomeIcon,
   FileTextIcon,
@@ -27,7 +26,7 @@ interface SidebarProps {
 const Sidebar = ({ activeItem = 'dashboard' }: SidebarProps) => {
   const [collapsed, setCollapsed] = useState(true);
   const location = useLocation();
-  const isMobile = useMobile();
+  const isMobile = useIsMobile();
 
   const items = [
     { id: 'dashboard', name: 'Dashboard', icon: HomeIcon, path: '/dashboard' },

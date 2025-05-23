@@ -1,67 +1,25 @@
 
 import React, { useState } from 'react';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Card } from '@/components/ui/card';
-import { toast } from 'sonner';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate } from 'react-router-dom';
-import { getCurrentUser } from '@/services/authService';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { CalendarIcon } from 'lucide-react';
-import { format } from 'date-fns';
-import { pt } from 'date-fns/locale';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { cn } from '@/lib/utils';
-import { saveClientInfo } from '@/services/userProfileService';
-
-// Define schema for form validation
-const clientFormSchema = z.object({
-  nome_completo: z.string().min(3, { message: 'Nome deve ter pelo menos 3 caracteres' }),
-  cpf: z.string().optional(),
-  cnpj: z.string().optional(),
-  data_abertura: z.date().optional(),
-  tipo_empresa: z.string().optional(),
-  regime_tributario: z.string().optional(),
-  cnae_atividade: z.string().optional(),
-  faturamento_mensal: z.coerce.number().optional(),
-  receitas: z.string().optional(),
-  despesas: z.string().optional(),
-  funcionarios: z.coerce.number().optional(),
-  folha_pagamento_total: z.coerce.number().optional(),
-  notas_fiscais_emitidas: z.string().optional(),
-  banco_movimentacoes: z.string().optional()
-}).refine(data => Boolean(data.cpf) || Boolean(data.cnpj), {
-  message: "Você deve fornecer um CPF ou CNPJ",
-  path: ['cpf']
-});
-
-type ClientFormValues = z.infer<typeof clientFormSchema>;
+import { toast } from 'sonner';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Card } from '@/components/ui/card';
+import { clientInfoSchema, ClientFormValues } from '@/types/clientInfoTypes';
+import { supabase } from '@/services/supabaseClient';
 
 const ClientInfoForm = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const form = useForm<ClientFormValues>({
-    resolver: zodResolver(clientFormSchema),
+    resolver: zodResolver(clientInfoSchema),
     defaultValues: {
       nome_completo: '',
       cpf: '',
@@ -69,46 +27,47 @@ const ClientInfoForm = () => {
       tipo_empresa: '',
       regime_tributario: '',
       cnae_atividade: '',
-      faturamento_mensal: undefined,
       receitas: '',
       despesas: '',
-      funcionarios: undefined,
-      folha_pagamento_total: undefined,
       notas_fiscais_emitidas: '',
       banco_movimentacoes: ''
     }
   });
 
-  const onSubmit = async (data: ClientFormValues) => {
+  const onSubmit = async (values: ClientFormValues) => {
     setLoading(true);
     try {
-      const currentUser = getCurrentUser();
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
       
-      if (!currentUser) {
-        toast.error('Você precisa estar conectado para salvar informações');
+      if (!user) {
+        toast.error('Usuário não autenticado');
+        navigate('/login');
         return;
       }
-      
-      const result = await saveClientInfo({
-        ...data,
-        user_id: currentUser.id,
-        id: undefined,
-        created_at: undefined,
-        updated_at: undefined
-      });
-      
-      if (result) {
-        toast.success('Informações salvas com sucesso!');
-        // Redirect to dashboard after saving successfully
-        setTimeout(() => {
-          navigate('/dashboard');
-        }, 1000);
+
+      // Process the form data
+      const clientInfo = {
+        user_id: user.id,
+        ...values
+      };
+
+      // Insert data into the database
+      const { data, error } = await supabase
+        .from('client_info')
+        .insert(clientInfo)
+        .select();
+
+      if (error) {
+        console.error('Error submitting form:', error);
+        toast.error('Erro ao salvar informações. Por favor, tente novamente.');
       } else {
-        toast.error('Erro ao salvar informações. Tente novamente.');
+        toast.success('Informações salvas com sucesso!');
+        navigate('/dashboard');
       }
     } catch (error) {
-      console.error('Erro ao salvar informações:', error);
-      toast.error('Erro ao salvar informações. Tente novamente.');
+      console.error('Error:', error);
+      toast.error('Erro ao processar requisição');
     } finally {
       setLoading(false);
     }
@@ -116,23 +75,18 @@ const ClientInfoForm = () => {
 
   return (
     <Card className="p-6">
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">Formulário de Informações do Cliente</h2>
-        <p className="text-gray-500 mt-1">Preencha os dados abaixo para que possamos analisar seu perfil</p>
-      </div>
-
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Nome completo */}
+            {/* Nome Completo */}
             <FormField
               control={form.control}
               name="nome_completo"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Nome completo</FormLabel>
+                  <FormLabel>Nome Completo</FormLabel>
                   <FormControl>
-                    <Input placeholder="Digite o nome completo" {...field} />
+                    <Input placeholder="Nome completo" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -145,7 +99,7 @@ const ClientInfoForm = () => {
               name="cpf"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>CPF (para pessoa física)</FormLabel>
+                  <FormLabel>CPF</FormLabel>
                   <FormControl>
                     <Input placeholder="000.000.000-00" {...field} />
                   </FormControl>
@@ -160,69 +114,43 @@ const ClientInfoForm = () => {
               name="cnpj"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>CNPJ (para pessoa jurídica)</FormLabel>
+                  <FormLabel>CNPJ</FormLabel>
                   <FormControl>
-                    <Input placeholder="00.000.000/0001-00" {...field} />
+                    <Input placeholder="00.000.000/0000-00" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            {/* Data de abertura */}
+            {/* Data de Abertura */}
             <FormField
               control={form.control}
               name="data_abertura"
               render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <FormLabel>Data de abertura</FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant={"outline"}
-                          className={cn(
-                            "w-full pl-3 text-left font-normal",
-                            !field.value && "text-muted-foreground"
-                          )}
-                        >
-                          {field.value ? (
-                            format(field.value, "dd/MM/yyyy", { locale: pt })
-                          ) : (
-                            <span>Selecione uma data</span>
-                          )}
-                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={field.value}
-                        onSelect={field.onChange}
-                        disabled={(date) =>
-                          date > new Date() || date < new Date("1900-01-01")
-                        }
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
+                <FormItem>
+                  <FormLabel>Data de Abertura</FormLabel>
+                  <FormControl>
+                    <Input type="date" {...field} value={field.value instanceof Date ? field.value.toISOString().substring(0, 10) : ''} 
+                      onChange={(e) => field.onChange(e.target.value ? new Date(e.target.value) : undefined)}
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            {/* Tipo de empresa */}
+            {/* Tipo de Empresa */}
             <FormField
               control={form.control}
               name="tipo_empresa"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Tipo de empresa</FormLabel>
+                  <FormLabel>Tipo de Empresa</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Selecione o tipo" />
+                        <SelectValue placeholder="Selecione o tipo de empresa" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -231,7 +159,6 @@ const ClientInfoForm = () => {
                       <SelectItem value="EI">EI</SelectItem>
                       <SelectItem value="EIRELI">EIRELI</SelectItem>
                       <SelectItem value="SA">S.A.</SelectItem>
-                      <SelectItem value="SLU">SLU</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -239,23 +166,23 @@ const ClientInfoForm = () => {
               )}
             />
 
-            {/* Regime tributário */}
+            {/* Regime Tributário */}
             <FormField
               control={form.control}
               name="regime_tributario"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Regime tributário</FormLabel>
+                  <FormLabel>Regime Tributário</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Selecione o regime" />
+                        <SelectValue placeholder="Selecione o regime tributário" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="simples_nacional">Simples Nacional</SelectItem>
-                      <SelectItem value="lucro_presumido">Lucro Presumido</SelectItem>
-                      <SelectItem value="lucro_real">Lucro Real</SelectItem>
+                      <SelectItem value="Simples Nacional">Simples Nacional</SelectItem>
+                      <SelectItem value="Lucro Presumido">Lucro Presumido</SelectItem>
+                      <SelectItem value="Lucro Real">Lucro Real</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -269,75 +196,47 @@ const ClientInfoForm = () => {
               name="cnae_atividade"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>CNAE / Atividade principal</FormLabel>
+                  <FormLabel>CNAE / Atividade</FormLabel>
                   <FormControl>
-                    <Input placeholder="Ex: 6202-3/00 - Desenvolvimento de software" {...field} />
+                    <Input placeholder="Ex: 62.01-5-01 - Desenvolvimento de sistemas" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            {/* Faturamento mensal */}
+            {/* Faturamento Mensal */}
             <FormField
               control={form.control}
               name="faturamento_mensal"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Faturamento mensal (R$)</FormLabel>
+                  <FormLabel>Faturamento Mensal</FormLabel>
                   <FormControl>
-                    <Input type="number" placeholder="0,00" {...field} />
+                    <Input 
+                      type="number" 
+                      placeholder="0.00" 
+                      {...field}
+                      onChange={(e) => field.onChange(e.target.value === '' ? undefined : Number(e.target.value))}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            {/* Número de funcionários */}
-            <FormField
-              control={form.control}
-              name="funcionarios"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Número de funcionários</FormLabel>
-                  <FormControl>
-                    <Input type="number" placeholder="0" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Valor total da folha de pagamento */}
-            <FormField
-              control={form.control}
-              name="folha_pagamento_total"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Valor total da folha de pagamento (R$)</FormLabel>
-                  <FormControl>
-                    <Input type="number" placeholder="0,00" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          {/* Campos de texto longo */}
-          <div className="space-y-6">
             {/* Receitas */}
             <FormField
               control={form.control}
               name="receitas"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Receitas (descreva ou cole de uma planilha)</FormLabel>
+                <FormItem className="md:col-span-2">
+                  <FormLabel>Receitas (descrever ou copiar de planilha)</FormLabel>
                   <FormControl>
                     <Textarea 
-                      placeholder="Descreva suas receitas ou cole dados de uma planilha"
-                      className="min-h-[120px]"
-                      {...field} 
+                      placeholder="Liste ou copie seus itens de receita"
+                      className="min-h-[100px]"
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
@@ -350,13 +249,13 @@ const ClientInfoForm = () => {
               control={form.control}
               name="despesas"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="md:col-span-2">
                   <FormLabel>Despesas</FormLabel>
                   <FormControl>
                     <Textarea 
-                      placeholder="Descreva suas despesas mensais"
-                      className="min-h-[120px]"
-                      {...field} 
+                      placeholder="Liste ou copie seus itens de despesa"
+                      className="min-h-[100px]"
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
@@ -364,18 +263,58 @@ const ClientInfoForm = () => {
               )}
             />
 
-            {/* Notas fiscais emitidas */}
+            {/* Número de Funcionários */}
+            <FormField
+              control={form.control}
+              name="funcionarios"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Número de Funcionários</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="number" 
+                      placeholder="0" 
+                      {...field}
+                      onChange={(e) => field.onChange(e.target.value === '' ? undefined : Number(e.target.value))}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Folha de Pagamento Total */}
+            <FormField
+              control={form.control}
+              name="folha_pagamento_total"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Folha de Pagamento Total</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="number" 
+                      placeholder="0.00" 
+                      {...field}
+                      onChange={(e) => field.onChange(e.target.value === '' ? undefined : Number(e.target.value))}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Notas Fiscais Emitidas */}
             <FormField
               control={form.control}
               name="notas_fiscais_emitidas"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Notas fiscais emitidas</FormLabel>
+                <FormItem className="md:col-span-2">
+                  <FormLabel>Notas Fiscais Emitidas</FormLabel>
                   <FormControl>
                     <Textarea 
-                      placeholder="Lista de notas fiscais emitidas no período"
-                      className="min-h-[120px]"
-                      {...field} 
+                      placeholder="Informe as notas fiscais emitidas"
+                      className="min-h-[100px]"
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
@@ -383,18 +322,18 @@ const ClientInfoForm = () => {
               )}
             />
 
-            {/* Movimentações bancárias */}
+            {/* Banco e Movimentações */}
             <FormField
               control={form.control}
               name="banco_movimentacoes"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Movimentações bancárias</FormLabel>
+                <FormItem className="md:col-span-2">
+                  <FormLabel>Banco e Movimentações</FormLabel>
                   <FormControl>
                     <Textarea 
-                      placeholder="Resumo das movimentações bancárias"
-                      className="min-h-[120px]"
-                      {...field} 
+                      placeholder="Informe o banco e as movimentações"
+                      className="min-h-[100px]"
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
@@ -403,13 +342,20 @@ const ClientInfoForm = () => {
             />
           </div>
 
-          <div className="flex justify-end pt-4">
+          <div className="flex justify-end gap-2">
             <Button 
-              type="submit" 
-              className="bg-brand-blue hover:bg-brand-blue/90 text-white"
-              disabled={loading}
+              type="button"
+              variant="outline"
+              onClick={() => form.reset()}
             >
-              {loading ? "Salvando..." : "Enviar Informações"}
+              Limpar
+            </Button>
+            <Button 
+              type="submit"
+              disabled={loading}
+              className="bg-brand-blue hover:bg-brand-blue/90 text-white"
+            >
+              {loading ? 'Salvando...' : 'Salvar Informações'}
             </Button>
           </div>
         </form>
