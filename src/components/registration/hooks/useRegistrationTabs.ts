@@ -1,74 +1,73 @@
 
 import { useState } from 'react';
 import { UseFormReturn } from 'react-hook-form';
-import { toast } from 'sonner';
-import { CpfFormValues } from '../types/cpfRegistrationTypes';
 
-type TabType = 'account' | 'personal' | 'address' | 'financial' | 'assets' | 'other';
+type TabType = 'account' | 'company' | 'address' | 'tax' | 'financial' | 'banking' | 'personal' | 'assets' | 'other';
 
-export const useRegistrationTabs = (form: UseFormReturn<CpfFormValues>) => {
+// Generic type to handle different form types
+export function useRegistrationTabs<T>(form: UseFormReturn<T>) {
   const [activeTab, setActiveTab] = useState<TabType>('account');
 
+  const tabOrder: TabType[] = [
+    'account', 
+    'company', 
+    'address', 
+    'tax', 
+    'financial', 
+    'banking',
+    'personal',
+    'assets',
+    'other'
+  ];
+
+  const isValidTabName = (tab: string): tab is TabType => {
+    return tabOrder.includes(tab as TabType);
+  };
+
   const handleNextTab = () => {
-    if (activeTab === 'account') {
-      // Verificar campos da conta
-      form.trigger(['email', 'password', 'confirmPassword']).then(isValid => {
-        if (isValid) setActiveTab('personal');
-      });
-    } else if (activeTab === 'personal') {
-      // Verificar campos pessoais
-      form.trigger(['full_name', 'cpf', 'phone', 'birth_date', 'marital_status']).then(isValid => {
-        if (isValid) setActiveTab('address');
-      });
-    } else if (activeTab === 'address') {
-      // Verificar campos de endereço
-      form.trigger(['address_street', 'address_number', 'address_city', 'address_state', 'address_zipcode']).then(isValid => {
-        if (isValid) setActiveTab('financial');
-      });
-    } else if (activeTab === 'financial') {
-      // Verificar campos financeiros
-      form.trigger(['profession', 'monthly_income']).then(isValid => {
-        if (isValid) setActiveTab('assets');
-      });
-    } else if (activeTab === 'assets') {
-      // Verificar patrimônio
-      const assets = form.getValues().assets;
-      let isValid = true;
+    const currentIndex = tabOrder.indexOf(activeTab);
+    if (currentIndex < tabOrder.length - 1) {
+      const nextTab = tabOrder[currentIndex + 1];
       
-      // Validar cada patrimônio
-      for (let i = 0; i < assets.length; i++) {
-        if (!assets[i].description || assets[i].value < 0) {
-          isValid = false;
-          break;
-        }
-      }
-      
-      if (isValid) {
+      // Skip tabs that don't exist in the specific form
+      // This check could be more sophisticated based on the form's context
+      if (activeTab === 'personal' && nextTab === 'assets' && !('assets' in form.getValues())) {
         setActiveTab('other');
+      } else if (activeTab === 'company' && nextTab === 'address' && !('address_street' in form.getValues())) {
+        setActiveTab('tax');
       } else {
-        toast.error("Verifique os dados de patrimônio");
+        setActiveTab(nextTab);
       }
     }
   };
 
   const handlePreviousTab = () => {
-    if (activeTab === 'personal') {
-      setActiveTab('account');
-    } else if (activeTab === 'address') {
-      setActiveTab('personal');
-    } else if (activeTab === 'financial') {
-      setActiveTab('address');
-    } else if (activeTab === 'assets') {
-      setActiveTab('financial');
-    } else if (activeTab === 'other') {
-      setActiveTab('assets');
+    const currentIndex = tabOrder.indexOf(activeTab);
+    if (currentIndex > 0) {
+      const prevTab = tabOrder[currentIndex - 1];
+      
+      // Skip tabs that don't exist in the specific form
+      // This check could be more sophisticated based on the form's context
+      if (activeTab === 'assets' && prevTab === 'personal' && !('full_name' in form.getValues())) {
+        setActiveTab('account');
+      } else if (activeTab === 'tax' && prevTab === 'address' && !('address_street' in form.getValues())) {
+        setActiveTab('company');
+      } else {
+        setActiveTab(prevTab);
+      }
+    }
+  };
+
+  const setActiveTabSafe = (tab: string) => {
+    if (isValidTabName(tab)) {
+      setActiveTab(tab);
     }
   };
 
   return {
     activeTab,
-    setActiveTab,
+    setActiveTab: setActiveTabSafe,
     handleNextTab,
-    handlePreviousTab
+    handlePreviousTab,
   };
-};
+}

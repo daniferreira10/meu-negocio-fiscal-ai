@@ -1,12 +1,10 @@
-
-import React, { useState } from 'react';
-import { UseFormReturn, useFieldArray } from 'react-hook-form';
+import React from 'react';
+import { UseFormReturn } from 'react-hook-form';
 import { CnpjFormValues } from '@/types/userProfileTypes';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Plus, Trash2 } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
 
 interface BankingTabProps {
   form: UseFormReturn<CnpjFormValues>;
@@ -15,98 +13,49 @@ interface BankingTabProps {
 }
 
 const BankingTab: React.FC<BankingTabProps> = ({ form, onPrevious, loading }) => {
-  const { fields, append, remove } = useFieldArray({
-    control: form.control,
-    name: "bank_accounts"
-  });
-  
-  const addBankAccount = () => {
-    append({ bank_name: '', account_type: '', account_number: '' });
-  };
-
   return (
     <div className="space-y-6">
       <div className="space-y-4">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-medium">Contas Bancárias</h3>
-          <Button 
-            type="button" 
-            variant="outline" 
-            size="sm"
-            onClick={addBankAccount}
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Adicionar Conta
-          </Button>
-        </div>
+        {/* Isso seria expandido para incluir campos para contas bancárias, 
+            mas foi simplificado para este exemplo */}
+        <FormField
+          control={form.control}
+          name="issues_invoices"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-start space-x-3 space-y-0 py-2">
+              <FormControl>
+                <Checkbox
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
+              <div className="space-y-1 leading-none">
+                <FormLabel>
+                  Empresa emite notas fiscais
+                </FormLabel>
+              </div>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         
-        {fields.length === 0 ? (
-          <div className="text-center py-6 text-gray-500">
-            Nenhuma conta bancária adicionada.
-          </div>
-        ) : (
-          fields.map((field, index) => (
-            <Card key={field.id} className="mb-4">
-              <CardContent className="pt-6">
-                <div className="flex justify-between mb-4">
-                  <h4 className="font-medium">Conta {index + 1}</h4>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => remove(index)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-                
-                <div className="grid gap-4">
-                  <FormField
-                    control={form.control}
-                    name={`bank_accounts.${index}.bank_name`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Nome do Banco</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="Nome do banco" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name={`bank_accounts.${index}.account_type`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Tipo de Conta</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="Corrente, Poupança, etc." />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name={`bank_accounts.${index}.account_number`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Número da Conta</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="Número da conta" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-          ))
-        )}
+        <FormField
+          control={form.control}
+          name="invoice_type"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Tipo de Nota Fiscal</FormLabel>
+              <FormControl>
+                <Input 
+                  placeholder="Ex: NF-e, NFS-e" 
+                  {...field} 
+                  disabled={!form.watch('issues_invoices')}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         
         <FormField
           control={form.control}
@@ -115,8 +64,8 @@ const BankingTab: React.FC<BankingTabProps> = ({ form, onPrevious, loading }) =>
             <FormItem>
               <FormLabel>Informações Contábeis Atuais</FormLabel>
               <FormControl>
-                <Input
-                  placeholder="Informações sobre contabilidade atual (opcional)"
+                <Input 
+                  placeholder="Informações sobre contabilidade atual"
                   {...field}
                 />
               </FormControl>

@@ -5,7 +5,13 @@ import { CnpjFormValues, TaxRegime } from '@/types/userProfileTypes';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface TaxTabProps {
   form: UseFormReturn<CnpjFormValues>;
@@ -24,13 +30,13 @@ const TaxTab: React.FC<TaxTabProps> = ({ form, onNext, onPrevious }) => {
             <FormItem>
               <FormLabel>Natureza Jurídica</FormLabel>
               <FormControl>
-                <Input placeholder="Natureza Jurídica" {...field} />
+                <Input placeholder="Ex: LTDA, S/A, MEI" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        
+
         <FormField
           control={form.control}
           name="tax_regime"
@@ -38,8 +44,8 @@ const TaxTab: React.FC<TaxTabProps> = ({ form, onNext, onPrevious }) => {
             <FormItem>
               <FormLabel>Regime Tributário</FormLabel>
               <Select 
-                onValueChange={(value) => field.onChange(value as TaxRegime)} 
-                value={field.value}
+                onValueChange={field.onChange} 
+                defaultValue={field.value}
               >
                 <FormControl>
                   <SelectTrigger>
@@ -57,21 +63,21 @@ const TaxTab: React.FC<TaxTabProps> = ({ form, onNext, onPrevious }) => {
             </FormItem>
           )}
         />
-        
+
         <FormField
           control={form.control}
           name="cnae"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>CNAE Principal</FormLabel>
+              <FormLabel>Código CNAE</FormLabel>
               <FormControl>
-                <Input placeholder="Código CNAE" {...field} />
+                <Input placeholder="Código da atividade econômica" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        
+
         <FormField
           control={form.control}
           name="tax_status"
@@ -79,7 +85,7 @@ const TaxTab: React.FC<TaxTabProps> = ({ form, onNext, onPrevious }) => {
             <FormItem>
               <FormLabel>Situação Fiscal</FormLabel>
               <FormControl>
-                <Input placeholder="Situação fiscal atual" {...field} />
+                <Input placeholder="Status fiscal atual" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

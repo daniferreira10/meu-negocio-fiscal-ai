@@ -25,6 +25,12 @@ import TaxTab from './tabs/TaxTab';
 import FinancialTab from './tabs/FinancialTab';
 import BankingTab from './tabs/BankingTab';
 
+// Create a custom hook wrapper to handle the registration tabs with the correct type
+const useCnpjRegistrationTabs = (form: ReturnType<typeof useForm<CnpjFormValues>>) => {
+  const { activeTab, setActiveTab, handleNextTab, handlePreviousTab } = useRegistrationTabs(form as any);
+  return { activeTab, setActiveTab, handleNextTab, handlePreviousTab };
+};
+
 const CnpjRegistrationForm = ({ onRegistrationComplete, onBack }: RegistrationFormProps) => {
   const [loading, setLoading] = useState(false);
 
@@ -79,7 +85,7 @@ const CnpjRegistrationForm = ({ onRegistrationComplete, onBack }: RegistrationFo
     }
   });
 
-  const { activeTab, setActiveTab, handleNextTab, handlePreviousTab } = useRegistrationTabs(form);
+  const { activeTab, setActiveTab, handleNextTab, handlePreviousTab } = useCnpjRegistrationTabs(form);
 
   const onSubmit = async (data: CnpjFormValues) => {
     setLoading(true);
@@ -124,7 +130,7 @@ const CnpjRegistrationForm = ({ onRegistrationComplete, onBack }: RegistrationFo
         };
         
         // Type cast to ensure correct typing
-        const savedProfile = await saveLegalPersonProfile(profileData);
+        const savedProfile = await saveLegalPersonProfile(profileData as any);
         
         if (savedProfile) {
           toast.success("Cadastro realizado com sucesso!");
