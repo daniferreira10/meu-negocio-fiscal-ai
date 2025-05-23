@@ -5,12 +5,20 @@ import {
   UserProfile, 
   PhysicalPersonProfile, 
   LegalPersonProfile,
-  ProfileType
+  ProfileType,
+  MaritalStatus,
+  IncomeRange,
+  RevenueRange
 } from '@/types/userProfileTypes';
 import { ClientInfo } from '@/types/clientInfoTypes';
 
 // Re-exporte dos tipos para compatibilidade com código existente
-export { ProfileType, MaritalStatus } from '@/types/userProfileTypes';
+export { 
+  ProfileType, 
+  MaritalStatus,
+  IncomeRange,
+  RevenueRange 
+} from '@/types/userProfileTypes';
 export type { 
   UserProfile, 
   PhysicalPersonProfile, 
