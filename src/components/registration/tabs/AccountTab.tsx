@@ -6,8 +6,9 @@ import { FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescripti
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
+// Updated interface to use union type
 interface AccountTabProps {
-  form: UseFormReturn<CpfFormValues | CnpjFormValues>;
+  form: UseFormReturn<CpfFormValues> | UseFormReturn<CnpjFormValues>;
   onNext: () => void;
 }
 

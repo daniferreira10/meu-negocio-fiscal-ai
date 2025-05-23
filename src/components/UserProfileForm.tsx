@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -21,10 +20,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { 
   getUserProfile, 
   savePhysicalPersonProfile,
-  PhysicalPersonProfile,
   ProfileType,
-  IncomeRange,
-  MaritalStatus
+  MaritalStatus,
+  IncomeRange
 } from '@/services/userProfileService';
 import { getCurrentUser } from '@/services/authService';
 import { physicalPersonSchema } from '@/types/userProfileTypes';
@@ -330,7 +328,7 @@ const UserProfileForm = () => {
                       <SelectItem value={MaritalStatus.MARRIED}>Casado(a)</SelectItem>
                       <SelectItem value={MaritalStatus.DIVORCED}>Divorciado(a)</SelectItem>
                       <SelectItem value={MaritalStatus.WIDOWED}>Viúvo(a)</SelectItem>
-                      <SelectItem value={MaritalStatus.SEPARATE}>Separado(a)</SelectItem>
+                      <SelectItem value={MaritalStatus.SEPARATED}>Separado(a)</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />

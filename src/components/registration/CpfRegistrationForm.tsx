@@ -1,4 +1,4 @@
-
+import React from 'react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -121,12 +121,13 @@ const CpfRegistrationForm = ({ onRegistrationComplete, onBack }: RegistrationFor
                 />
               </TabsContent>
               
-              <TabsContent value="personal">
-                <PersonalTab 
+              {activeTab === 'personal' && (
+                <PersonalTab
                   form={form}
-                  onNext={handleNextTab} 
+                  onNext={handleNextTab}
+                  onPrevious={handlePreviousTab}
                 />
-              </TabsContent>
+              )}
               
               <TabsContent value="address">
                 <AddressTab 

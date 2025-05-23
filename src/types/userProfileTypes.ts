@@ -14,6 +14,31 @@ export enum MaritalStatus {
   SEPARATED = 'separated'
 }
 
+// Adding missing IncomeRange enum
+export enum IncomeRange {
+  RANGE_1 = 'up_to_2k',
+  RANGE_2 = '2k_to_5k',
+  RANGE_3 = '5k_to_10k',
+  RANGE_4 = '10k_to_20k',
+  RANGE_5 = 'above_20k'
+}
+
+// Adding missing RevenueRange enum
+export enum RevenueRange {
+  RANGE_1 = 'up_to_10k',
+  RANGE_2 = '10k_to_30k',
+  RANGE_3 = '30k_to_100k',
+  RANGE_4 = '100k_to_300k',
+  RANGE_5 = 'above_300k'
+}
+
+// User type for auth contexts
+export interface User {
+  id: string;
+  email: string;
+  name?: string;
+}
+
 // Base profile fields shared by both CPF and CNPJ
 export interface BaseProfileFormValues {
   email?: string;
@@ -131,6 +156,30 @@ export interface CnpjFormValues extends BaseProfileFormValues {
 // Generic user profile that could be either type
 export type UserProfileFormValues = CpfFormValues | CnpjFormValues;
 
+// Extended database profile types
+export interface BaseProfile {
+  id: string;
+  user_id: string;
+  created_at: string;
+  updated_at: string;
+  profile_type: ProfileType;
+}
+
+// Physical Person Profile (extended from CpfFormValues for database storage)
+export interface PhysicalPersonProfile extends CpfFormValues, Partial<BaseProfile> {
+  profile_type: ProfileType.PHYSICAL;
+  user_id: string;
+}
+
+// Legal Person Profile (extended from CnpjFormValues for database storage)
+export interface LegalPersonProfile extends CnpjFormValues, Partial<BaseProfile> {
+  profile_type: ProfileType.LEGAL;
+  user_id: string;
+}
+
+// UserProfile type for database operations
+export type UserProfile = PhysicalPersonProfile | LegalPersonProfile;
+
 // Registration form props interface
 export interface RegistrationFormProps {
   onRegistrationComplete?: () => void;
@@ -219,4 +268,20 @@ export const cnpjRegistrationSchema = z.object({
 }).refine((data) => data.password === data.confirmPassword, {
   message: "As senhas não correspondem",
   path: ["confirmPassword"],
+});
+
+// Adding physicalPersonSchema for UserProfileForm
+export const physicalPersonSchema = z.object({
+  full_name: z.string().min(3, "Nome completo deve ter pelo menos 3 caracteres"),
+  email: z.string().email("Email inválido"),
+  cpf: z.string().min(11, "CPF deve ter 11 dígitos"),
+  phone: z.string().optional(),
+  profession: z.string().optional(),
+  monthly_income: z.number().optional(),
+  monthly_expenses: z.number().optional(),
+  monthly_income_range: z.string().optional(),
+  income_tax_declarant: z.boolean().optional(),
+  autonomous_activity: z.boolean().optional(),
+  other_income_sources: z.string().optional(),
+  marital_status: z.string().optional()
 });
