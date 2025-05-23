@@ -1,13 +1,13 @@
 
 import React from 'react';
 import { UseFormReturn } from 'react-hook-form';
-import { CnpjFormValues } from '@/types/userProfileTypes';
+import { CnpjFormValues, CpfFormValues } from '@/types/userProfileTypes';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
 interface AddressTabProps {
-  form: UseFormReturn<CnpjFormValues>;
+  form: UseFormReturn<CnpjFormValues | CpfFormValues>;
   onNext: () => void;
   onPrevious: () => void;
 }

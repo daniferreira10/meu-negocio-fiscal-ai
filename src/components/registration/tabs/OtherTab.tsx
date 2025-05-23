@@ -1,54 +1,34 @@
 
 import React from 'react';
 import { UseFormReturn } from 'react-hook-form';
-import { CpfFormValues } from '../types/cpfRegistrationTypes';
+import { CpfFormValues, CnpjFormValues } from '@/types/userProfileTypes';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import SubmitButton from '@/components/forms/SubmitButton';
 
 interface OtherTabProps {
-  form: UseFormReturn<CpfFormValues>;
+  form: UseFormReturn<CpfFormValues | CnpjFormValues>;
+  onSubmit: () => void;
   onPrevious: () => void;
   loading: boolean;
 }
 
-const OtherTab: React.FC<OtherTabProps> = ({ form, onPrevious, loading }) => {
+const OtherTab: React.FC<OtherTabProps> = ({ form, onSubmit, onPrevious, loading }) => {
   return (
     <div className="space-y-6">
       <div className="space-y-4">
         <FormField
           control={form.control}
-          name="main_bank_account"
+          name="current_accounting_info"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Conta Bancária Principal</FormLabel>
-              <FormControl>
-                <Input placeholder="Banco, tipo e número da conta" {...field} />
-              </FormControl>
-              <FormDescription>
-                Exemplo: Banco XYZ, Conta Corrente nº 12345-6
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <FormField
-          control={form.control}
-          name="tax_return_info"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Informações de Declaração de Imposto de Renda</FormLabel>
+              <FormLabel>Informações Contábeis Atuais</FormLabel>
               <FormControl>
                 <Input 
-                  placeholder="Detalhe sua situação com o Imposto de Renda" 
-                  {...field} 
+                  placeholder="Informações sobre contabilidade atual"
+                  {...field}
                 />
               </FormControl>
-              <FormDescription>
-                Exemplo: Declarante, isento, última declaração em 2024
-              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -63,7 +43,14 @@ const OtherTab: React.FC<OtherTabProps> = ({ form, onPrevious, loading }) => {
         >
           Voltar
         </Button>
-        <SubmitButton loading={loading} text="Finalizar Cadastro" />
+        <Button 
+          type="submit" 
+          className="bg-brand-blue hover:bg-brand-blue/90 text-white"
+          disabled={loading}
+          onClick={onSubmit}
+        >
+          {loading ? "Salvando..." : "Finalizar Cadastro"}
+        </Button>
       </div>
     </div>
   );

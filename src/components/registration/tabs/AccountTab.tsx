@@ -1,13 +1,13 @@
 
 import React from 'react';
 import { UseFormReturn } from 'react-hook-form';
-import { CnpjFormValues } from '@/types/userProfileTypes';
+import { CpfFormValues, CnpjFormValues } from '@/types/userProfileTypes';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
 interface AccountTabProps {
-  form: UseFormReturn<CnpjFormValues>;
+  form: UseFormReturn<CpfFormValues | CnpjFormValues>;
   onNext: () => void;
 }
 

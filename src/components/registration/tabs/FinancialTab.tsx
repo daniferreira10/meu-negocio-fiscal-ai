@@ -1,115 +1,131 @@
 
 import React from 'react';
 import { UseFormReturn } from 'react-hook-form';
-import { CnpjFormValues } from '@/types/userProfileTypes';
+import { CnpjFormValues, CpfFormValues } from '@/types/userProfileTypes';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
 interface FinancialTabProps {
-  form: UseFormReturn<CnpjFormValues>;
+  form: UseFormReturn<CnpjFormValues | CpfFormValues>;
   onNext: () => void;
   onPrevious: () => void;
 }
 
 const FinancialTab: React.FC<FinancialTabProps> = ({ form, onNext, onPrevious }) => {
+  // Check if form is for CNPJ or CPF to render appropriate fields
+  const isCnpj = form.getValues().profile_type === 'legal';
+
   return (
     <div className="space-y-6">
       <div className="space-y-4">
-        <FormField
-          control={form.control}
-          name="monthly_revenue"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Receita Mensal</FormLabel>
-              <FormControl>
-                <Input 
-                  type="number" 
-                  placeholder="0.00" 
-                  {...field} 
-                  onChange={e => field.onChange(Number(e.target.value))}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <FormField
-          control={form.control}
-          name="employees_count"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Número de Funcionários</FormLabel>
-              <FormControl>
-                <Input 
-                  type="number" 
-                  placeholder="0" 
-                  {...field} 
-                  onChange={e => field.onChange(Number(e.target.value))}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <FormField
-          control={form.control}
-          name="average_payroll"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Folha de Pagamento Média</FormLabel>
-              <FormControl>
-                <Input 
-                  type="number" 
-                  placeholder="0.00" 
-                  {...field} 
-                  onChange={e => field.onChange(Number(e.target.value))}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <FormField
-          control={form.control}
-          name="fixed_expenses"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Despesas Fixas</FormLabel>
-              <FormControl>
-                <Input 
-                  type="number" 
-                  placeholder="0.00" 
-                  {...field} 
-                  onChange={e => field.onChange(Number(e.target.value))}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <FormField
-          control={form.control}
-          name="variable_expenses"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Despesas Variáveis</FormLabel>
-              <FormControl>
-                <Input 
-                  type="number" 
-                  placeholder="0.00" 
-                  {...field} 
-                  onChange={e => field.onChange(Number(e.target.value))}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {isCnpj ? (
+          // CNPJ specific fields
+          <>
+            <FormField
+              control={form.control}
+              name="monthly_revenue"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Receita Mensal</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="number" 
+                      placeholder="0.00" 
+                      {...field} 
+                      onChange={e => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
+                      value={field.value || ''}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="employee_count"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Número de Funcionários</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="number" 
+                      placeholder="0" 
+                      {...field} 
+                      onChange={e => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
+                      value={field.value || ''}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="monthly_expenses"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Despesas Mensais</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="number" 
+                      placeholder="0.00" 
+                      {...field} 
+                      onChange={e => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
+                      value={field.value || ''}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </>
+        ) : (
+          // CPF specific fields
+          <>
+            <FormField
+              control={form.control}
+              name="monthly_income"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Renda Mensal</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="number" 
+                      placeholder="0.00" 
+                      {...field} 
+                      onChange={e => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
+                      value={field.value || ''}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="monthly_expenses"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Despesas Mensais</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="number" 
+                      placeholder="0.00" 
+                      {...field} 
+                      onChange={e => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
+                      value={field.value || ''}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </>
+        )}
       </div>
       
       <div className="flex justify-between pt-4">

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -12,18 +13,17 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { AccountTab } from '@/components/registration/tabs/AccountTab';
-import { CompanyTab } from '@/components/registration/tabs/CompanyTab';
-import { AddressTab } from '@/components/registration/tabs/AddressTab';
-import { TaxTab } from '@/components/registration/tabs/TaxTab';
-import { FinancialTab } from '@/components/registration/tabs/FinancialTab';
-import { BankingTab } from '@/components/registration/tabs/BankingTab';
-import { OtherTab } from '@/components/registration/tabs/OtherTab';
+import AccountTab from '@/components/registration/tabs/AccountTab';
+import CompanyTab from '@/components/registration/tabs/CompanyTab';
+import AddressTab from '@/components/registration/tabs/AddressTab';
+import TaxTab from '@/components/registration/tabs/TaxTab';
+import FinancialTab from '@/components/registration/tabs/FinancialTab';
+import BankingTab from '@/components/registration/tabs/BankingTab';
+import OtherTab from '@/components/registration/tabs/OtherTab';
 import { useRegistrationTabs } from '@/components/registration/hooks/useRegistrationTabs';
-import { CnpjFormValues } from '@/types/userProfileTypes';
+import { CnpjFormValues, ProfileType } from '@/types/userProfileTypes';
 import { toast } from 'sonner';
-import { useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
+import { useNavigate } from 'react-router-dom';
 
 const formSchema = z.object({
   email: z.string().email({ message: "Email inválido" }),
@@ -74,10 +74,16 @@ const formSchema = z.object({
   path: ["confirmPassword"],
 });
 
-const CnpjRegistrationForm: React.FC = () => {
+interface CnpjRegistrationFormProps {
+  onRegistrationComplete?: () => void;
+  onBack?: () => void;
+}
+
+const CnpjRegistrationForm: React.FC<CnpjRegistrationFormProps> = ({ onRegistrationComplete, onBack }) => {
   const form = useForm<CnpjFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      profile_type: ProfileType.LEGAL,
       email: '',
       password: '',
       confirmPassword: '',
@@ -107,8 +113,7 @@ const CnpjRegistrationForm: React.FC = () => {
   });
 
   const { activeTab, handleNextTab, handlePreviousTab, setActiveTab } = useRegistrationTabs(form);
-  const router = useRouter();
-  const { data: session } = useSession();
+  const navigate = useNavigate();
 
   const onSubmit = async (data: CnpjFormValues) => {
     try {
@@ -120,13 +125,16 @@ const CnpjRegistrationForm: React.FC = () => {
         body: JSON.stringify({
           ...data,
           type: 'cnpj',
-          userId: session?.user?.id,
         }),
       });
   
       if (response.ok) {
         toast.success('Cadastro realizado com sucesso!');
-        router.push('/dashboard');
+        if (onRegistrationComplete) {
+          onRegistrationComplete();
+        } else {
+          navigate('/dashboard');
+        }
       } else {
         const errorData = await response.json();
         toast.error(errorData.message || 'Erro ao realizar o cadastro.');
@@ -156,25 +164,53 @@ const CnpjRegistrationForm: React.FC = () => {
           <div className="shadow sm:overflow-hidden sm:rounded-md">
             <div className="bg-white py-6 px-4 sm:p-6">
               {activeTab === 'account' && (
-                <AccountTab form={form as UseFormReturn<CnpjFormValues>} onNext={handleNextTab} />
+                <AccountTab 
+                  form={form} 
+                  onNext={handleNextTab} 
+                />
               )}
               {activeTab === 'company' && (
-                <CompanyTab form={form as UseFormReturn<CnpjFormValues>} onNext={handleNextTab} onBack={handlePreviousTab} />
+                <CompanyTab 
+                  form={form} 
+                  onNext={handleNextTab} 
+                  onPrevious={handlePreviousTab} 
+                />
               )}
               {activeTab === 'address' && (
-                <AddressTab form={form as UseFormReturn<CnpjFormValues>} onNext={handleNextTab} onBack={handlePreviousTab} />
+                <AddressTab 
+                  form={form} 
+                  onNext={handleNextTab} 
+                  onPrevious={handlePreviousTab} 
+                />
               )}
               {activeTab === 'tax' && (
-                <TaxTab form={form as UseFormReturn<CnpjFormValues>} onNext={handleNextTab} onBack={handlePreviousTab} />
+                <TaxTab 
+                  form={form} 
+                  onNext={handleNextTab} 
+                  onBack={handlePreviousTab} 
+                />
               )}
               {activeTab === 'financial' && (
-                <FinancialTab form={form as UseFormReturn<CnpjFormValues>} onNext={handleNextTab} onBack={handlePreviousTab} />
+                <FinancialTab 
+                  form={form} 
+                  onNext={handleNextTab} 
+                  onPrevious={handlePreviousTab} 
+                />
               )}
               {activeTab === 'banking' && (
-                <BankingTab form={form as UseFormReturn<CnpjFormValues>} onNext={handleNextTab} onBack={handlePreviousTab} />
+                <BankingTab 
+                  form={form} 
+                  onPrevious={handlePreviousTab} 
+                  loading={false} 
+                />
               )}
               {activeTab === 'other' && (
-                <OtherTab form={form as UseFormReturn<CnpjFormValues>} onSubmit={handleSubmit} onBack={handlePreviousTab} />
+                <OtherTab 
+                  form={form} 
+                  onSubmit={handleSubmit} 
+                  onPrevious={handlePreviousTab}
+                  loading={false} 
+                />
               )}
             </div>
           </div>
