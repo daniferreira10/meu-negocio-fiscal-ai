@@ -25,6 +25,7 @@ import { CnpjFormValues, ProfileType } from '@/types/userProfileTypes';
 import { toast } from 'sonner';
 import { saveLegalPersonProfile } from '@/services/userProfileService';
 import { getCurrentUser } from '@/services/authService';
+import { CompanyTabProps, BankingTabProps } from '@/types/accountTabTypes';
 
 const formSchema = z.object({
   email: z.string().email({ message: "Email inválido" }),
@@ -131,7 +132,7 @@ const CnpjRegistrationForm: React.FC<CnpjRegistrationFormProps> = ({ onRegistrat
       const profileData = {
         ...data,
         user_id: currentUser.id,
-        profile_type: ProfileType.LEGAL
+        profile_type: ProfileType.LEGAL as const
       };
       
       // Save the profile using service
@@ -178,20 +179,20 @@ const CnpjRegistrationForm: React.FC<CnpjRegistrationFormProps> = ({ onRegistrat
             <div className="bg-white py-6 px-4 sm:p-6">
               {activeTab === 'account' && (
                 <AccountTab 
-                  form={form as any} 
-                  onNext={handleNextTab} 
+                  form={form}
+                  onNext={handleNextTab}
                 />
               )}
               {activeTab === 'company' && (
                 <CompanyTab 
                   form={form} 
                   onNext={handleNextTab} 
-                  onBack={handlePreviousTab} 
+                  onPrevious={handlePreviousTab} 
                 />
               )}
               {activeTab === 'address' && (
                 <AddressTab 
-                  form={form as any} 
+                  form={form}
                   onNext={handleNextTab} 
                   onPrevious={handlePreviousTab} 
                 />
@@ -205,7 +206,7 @@ const CnpjRegistrationForm: React.FC<CnpjRegistrationFormProps> = ({ onRegistrat
               )}
               {activeTab === 'financial' && (
                 <FinancialTab 
-                  form={form as any} 
+                  form={form}
                   onNext={handleNextTab} 
                   onPrevious={handlePreviousTab} 
                 />
@@ -213,14 +214,13 @@ const CnpjRegistrationForm: React.FC<CnpjRegistrationFormProps> = ({ onRegistrat
               {activeTab === 'banking' && (
                 <BankingTab 
                   form={form} 
-                  onNext={handleNextTab}
                   onPrevious={handlePreviousTab} 
                   loading={loading} 
                 />
               )}
               {activeTab === 'other' && (
                 <OtherTab 
-                  form={form as any} 
+                  form={form}
                   onSubmit={handleSubmit} 
                   onPrevious={handlePreviousTab}
                   loading={loading} 

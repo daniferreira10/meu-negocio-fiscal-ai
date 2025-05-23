@@ -1,30 +1,45 @@
 
 import React from 'react';
 import ClientInfoForm from '@/components/ClientInfoForm';
-import Sidebar from '@/components/Sidebar';
+import DashboardLayout from '@/components/DashboardLayout';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
+import { FileText, UserPlus } from 'lucide-react';
 
 const ClientInformation = () => {
+  const navigate = useNavigate();
+  
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="flex">
-        {/* Sidebar */}
-        <Sidebar activeItem="clients" />
-
-        {/* Main Content */}
-        <main className="ml-20 md:ml-64 w-full min-h-screen">
-          <div className="container mx-auto px-4 py-8">
-            <div className="mb-8">
-              <h1 className="text-2xl font-bold text-brand-dark">
-                Informações do Cliente
-              </h1>
-              <p className="text-gray-500">Preencha o formulário com suas informações contábeis</p>
-            </div>
-            
-            <ClientInfoForm />
-          </div>
-        </main>
+    <DashboardLayout 
+      activeItem="clients"
+      title="Informações Contábeis"
+      subtitle="Preencha o formulário com suas informações fiscais e contábeis"
+      actions={
+        <Button 
+          variant="outline" 
+          size="sm"
+          onClick={() => navigate('/client-registration')}
+          className="flex items-center gap-2"
+        >
+          <UserPlus className="h-4 w-4" />
+          Novo Cliente
+        </Button>
+      }
+    >
+      <div className="mb-4 flex items-center space-x-2">
+        <FileText className="h-5 w-5 text-brand-blue" />
+        <h2 className="text-xl font-medium">Formulário de Coleta de Dados</h2>
       </div>
-    </div>
+      
+      <ClientInfoForm />
+      
+      <div className="mt-4 text-sm text-gray-500">
+        <p>
+          Suas informações são armazenadas com segurança e utilizadas para gerar análises contábeis
+          precisas e recomendações personalizadas pela Inteligência Artificial da PrimeDask.
+        </p>
+      </div>
+    </DashboardLayout>
   );
 };
 

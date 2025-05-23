@@ -91,7 +91,7 @@ const CpfRegistrationForm = ({ onRegistrationComplete, onBack }: RegistrationFor
       const profileData = {
         ...data,
         user_id: currentUser.id,
-        profile_type: ProfileType.PHYSICAL
+        profile_type: ProfileType.PHYSICAL as const
       };
       
       const result = await savePhysicalPersonProfile(profileData);
@@ -145,7 +145,7 @@ const CpfRegistrationForm = ({ onRegistrationComplete, onBack }: RegistrationFor
               
               <TabsContent value="account">
                 <AccountTab 
-                  form={form as any} 
+                  form={form}
                   onNext={handleNextTab} 
                 />
               </TabsContent>
@@ -160,7 +160,7 @@ const CpfRegistrationForm = ({ onRegistrationComplete, onBack }: RegistrationFor
               
               <TabsContent value="address">
                 <AddressTab 
-                  form={form as any}
+                  form={form}
                   onNext={handleNextTab} 
                   onPrevious={handlePreviousTab}
                 />
@@ -168,7 +168,7 @@ const CpfRegistrationForm = ({ onRegistrationComplete, onBack }: RegistrationFor
               
               <TabsContent value="financial">
                 <FinancialTab 
-                  form={form as any}
+                  form={form}
                   onNext={handleNextTab} 
                   onPrevious={handlePreviousTab}
                 />
@@ -184,7 +184,7 @@ const CpfRegistrationForm = ({ onRegistrationComplete, onBack }: RegistrationFor
               
               <TabsContent value="other">
                 <OtherTab 
-                  form={form as any}
+                  form={form}
                   onSubmit={form.handleSubmit(onSubmit)} 
                   onPrevious={handlePreviousTab}
                   loading={loading}

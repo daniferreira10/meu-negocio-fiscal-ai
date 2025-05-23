@@ -1,83 +1,98 @@
 
 import React from 'react';
-import { UseFormReturn } from 'react-hook-form';
-import { CpfFormValues, CnpjFormValues } from '@/types/userProfileTypes';
-import { FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { AccountTabProps } from "@/types/accountTabTypes";
 
-// Updated interface to use union type
-interface AccountTabProps {
-  form: UseFormReturn<CpfFormValues> | UseFormReturn<CnpjFormValues>;
-  onNext: () => void;
-}
+const AccountTab = ({ form, onNext }: AccountTabProps) => {
+  const handleNext = () => {
+    // Validate just the fields in this tab
+    const { email, password, confirmPassword } = form.getValues();
+    
+    // Check if fields are valid before proceeding
+    if (email && password && confirmPassword && password === confirmPassword) {
+      onNext();
+    } else {
+      // Trigger validation on these fields
+      form.trigger(["email", "password", "confirmPassword"]);
+    }
+  };
 
-const AccountTab: React.FC<AccountTabProps> = ({ form, onNext }) => {
   return (
     <div className="space-y-6">
-      <div className="space-y-4">
-        <div className="mb-6 pb-4 border-b border-gray-200 dark:border-gray-700">
-          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Informações de Acesso</h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            Configure suas credenciais de acesso ao sistema PrimeDash.
-          </p>
-        </div>
-        
-        <FormField
-          control={form.control}
-          name="email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Email</FormLabel>
-              <FormControl>
-                <Input type="email" placeholder="exemplo@empresa.com.br" {...field} />
-              </FormControl>
-              <FormDescription>
-                Este será seu email de login e para comunicações importantes.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <FormField
-          control={form.control}
-          name="password"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Senha</FormLabel>
-              <FormControl>
-                <Input type="password" placeholder="********" {...field} />
-              </FormControl>
-              <FormDescription>
-                Utilize no mínimo 8 caracteres com letras, números e símbolos.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <FormField
-          control={form.control}
-          name="confirmPassword"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Confirmar Senha</FormLabel>
-              <FormControl>
-                <Input type="password" placeholder="********" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+      <div>
+        <h3 className="text-lg font-medium">Informações de Conta</h3>
+        <p className="text-sm text-gray-500">
+          Crie suas credenciais de acesso à plataforma
+        </p>
       </div>
-      
+
+      <FormField
+        control={form.control}
+        name="email"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Email</FormLabel>
+            <FormControl>
+              <Input
+                placeholder="seu.email@exemplo.com"
+                type="email"
+                autoComplete="email"
+                {...field}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="password"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Senha</FormLabel>
+            <FormControl>
+              <Input
+                placeholder="********"
+                type="password"
+                autoComplete="new-password"
+                {...field}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="confirmPassword"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Confirmar Senha</FormLabel>
+            <FormControl>
+              <Input
+                placeholder="********"
+                type="password"
+                autoComplete="new-password"
+                {...field}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
       <div className="flex justify-end pt-4">
-        <Button 
-          type="button" 
-          onClick={onNext}
-          className="bg-brand-blue hover:bg-brand-blue/90 text-white"
-        >
+        <Button type="button" onClick={handleNext}>
           Próximo
         </Button>
       </div>

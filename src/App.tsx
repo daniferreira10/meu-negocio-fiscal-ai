@@ -16,6 +16,7 @@ import ClientRegistration from '@/pages/ClientRegistration';
 import ClientInformation from '@/pages/ClientInformation';
 import PrivateRoute from '@/components/PrivateRoute';
 import Pricing from '@/pages/Pricing';
+import About from '@/pages/About';
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/pricing" element={<Pricing />} />
+        <Route path="/about" element={<About />} />
 
         {/* Protected routes */}
         <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
