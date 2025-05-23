@@ -7,7 +7,7 @@ export interface ClientInfo {
   user_id: string;
   created_at?: string;
   updated_at?: string;
-  nome_completo: string;
+  nome_completo: string;  // this is required
   cpf?: string;
   cnpj?: string;
   data_abertura?: Date;

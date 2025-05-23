@@ -1,15 +1,14 @@
 
 import React from 'react';
 import { UseFormReturn } from 'react-hook-form';
-import { CpfFormValues, CnpjFormValues } from '@/types/userProfileTypes';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 
-// Updated interface to use union type
+// Updated interface to use a more flexible type
 interface OtherTabProps {
-  form: UseFormReturn<CpfFormValues> | UseFormReturn<CnpjFormValues>;
+  form: UseFormReturn<any>; // Using 'any' to allow both form types
   onSubmit: () => void;
   onPrevious: () => void;
   loading: boolean;
@@ -20,7 +19,7 @@ const OtherTab: React.FC<OtherTabProps> = ({ form, onSubmit, onPrevious, loading
     <div className="space-y-6">
       <div className="space-y-4">
         <FormField
-          control={form.control as any}
+          control={form.control}
           name="current_accounting_info"
           render={({ field }) => (
             <FormItem>

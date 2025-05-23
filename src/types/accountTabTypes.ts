@@ -2,12 +2,9 @@
 import { UseFormReturn, Control } from "react-hook-form";
 import { CpfFormValues, CnpjFormValues } from "@/types/userProfileTypes";
 
-// Define a union type that can be either CpfFormValues or CnpjFormValues
-export type RegistrationFormValues = CpfFormValues | CnpjFormValues;
-
-// Interface for AccountTab props that works with both form types
+// Create specific types for each form instead of using a union type
 export interface AccountTabProps {
-  form: UseFormReturn<RegistrationFormValues>;
+  form: UseFormReturn<any>; // Using 'any' to allow both form types
   onNext: () => void;
   onBack?: () => void;
 }

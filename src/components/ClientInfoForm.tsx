@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
@@ -15,7 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { clientInfoSchema, ClientFormValues } from '@/types/clientInfoTypes';
 import { saveClientInfo } from '@/services/userProfileService';
 import { getCurrentUser } from '@/services/authService';
-import { Info, FileCheck, Users, Bank, Receipt } from 'lucide-react';
+import { Info, FileCheck, Users, BanknoteIcon, Receipt } from 'lucide-react';
 
 const ClientInfoForm = () => {
   const [loading, setLoading] = useState(false);
@@ -62,9 +61,10 @@ const ClientInfoForm = () => {
         return;
       }
 
-      // Process the form data
+      // Process the form data - make sure nome_completo is always present
       const clientInfo = {
         ...values,
+        nome_completo: values.nome_completo || '', // Ensure it always has a value
         user_id: currentUser.id,
       };
 
@@ -88,7 +88,7 @@ const ClientInfoForm = () => {
   const tabIcons = {
     basic: <Info className="w-4 h-4" />,
     tax: <FileCheck className="w-4 h-4" />,
-    financial: <Bank className="w-4 h-4" />,
+    financial: <BanknoteIcon className="w-4 h-4" />,
     documents: <Receipt className="w-4 h-4" />
   };
 
