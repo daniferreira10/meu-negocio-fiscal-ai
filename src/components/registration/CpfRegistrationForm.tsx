@@ -73,7 +73,7 @@ const CpfRegistrationForm = ({ onRegistrationComplete, onBack }: RegistrationFor
     }
   });
 
-  const { activeTab, setActiveTab, handleNextTab, handlePreviousTab } = useRegistrationTabs(form);
+  const { activeTab, setActiveTab, handleNextTab, handlePreviousTab } = useRegistrationTabs<CpfFormValues>(form);
 
   const onSubmit = async (data: CpfFormValues) => {
     setLoading(true);

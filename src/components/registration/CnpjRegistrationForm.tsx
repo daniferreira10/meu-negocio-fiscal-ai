@@ -115,7 +115,7 @@ const CnpjRegistrationForm: React.FC<CnpjRegistrationFormProps> = ({ onRegistrat
     },
   });
 
-  const { activeTab, handleNextTab, handlePreviousTab } = useRegistrationTabs(form);
+  const { activeTab, handleNextTab, handlePreviousTab } = useRegistrationTabs<CnpjFormValues>(form);
   const navigate = useNavigate();
 
   const onSubmit = async (data: CnpjFormValues) => {

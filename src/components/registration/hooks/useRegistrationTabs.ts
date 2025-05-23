@@ -12,15 +12,14 @@ const cpfTabSequence: RegistrationTab[] = ['account', 'personal', 'address', 'fi
 // These are the CNPJ registration tab sequences
 const cnpjTabSequence: RegistrationTab[] = ['account', 'company', 'address', 'tax', 'financial', 'banking', 'other'];
 
-/**
- * Custom hook to manage registration tabs
- */
-export const useRegistrationTabs = (form: UseFormReturn<CpfFormValues> | UseFormReturn<CnpjFormValues>) => {
+// Generic type parameter to make the hook more flexible
+export function useRegistrationTabs<T extends CpfFormValues | CnpjFormValues>(form: UseFormReturn<T>) {
   const [activeTab, setActiveTab] = useState<RegistrationTab>('account');
   
   // Determine if we're dealing with CPF or CNPJ form based on the form values
   const isCpfForm = (): boolean => {
-    const watchedValue = form.watch() as any;
+    const watchedValue = form.watch();
+    // Check for company-specific fields to determine form type
     return !('company_name' in watchedValue) && !('trading_name' in watchedValue);
   };
 
@@ -55,4 +54,4 @@ export const useRegistrationTabs = (form: UseFormReturn<CpfFormValues> | UseForm
     handleNextTab,
     handlePreviousTab
   };
-};
+}
