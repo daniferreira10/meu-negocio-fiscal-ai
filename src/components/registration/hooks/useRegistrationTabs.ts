@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { UseFormReturn } from 'react-hook-form';
-import { CpfFormValues, CnpjFormValues } from '@/types/userProfileTypes';
+import { CpfFormValues, CnpjFormValues, ProfileType } from '@/types/userProfileTypes';
 
 // Define tabs that are used in registration processes
 type RegistrationTab = 'account' | 'personal' | 'company' | 'address' | 'financial' | 'tax' | 'assets' | 'banking' | 'other';
@@ -10,7 +10,7 @@ type RegistrationTab = 'account' | 'personal' | 'company' | 'address' | 'financi
 const cpfTabSequence: RegistrationTab[] = ['account', 'personal', 'address', 'financial', 'assets', 'other'];
 
 // These are the CNPJ registration tab sequences
-const cnpjTabSequence: RegistrationTab[] = ['account', 'company', 'address', 'tax', 'financial', 'banking'];
+const cnpjTabSequence: RegistrationTab[] = ['account', 'company', 'address', 'tax', 'financial', 'banking', 'other'];
 
 /**
  * Custom hook to manage registration tabs
@@ -20,7 +20,7 @@ export const useRegistrationTabs = (form: UseFormReturn<CpfFormValues> | UseForm
   
   // Determine if we're dealing with CPF or CNPJ form based on the form values
   const isCpfForm = (): boolean => {
-    const watchedValue = form.watch();
+    const watchedValue = form.watch() as any;
     return !('company_name' in watchedValue) && !('trading_name' in watchedValue);
   };
 

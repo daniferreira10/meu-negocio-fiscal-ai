@@ -19,7 +19,7 @@ const OtherTab: React.FC<OtherTabProps> = ({ form, onSubmit, onPrevious, loading
     <div className="space-y-6">
       <div className="space-y-4">
         <FormField
-          control={form.control}
+          control={form.control as any}
           name="current_accounting_info"
           render={({ field }) => (
             <FormItem>

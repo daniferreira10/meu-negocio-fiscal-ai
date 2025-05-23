@@ -1,15 +1,18 @@
-import React from 'react';
-import { useState } from 'react';
+
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useNavigate } from 'react-router-dom';
 import { Form } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { CpfFormValues, ProfileType, cpfRegistrationSchema, RegistrationFormProps, MaritalStatus } from '@/types/userProfileTypes';
+import { CpfFormValues, ProfileType, MaritalStatus, cpfRegistrationSchema, RegistrationFormProps } from '@/types/userProfileTypes';
 import { useRegistrationTabs } from './hooks/useRegistrationTabs';
+import { savePhysicalPersonProfile } from '@/services/userProfileService';
+import { getCurrentUser } from '@/services/authService';
 import AccountTab from './tabs/AccountTab';
 import PersonalTab from './tabs/PersonalTab';
 import AddressTab from './tabs/AddressTab';
@@ -19,6 +22,7 @@ import OtherTab from './tabs/OtherTab';
 
 const CpfRegistrationForm = ({ onRegistrationComplete, onBack }: RegistrationFormProps) => {
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const form = useForm<CpfFormValues>({
     resolver: zodResolver(cpfRegistrationSchema),
@@ -62,6 +66,7 @@ const CpfRegistrationForm = ({ onRegistrationComplete, onBack }: RegistrationFor
       other_income_sources: "",
       main_bank_account: "",
       tax_return_info: "",
+      current_accounting_info: "",
       
       // Additional
       dependents_count: 0,
@@ -75,10 +80,34 @@ const CpfRegistrationForm = ({ onRegistrationComplete, onBack }: RegistrationFor
     console.log("Dados de PF:", data);
     
     try {
-      // Simplified for now
-      toast.success("Cadastro realizado com sucesso!");
-      if (onRegistrationComplete) {
-        onRegistrationComplete();
+      const currentUser = getCurrentUser();
+      
+      if (!currentUser) {
+        toast.error("Você precisa estar conectado para salvar seu perfil");
+        return;
+      }
+      
+      // Preparar os dados com o schema do perfil físico completo
+      const profileData = {
+        ...data,
+        user_id: currentUser.id,
+        profile_type: ProfileType.PHYSICAL
+      };
+      
+      const result = await savePhysicalPersonProfile(profileData);
+      
+      if (result) {
+        toast.success("Cadastro realizado com sucesso!");
+        if (onRegistrationComplete) {
+          onRegistrationComplete();
+        } else {
+          // Redirecionar para o dashboard após um pequeno delay
+          setTimeout(() => {
+            navigate('/dashboard');
+          }, 1500);
+        }
+      } else {
+        toast.error("Erro ao criar conta. Tente novamente.");
       }
     } catch (error: any) {
       console.error("Erro no cadastro:", error);
@@ -116,7 +145,7 @@ const CpfRegistrationForm = ({ onRegistrationComplete, onBack }: RegistrationFor
               
               <TabsContent value="account">
                 <AccountTab 
-                  form={form} 
+                  form={form as any} 
                   onNext={handleNextTab} 
                 />
               </TabsContent>
@@ -131,7 +160,7 @@ const CpfRegistrationForm = ({ onRegistrationComplete, onBack }: RegistrationFor
               
               <TabsContent value="address">
                 <AddressTab 
-                  form={form}
+                  form={form as any}
                   onNext={handleNextTab} 
                   onPrevious={handlePreviousTab}
                 />
@@ -139,7 +168,7 @@ const CpfRegistrationForm = ({ onRegistrationComplete, onBack }: RegistrationFor
               
               <TabsContent value="financial">
                 <FinancialTab 
-                  form={form}
+                  form={form as any}
                   onNext={handleNextTab} 
                   onPrevious={handlePreviousTab}
                 />
@@ -155,7 +184,7 @@ const CpfRegistrationForm = ({ onRegistrationComplete, onBack }: RegistrationFor
               
               <TabsContent value="other">
                 <OtherTab 
-                  form={form}
+                  form={form as any}
                   onSubmit={form.handleSubmit(onSubmit)} 
                   onPrevious={handlePreviousTab}
                   loading={loading}

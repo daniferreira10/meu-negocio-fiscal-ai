@@ -1,8 +1,9 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
+import { useNavigate } from 'react-router-dom';
 import { 
   Form, 
   FormControl, 
@@ -11,7 +12,6 @@ import {
   FormLabel, 
   FormMessage 
 } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import AccountTab from '@/components/registration/tabs/AccountTab';
 import CompanyTab from '@/components/registration/tabs/CompanyTab';
@@ -23,7 +23,8 @@ import OtherTab from '@/components/registration/tabs/OtherTab';
 import { useRegistrationTabs } from '@/components/registration/hooks/useRegistrationTabs';
 import { CnpjFormValues, ProfileType } from '@/types/userProfileTypes';
 import { toast } from 'sonner';
-import { useNavigate } from 'react-router-dom';
+import { saveLegalPersonProfile } from '@/services/userProfileService';
+import { getCurrentUser } from '@/services/authService';
 
 const formSchema = z.object({
   email: z.string().email({ message: "Email inválido" }),
@@ -50,25 +51,25 @@ const formSchema = z.object({
     z.object({
       bank_name: z.string().optional(),
       account_type: z.string().optional(),
-      account_number: z.string().optional(),
+      account_number: z.string().optional()
     })
   ).optional(),
   tax_obligations: z.array(
     z.object({
       name: z.string().optional(),
       frequency: z.string().optional(),
-      next_due_date: z.string().optional(),
+      next_due_date: z.string().optional()
     })
   ).optional(),
   public_debts: z.array(
     z.object({
       description: z.string().optional(),
       value: z.number().optional(),
-      due_date: z.string().optional(),
+      due_date: z.string().optional()
     })
   ).optional(),
   has_accountant: z.boolean().optional(),
-  current_accounting_info: z.string().optional(),
+  current_accounting_info: z.string().optional()
 }).refine((data) => data.password === data.confirmPassword, {
   message: "As senhas não correspondem",
   path: ["confirmPassword"],
@@ -80,6 +81,7 @@ interface CnpjRegistrationFormProps {
 }
 
 const CnpjRegistrationForm: React.FC<CnpjRegistrationFormProps> = ({ onRegistrationComplete, onBack }) => {
+  const [loading, setLoading] = useState(false);
   const form = useForm<CnpjFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -112,36 +114,47 @@ const CnpjRegistrationForm: React.FC<CnpjRegistrationFormProps> = ({ onRegistrat
     },
   });
 
-  const { activeTab, handleNextTab, handlePreviousTab, setActiveTab } = useRegistrationTabs(form);
+  const { activeTab, handleNextTab, handlePreviousTab } = useRegistrationTabs(form);
   const navigate = useNavigate();
 
   const onSubmit = async (data: CnpjFormValues) => {
+    setLoading(true);
     try {
-      const response = await fetch('/api/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...data,
-          type: 'cnpj',
-        }),
-      });
-  
-      if (response.ok) {
+      const currentUser = getCurrentUser();
+      
+      if (!currentUser) {
+        toast.error("Você precisa estar conectado para salvar seu perfil");
+        return;
+      }
+
+      // Prepare data for saving
+      const profileData = {
+        ...data,
+        user_id: currentUser.id,
+        profile_type: ProfileType.LEGAL
+      };
+      
+      // Save the profile using service
+      const result = await saveLegalPersonProfile(profileData);
+      
+      if (result) {
         toast.success('Cadastro realizado com sucesso!');
         if (onRegistrationComplete) {
           onRegistrationComplete();
         } else {
-          navigate('/dashboard');
+          // Redirect to dashboard after a small delay
+          setTimeout(() => {
+            navigate('/dashboard');
+          }, 1500);
         }
       } else {
-        const errorData = await response.json();
-        toast.error(errorData.message || 'Erro ao realizar o cadastro.');
+        toast.error('Erro ao realizar o cadastro.');
       }
     } catch (error) {
       console.error('Erro durante o cadastro:', error);
       toast.error('Erro ao realizar o cadastro.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -165,7 +178,7 @@ const CnpjRegistrationForm: React.FC<CnpjRegistrationFormProps> = ({ onRegistrat
             <div className="bg-white py-6 px-4 sm:p-6">
               {activeTab === 'account' && (
                 <AccountTab 
-                  form={form} 
+                  form={form as any} 
                   onNext={handleNextTab} 
                 />
               )}
@@ -173,12 +186,12 @@ const CnpjRegistrationForm: React.FC<CnpjRegistrationFormProps> = ({ onRegistrat
                 <CompanyTab 
                   form={form} 
                   onNext={handleNextTab} 
-                  onPrevious={handlePreviousTab} 
+                  onBack={handlePreviousTab} 
                 />
               )}
               {activeTab === 'address' && (
                 <AddressTab 
-                  form={form} 
+                  form={form as any} 
                   onNext={handleNextTab} 
                   onPrevious={handlePreviousTab} 
                 />
@@ -192,7 +205,7 @@ const CnpjRegistrationForm: React.FC<CnpjRegistrationFormProps> = ({ onRegistrat
               )}
               {activeTab === 'financial' && (
                 <FinancialTab 
-                  form={form} 
+                  form={form as any} 
                   onNext={handleNextTab} 
                   onPrevious={handlePreviousTab} 
                 />
@@ -200,16 +213,17 @@ const CnpjRegistrationForm: React.FC<CnpjRegistrationFormProps> = ({ onRegistrat
               {activeTab === 'banking' && (
                 <BankingTab 
                   form={form} 
+                  onNext={handleNextTab}
                   onPrevious={handlePreviousTab} 
-                  loading={false} 
+                  loading={loading} 
                 />
               )}
               {activeTab === 'other' && (
                 <OtherTab 
-                  form={form} 
+                  form={form as any} 
                   onSubmit={handleSubmit} 
                   onPrevious={handlePreviousTab}
-                  loading={false} 
+                  loading={loading} 
                 />
               )}
             </div>

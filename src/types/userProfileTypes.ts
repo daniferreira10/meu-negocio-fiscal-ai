@@ -1,4 +1,3 @@
-
 import { z } from 'zod';
 
 export enum ProfileType {
@@ -98,6 +97,7 @@ export interface CpfFormValues extends BaseProfileFormValues {
   other_income_sources?: string;
   main_bank_account?: string;
   dependents_count?: number;
+  current_accounting_info?: string;
 }
 
 // CNPJ (Company) specific fields

@@ -1,7 +1,9 @@
+
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 import { 
   Form,
   FormControl,
@@ -25,7 +27,7 @@ import {
   IncomeRange
 } from '@/services/userProfileService';
 import { getCurrentUser } from '@/services/authService';
-import { physicalPersonSchema } from '@/types/userProfileTypes';
+import { physicalPersonSchema, PhysicalPersonProfile } from '@/types/userProfileTypes';
 import { z } from 'zod';
 
 // Schema simplificado para o formulário de perfil
@@ -50,6 +52,7 @@ type ProfileFormValues = z.infer<typeof profileFormSchema>;
 const UserProfileForm = () => {
   const [loading, setLoading] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
+  const navigate = useNavigate();
   
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
@@ -65,7 +68,7 @@ const UserProfileForm = () => {
       income_tax_declarant: false,
       autonomous_activity: false,
       other_income_sources: '',
-      marital_status: 'solteiro' as MaritalStatus
+      marital_status: 'single' as MaritalStatus
     }
   });
 
@@ -145,6 +148,10 @@ const UserProfileForm = () => {
       if (result) {
         toast.success("Perfil salvo com sucesso!");
         setIsSaved(true);
+        // Redirecionar para o dashboard após salvar com sucesso
+        setTimeout(() => {
+          navigate('/dashboard');
+        }, 1500);
       } else {
         toast.error("Erro ao salvar perfil. Tente novamente.");
       }
