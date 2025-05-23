@@ -2,7 +2,7 @@
 import React from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { CnpjFormValues } from '@/types/userProfileTypes';
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
+import { FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
@@ -15,6 +15,13 @@ const AccountTab: React.FC<AccountTabProps> = ({ form, onNext }) => {
   return (
     <div className="space-y-6">
       <div className="space-y-4">
+        <div className="mb-6 pb-4 border-b border-gray-200 dark:border-gray-700">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Informações de Acesso</h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Configure suas credenciais de acesso ao sistema PrimeDash.
+          </p>
+        </div>
+        
         <FormField
           control={form.control}
           name="email"
@@ -24,6 +31,9 @@ const AccountTab: React.FC<AccountTabProps> = ({ form, onNext }) => {
               <FormControl>
                 <Input type="email" placeholder="exemplo@empresa.com.br" {...field} />
               </FormControl>
+              <FormDescription>
+                Este será seu email de login e para comunicações importantes.
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -38,6 +48,9 @@ const AccountTab: React.FC<AccountTabProps> = ({ form, onNext }) => {
               <FormControl>
                 <Input type="password" placeholder="********" {...field} />
               </FormControl>
+              <FormDescription>
+                Utilize no mínimo 8 caracteres com letras, números e símbolos.
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}

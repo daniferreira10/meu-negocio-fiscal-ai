@@ -4,8 +4,8 @@ import { UseFormReturn } from 'react-hook-form';
 
 type TabType = 'account' | 'company' | 'address' | 'tax' | 'financial' | 'banking' | 'personal' | 'assets' | 'other';
 
-// Generic type to handle different form types
-export function useRegistrationTabs<T>(form: UseFormReturn<T>) {
+// Generic type to handle different form types with a constraint to ensure it's an object
+export function useRegistrationTabs<T extends Record<string, any>>(form: UseFormReturn<T>) {
   const [activeTab, setActiveTab] = useState<TabType>('account');
 
   const tabOrder: TabType[] = [

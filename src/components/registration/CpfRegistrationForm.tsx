@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -135,47 +134,48 @@ const CpfRegistrationForm = ({ onRegistrationComplete, onBack }: RegistrationFor
               
               <TabsContent value="account">
                 <AccountTab 
-                  form={form} 
+                  form={form as UseFormReturn<CpfFormValues>} 
                   onNext={handleNextTab} 
                 />
               </TabsContent>
               
               <TabsContent value="personal">
                 <PersonalTab 
-                  form={form}
-                  onNext={handleNextTab}
-                  onPrevious={handlePreviousTab}
+                  form={form as UseFormReturn<CpfFormValues>} 
+                  onNext={handleNextTab} 
+                  onBack={handlePreviousTab}
                 />
               </TabsContent>
               
               <TabsContent value="address">
                 <AddressTab 
-                  form={form}
-                  onNext={handleNextTab}
-                  onPrevious={handlePreviousTab}
+                  form={form as UseFormReturn<CpfFormValues>} 
+                  onNext={handleNextTab} 
+                  onBack={handlePreviousTab}
                 />
               </TabsContent>
               
               <TabsContent value="financial">
                 <FinancialTab 
-                  form={form}
-                  onNext={handleNextTab}
-                  onPrevious={handlePreviousTab}
+                  form={form as UseFormReturn<CpfFormValues>} 
+                  onNext={handleNextTab} 
+                  onBack={handlePreviousTab}
                 />
               </TabsContent>
               
               <TabsContent value="assets">
                 <AssetsTab 
-                  form={form}
-                  onNext={handleNextTab}
-                  onPrevious={handlePreviousTab}
+                  form={form as UseFormReturn<CpfFormValues>} 
+                  onNext={handleNextTab} 
+                  onBack={handlePreviousTab}
                 />
               </TabsContent>
               
               <TabsContent value="other">
                 <OtherTab 
-                  form={form}
-                  onPrevious={handlePreviousTab}
+                  form={form as UseFormReturn<CpfFormValues>} 
+                  onSubmit={form.handleSubmit} 
+                  onBack={handlePreviousTab}
                   loading={loading}
                 />
               </TabsContent>

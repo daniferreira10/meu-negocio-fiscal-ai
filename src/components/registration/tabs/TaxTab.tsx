@@ -1,25 +1,19 @@
 
 import React from 'react';
 import { UseFormReturn } from 'react-hook-form';
-import { CnpjFormValues, TaxRegime } from '@/types/userProfileTypes';
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
+import { CnpjFormValues } from '@/types/userProfileTypes';
+import { FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 
 interface TaxTabProps {
   form: UseFormReturn<CnpjFormValues>;
   onNext: () => void;
-  onPrevious: () => void;
+  onBack: () => void;
 }
 
-const TaxTab: React.FC<TaxTabProps> = ({ form, onNext, onPrevious }) => {
+const TaxTab: React.FC<TaxTabProps> = ({ form, onNext, onBack }) => {
   return (
     <div className="space-y-6">
       <div className="space-y-4">
@@ -29,14 +23,31 @@ const TaxTab: React.FC<TaxTabProps> = ({ form, onNext, onPrevious }) => {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Natureza Jurídica</FormLabel>
-              <FormControl>
-                <Input placeholder="Ex: LTDA, S/A, MEI" {...field} />
-              </FormControl>
+              <Select 
+                onValueChange={field.onChange} 
+                defaultValue={field.value}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione a natureza jurídica" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="sociedade_limitada">Sociedade Limitada (LTDA)</SelectItem>
+                  <SelectItem value="empresario_individual">Empresário Individual (EI)</SelectItem>
+                  <SelectItem value="empresa_individual">Empresa Individual (EIRELI)</SelectItem>
+                  <SelectItem value="sociedade_anonima">Sociedade Anônima (S.A.)</SelectItem>
+                  <SelectItem value="mei">Microempreendedor Individual (MEI)</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormDescription>
+                Natureza jurídica conforme registro na Receita Federal
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
-
+        
         <FormField
           control={form.control}
           name="tax_regime"
@@ -53,40 +64,31 @@ const TaxTab: React.FC<TaxTabProps> = ({ form, onNext, onPrevious }) => {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value={TaxRegime.SIMPLES_NACIONAL}>Simples Nacional</SelectItem>
-                  <SelectItem value={TaxRegime.LUCRO_PRESUMIDO}>Lucro Presumido</SelectItem>
-                  <SelectItem value={TaxRegime.LUCRO_REAL}>Lucro Real</SelectItem>
-                  <SelectItem value={TaxRegime.MEI}>MEI</SelectItem>
+                  <SelectItem value="simples_nacional">Simples Nacional</SelectItem>
+                  <SelectItem value="lucro_presumido">Lucro Presumido</SelectItem>
+                  <SelectItem value="lucro_real">Lucro Real</SelectItem>
                 </SelectContent>
               </Select>
+              <FormDescription>
+                Regime tributário atual da empresa
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
-
+        
         <FormField
           control={form.control}
-          name="cnae"
+          name="activity_code"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Código CNAE</FormLabel>
+              <FormLabel>CNAE Principal</FormLabel>
               <FormControl>
-                <Input placeholder="Código da atividade econômica" {...field} />
+                <Input placeholder="Ex: 6201-5/01" {...field} />
               </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="tax_status"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Situação Fiscal</FormLabel>
-              <FormControl>
-                <Input placeholder="Status fiscal atual" {...field} />
-              </FormControl>
+              <FormDescription>
+                Código Nacional de Atividade Econômica principal
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -97,10 +99,11 @@ const TaxTab: React.FC<TaxTabProps> = ({ form, onNext, onPrevious }) => {
         <Button 
           type="button" 
           variant="outline"
-          onClick={onPrevious}
+          onClick={onBack}
         >
           Voltar
         </Button>
+        
         <Button 
           type="button" 
           onClick={onNext}

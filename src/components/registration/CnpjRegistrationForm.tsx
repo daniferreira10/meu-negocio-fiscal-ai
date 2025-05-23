@@ -1,234 +1,186 @@
-
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Form } from '@/components/ui/form';
-import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
-import { toast } from 'sonner';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { registerUser } from '@/services/authService';
-import { saveLegalPersonProfile } from '@/services/userProfileService';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 import { 
-  RegistrationFormProps,
-  ProfileType,
-  cnpjRegistrationSchema,
-  CnpjFormValues,
-  TaxRegime
-} from '@/types/userProfileTypes';
-import { useRegistrationTabs } from './hooks/useRegistrationTabs';
-import AccountTab from './tabs/AccountTab';
-import CompanyTab from './tabs/CompanyTab';
-import AddressTab from './tabs/AddressTab';
-import TaxTab from './tabs/TaxTab';
-import FinancialTab from './tabs/FinancialTab';
-import BankingTab from './tabs/BankingTab';
+  Form, 
+  FormControl, 
+  FormField, 
+  FormItem, 
+  FormLabel, 
+  FormMessage 
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { AccountTab } from '@/components/registration/tabs/AccountTab';
+import { CompanyTab } from '@/components/registration/tabs/CompanyTab';
+import { AddressTab } from '@/components/registration/tabs/AddressTab';
+import { TaxTab } from '@/components/registration/tabs/TaxTab';
+import { FinancialTab } from '@/components/registration/tabs/FinancialTab';
+import { BankingTab } from '@/components/registration/tabs/BankingTab';
+import { OtherTab } from '@/components/registration/tabs/OtherTab';
+import { useRegistrationTabs } from '@/components/registration/hooks/useRegistrationTabs';
+import { CnpjFormValues } from '@/types/userProfileTypes';
+import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 
-// Create a custom hook wrapper to handle the registration tabs with the correct type
-const useCnpjRegistrationTabs = (form: ReturnType<typeof useForm<CnpjFormValues>>) => {
-  const { activeTab, setActiveTab, handleNextTab, handlePreviousTab } = useRegistrationTabs(form as any);
-  return { activeTab, setActiveTab, handleNextTab, handlePreviousTab };
-};
+const formSchema = z.object({
+  email: z.string().email({ message: "Email inválido" }),
+  password: z.string().min(8, { message: "A senha deve ter pelo menos 8 caracteres" }),
+  confirmPassword: z.string(),
+  company_name: z.string().min(2, { message: "O nome da empresa deve ter pelo menos 2 caracteres" }),
+  trading_name: z.string().optional(),
+  cnpj: z.string().min(14, { message: "CNPJ deve ter 14 caracteres" }),
+  founding_date: z.string().optional(),
+  legal_representative: z.string().optional(),
+  tax_regime: z.enum(['simples_nacional', 'lucro_presumido', 'lucro_real']).optional(),
+  activity_code: z.string().optional(),
+  legal_nature: z.string().optional(),
+  address_street: z.string().optional(),
+  address_number: z.string().optional(),
+  address_neighborhood: z.string().optional(),
+  address_city: z.string().optional(),
+  address_state: z.string().optional(),
+  address_zipcode: z.string().optional(),
+  monthly_revenue: z.number().optional(),
+  monthly_expenses: z.number().optional(),
+  employee_count: z.number().optional(),
+  bank_accounts: z.array(
+    z.object({
+      bank_name: z.string().optional(),
+      account_type: z.string().optional(),
+      account_number: z.string().optional(),
+    })
+  ).optional(),
+  tax_obligations: z.array(
+    z.object({
+      name: z.string().optional(),
+      frequency: z.string().optional(),
+      next_due_date: z.string().optional(),
+    })
+  ).optional(),
+  public_debts: z.array(
+    z.object({
+      description: z.string().optional(),
+      value: z.number().optional(),
+      due_date: z.string().optional(),
+    })
+  ).optional(),
+  has_accountant: z.boolean().optional(),
+  current_accounting_info: z.string().optional(),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "As senhas não correspondem",
+  path: ["confirmPassword"],
+});
 
-const CnpjRegistrationForm = ({ onRegistrationComplete, onBack }: RegistrationFormProps) => {
-  const [loading, setLoading] = useState(false);
-
+const CnpjRegistrationForm: React.FC = () => {
   const form = useForm<CnpjFormValues>({
-    resolver: zodResolver(cnpjRegistrationSchema),
+    resolver: zodResolver(formSchema),
     defaultValues: {
-      // Dados de perfil
-      profile_type: ProfileType.LEGAL,
-      
-      // Dados de conta
       email: '',
       password: '',
       confirmPassword: '',
-      
-      // Dados da empresa
       company_name: '',
       trading_name: '',
       cnpj: '',
       founding_date: '',
       legal_representative: '',
-      phone: '',
-      
-      // Endereço
+      tax_regime: undefined,
+      activity_code: '',
+      legal_nature: '',
       address_street: '',
       address_number: '',
       address_neighborhood: '',
       address_city: '',
       address_state: '',
       address_zipcode: '',
-      
-      // Informações Fiscais
-      legal_nature: '',
-      tax_regime: TaxRegime.SIMPLES_NACIONAL,
-      cnae: '',
-      tax_status: '',
-      
-      // Informações Financeiras
-      monthly_revenue: 0,
-      employees_count: 0,
-      average_payroll: 0,
-      fixed_expenses: 0,
-      variable_expenses: 0,
-      
-      // Contas bancárias
+      monthly_revenue: undefined,
+      monthly_expenses: undefined,
+      employee_count: undefined,
       bank_accounts: [],
-      
-      // Outras informações
-      issues_invoices: false,
-      invoice_type: '',
+      tax_obligations: [],
       public_debts: [],
-      current_accounting_info: ''
-    }
+      has_accountant: false,
+      current_accounting_info: '',
+    },
   });
 
-  const { activeTab, setActiveTab, handleNextTab, handlePreviousTab } = useCnpjRegistrationTabs(form);
+  const { activeTab, handleNextTab, handlePreviousTab, setActiveTab } = useRegistrationTabs(form);
+  const router = useRouter();
+  const { data: session } = useSession();
 
   const onSubmit = async (data: CnpjFormValues) => {
-    setLoading(true);
-    console.log("Dados de empresa:", data);
-    
     try {
-      // 1. Registrar usuário com email e senha
-      const success = await registerUser(data.email, data.password);
-      
-      if (success) {
-        // 2. Salvar perfil completo - todos os campos do schema são enviados
-        const profileData = {
-          user_id: "", // preenchido no backend pelo currentUser
-          company_name: data.company_name,
-          trading_name: data.trading_name || '',
-          cnpj: data.cnpj,
-          founding_date: data.founding_date,
-          legal_representative: data.legal_representative,
-          email: data.email,
-          phone: data.phone,
-          address_street: data.address_street,
-          address_number: data.address_number,
-          address_neighborhood: data.address_neighborhood,
-          address_city: data.address_city,
-          address_state: data.address_state,
-          address_zipcode: data.address_zipcode,
-          legal_nature: data.legal_nature,
-          tax_regime: data.tax_regime,
-          cnae: data.cnae,
-          monthly_revenue: data.monthly_revenue,
-          employees_count: data.employees_count,
-          average_payroll: data.average_payroll || 0,
-          fixed_expenses: data.fixed_expenses || 0,
-          variable_expenses: data.variable_expenses || 0,
-          bank_accounts: data.bank_accounts || [],
-          issues_invoices: data.issues_invoices || false,
-          invoice_type: data.invoice_type || '',
-          tax_status: data.tax_status || '',
-          public_debts: data.public_debts || [],
-          current_accounting_info: data.current_accounting_info || '',
-          profile_type: ProfileType.LEGAL // Using the specific enum value
-        };
-        
-        // Type cast to ensure correct typing
-        const savedProfile = await saveLegalPersonProfile(profileData as any);
-        
-        if (savedProfile) {
-          toast.success("Cadastro realizado com sucesso!");
-          onRegistrationComplete();
-        } else {
-          toast.error("Erro ao salvar perfil. Tente novamente.");
-        }
-      }
-    } catch (error: any) {
-      console.error("Erro no cadastro:", error);
-      
-      if (error.message === 'EMAIL_ALREADY_EXISTS') {
-        toast.error("Este e-mail já está em uso. Tente outro ou faça login.");
+      const response = await fetch('/api/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...data,
+          type: 'cnpj',
+          userId: session?.user?.id,
+        }),
+      });
+  
+      if (response.ok) {
+        toast.success('Cadastro realizado com sucesso!');
+        router.push('/dashboard');
       } else {
-        toast.error("Erro ao criar conta. Tente novamente.");
+        const errorData = await response.json();
+        toast.error(errorData.message || 'Erro ao realizar o cadastro.');
       }
-    } finally {
-      setLoading(false);
+    } catch (error) {
+      console.error('Erro durante o cadastro:', error);
+      toast.error('Erro ao realizar o cadastro.');
     }
   };
 
+  const handleSubmit = form.handleSubmit(onSubmit);
+
   return (
-    <div>
-      <div className="flex items-center mb-6">
-        <Button 
-          variant="ghost" 
-          className="mr-2 p-0 h-8 w-8"
-          onClick={onBack}
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <h2 className="text-xl font-semibold">Cadastro de Pessoa Jurídica</h2>
+    <Form {...form}>
+      <div className="md:grid md:grid-cols-3 md:gap-6">
+        <div className="md:col-span-1">
+          <div className="px-4 sm:px-0">
+            <h3 className="text-lg font-medium leading-6 text-gray-900">
+              Cadastro de Pessoa Jurídica
+            </h3>
+            <p className="mt-1 text-sm text-gray-600">
+              Preencha os dados da sua empresa para completar o cadastro.
+            </p>
+          </div>
+        </div>
+        <div className="mt-5 md:col-span-2 md:mt-0">
+          <div className="shadow sm:overflow-hidden sm:rounded-md">
+            <div className="bg-white py-6 px-4 sm:p-6">
+              {activeTab === 'account' && (
+                <AccountTab form={form as UseFormReturn<CnpjFormValues>} onNext={handleNextTab} />
+              )}
+              {activeTab === 'company' && (
+                <CompanyTab form={form as UseFormReturn<CnpjFormValues>} onNext={handleNextTab} onBack={handlePreviousTab} />
+              )}
+              {activeTab === 'address' && (
+                <AddressTab form={form as UseFormReturn<CnpjFormValues>} onNext={handleNextTab} onBack={handlePreviousTab} />
+              )}
+              {activeTab === 'tax' && (
+                <TaxTab form={form as UseFormReturn<CnpjFormValues>} onNext={handleNextTab} onBack={handlePreviousTab} />
+              )}
+              {activeTab === 'financial' && (
+                <FinancialTab form={form as UseFormReturn<CnpjFormValues>} onNext={handleNextTab} onBack={handlePreviousTab} />
+              )}
+              {activeTab === 'banking' && (
+                <BankingTab form={form as UseFormReturn<CnpjFormValues>} onNext={handleNextTab} onBack={handlePreviousTab} />
+              )}
+              {activeTab === 'other' && (
+                <OtherTab form={form as UseFormReturn<CnpjFormValues>} onSubmit={handleSubmit} onBack={handlePreviousTab} />
+              )}
+            </div>
+          </div>
+        </div>
       </div>
-      
-      <ScrollArea className="h-[70vh] pr-4">
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)}>
-            <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as any)} className="w-full">
-              <TabsList className="grid grid-cols-6 mb-6">
-                <TabsTrigger value="account">Conta</TabsTrigger>
-                <TabsTrigger value="company">Empresa</TabsTrigger>
-                <TabsTrigger value="address">Endereço</TabsTrigger>
-                <TabsTrigger value="tax">Fiscal</TabsTrigger>
-                <TabsTrigger value="financial">Financeiro</TabsTrigger>
-                <TabsTrigger value="banking">Bancário</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="account">
-                <AccountTab 
-                  form={form} 
-                  onNext={handleNextTab} 
-                />
-              </TabsContent>
-              
-              <TabsContent value="company">
-                <CompanyTab 
-                  form={form}
-                  onNext={handleNextTab}
-                  onPrevious={handlePreviousTab}
-                />
-              </TabsContent>
-              
-              <TabsContent value="address">
-                <AddressTab 
-                  form={form}
-                  onNext={handleNextTab}
-                  onPrevious={handlePreviousTab}
-                />
-              </TabsContent>
-              
-              <TabsContent value="tax">
-                <TaxTab 
-                  form={form}
-                  onNext={handleNextTab}
-                  onPrevious={handlePreviousTab}
-                />
-              </TabsContent>
-              
-              <TabsContent value="financial">
-                <FinancialTab 
-                  form={form}
-                  onNext={handleNextTab}
-                  onPrevious={handlePreviousTab}
-                />
-              </TabsContent>
-              
-              <TabsContent value="banking">
-                <BankingTab 
-                  form={form}
-                  onPrevious={handlePreviousTab}
-                  loading={loading}
-                />
-              </TabsContent>
-            </Tabs>
-          </form>
-        </Form>
-      </ScrollArea>
-    </div>
+    </Form>
   );
 };
 
