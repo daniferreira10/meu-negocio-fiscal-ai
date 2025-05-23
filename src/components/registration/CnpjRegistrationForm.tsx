@@ -59,6 +59,7 @@ const CnpjRegistrationForm = ({ onRegistrationComplete, onBack }: RegistrationFo
       legal_nature: '',
       tax_regime: TaxRegime.SIMPLES_NACIONAL,
       cnae: '',
+      tax_status: '',
       
       // Informações Financeiras
       monthly_revenue: 0,
@@ -73,7 +74,6 @@ const CnpjRegistrationForm = ({ onRegistrationComplete, onBack }: RegistrationFo
       // Outras informações
       issues_invoices: false,
       invoice_type: '',
-      tax_status: '',
       public_debts: [],
       current_accounting_info: ''
     }

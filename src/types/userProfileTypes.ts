@@ -113,6 +113,7 @@ export const legalPersonSchema = baseProfileSchema.extend({
   founding_date: z.string().min(1, { message: "Data de fundação é obrigatória" }),
   legal_representative: z.string().min(3, { message: "Nome do representante legal é obrigatório" }),
   tax_regime: z.nativeEnum(TaxRegime),
+  legal_nature: z.string().min(2, { message: "Natureza jurídica é obrigatória" }),
   cnae: z.string().min(5, { message: "Código CNAE é obrigatório" }),
   monthly_revenue: z.number().min(0, { message: "Receita não pode ser negativa" }),
   monthly_revenue_range: z.nativeEnum(RevenueRange).optional(),
